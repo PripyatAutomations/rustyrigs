@@ -62,6 +62,7 @@ sub new {
    # XXX: ACCEL-Replace these with a global function
    $w_main_accel->connect(ord($cfg->{'key_split'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $split_mode_entry->grab_focus();
+      $split_mode_entry->popup();
    });
    $split_mode_entry->signal_connect(changed => sub {
       my $curr_vfo = $cfg->{'active_vfo'};
@@ -87,6 +88,7 @@ sub new {
    # XXX: ACCEL-Replace these with a global function
    $w_main_accel->connect(ord($cfg->{'key_offset'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $offset_entry->grab_focus();
+      $offset_entry->popup();
    });
    $offset_entry->signal_connect(changed => sub {
       my $curr_vfo = $cfg->{'active_vfo'};
@@ -109,6 +111,7 @@ sub new {
    # XXX: ACCEL-Replace these with a global function
    $w_main_accel->connect(ord($cfg->{'key_tone_mode'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $tone_mode_entry->grab_focus();
+      $tone_mode_entry->popup();
    });
    $tone_mode_entry->signal_connect(changed => sub {
       my $curr_vfo = $cfg->{'active_vfo'};
@@ -123,6 +126,7 @@ sub new {
    # XXX: ACCEL-Replace these with a global function
    $w_main_accel->connect(ord($cfg->{'key_tone_freq_rx'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $tone_freq_rx_entry->grab_focus();
+      $tone_freq_rx_entry->popup();
    });
    $tone_freq_rx_entry->signal_connect(changed => sub {
       my $curr_vfo = $cfg->{'active_vfo'};
@@ -146,6 +150,7 @@ sub new {
    # XXX: ACCEL-Replace these with a global function
    $w_main_accel->connect(ord($cfg->{'key_tone_freq_tx'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $tone_freq_tx_entry->grab_focus();
+      $tone_freq_tx_entry->popup();
    });
    $tone_freq_tx_entry->signal_connect(changed => sub {
       my $curr_vfo = $cfg->{'active_vfo'};

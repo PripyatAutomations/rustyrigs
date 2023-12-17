@@ -7,20 +7,28 @@ use Glib qw(TRUE FALSE);
 use Data::Dumper;
 
 my $w_mem_edit;
-my $w_mem_edit_box = Gtk3::Box->new('vertical', 5);
-my $w_mem_edit_open = 0;
-my $w_mem_edit_accel = Gtk3::AccelGroup->new();
+my $mem_edit_box = Gtk3::Box->new('vertical', 5);
+my $mem_edit_open = 0;
+my $mem_edit_accel = Gtk3::AccelGroup->new();
+
+# new() sets these up
 my $cfg;
 my $w_main;
 
+sub save_memory {
+   my $channel = shift;
+   close_window();
+   $mem_edit_open = 0;
+};
+
 sub show_window {
-   if ($w_mem_edit_open) {
+   if ($mem_edit_open) {
       $w_mem_edit->present();
       $w_mem_edit->grab_focus();
       return TRUE;
    }
    my $button_box = Gtk3::Box->new('vertical', 5);
-   $w_mem_edit_open = 1;
+   $mem_edit_open = 1;
    $w_mem_edit = Gtk3::Window->new('toplevel',
       decorated => TRUE,
       destroy_with_parent => TRUE,
@@ -48,14 +56,14 @@ sub show_window {
    $quit_button->signal_connect(clicked => \&close_window);
    $quit_button->set_tooltip_text("Close the memory editor");
 
-   $w_mem_edit->add_accel_group($w_mem_edit_accel);
+   $w_mem_edit->add_accel_group($mem_edit_accel);
 
    # add widgets into the button box at bottom
    $button_box->pack_start($save_button, FALSE, FALSE, 0);
    $button_box->pack_start($quit_button, FALSE, FALSE, 0);
    # add it to the END of the window
-   $w_mem_edit_box->pack_end($button_box, FALSE, FALSE, 0);
-   $w_mem_edit->add($w_mem_edit_box);
+   $mem_edit_box->pack_end($button_box, FALSE, FALSE, 0);
+   $w_mem_edit->add($mem_edit_box);
 
    # Handle moves and resizes
    $w_mem_edit->signal_connect('configure-event' => sub {
@@ -78,7 +86,7 @@ sub show_window {
 }
 
 sub close_window {
-    if (!$w_mem_edit_open || !defined($w_mem_edit)) {
+    if (!$mem_edit_open || !defined($w_mem_edit)) {
        return;
     }
     my $s_modal = $w_mem_edit->get_modal();
@@ -105,7 +113,7 @@ sub close_window {
     if ($response eq 'yes') {
        $dialog->destroy();
        $w_mem_edit->destroy();
-       $w_mem_edit_open = 0;
+       $mem_edit_open = 0;
     } else {
        $dialog->destroy();
        $w_mem_edit->set_keep_above(1);

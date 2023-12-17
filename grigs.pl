@@ -114,6 +114,7 @@ my $def_cfg = {
    win_settings_y => 318,
    win_settings_height => 278,
    win_settings_width => 489,
+   key_chan => 'C',			# open channel dropbown
    key_freq => 'F',
    key_rf_gain => 'G',
    key_mem_edit => 'E',
@@ -532,6 +533,11 @@ sub draw_main_win {
    $chan_combo->add_attribute($render3, text => 2);
    $box->pack_start($chan_combo, FALSE, FALSE, 0);
 
+   $w_main_accel->connect(ord($cfg->{'key_chan'}), $cfg->{'shortcut_key'}, 'visible', sub {
+      $chan_combo->grab_focus();
+      $chan_combo->popup();
+   });
+
    # Memory edit button
    my $mem_edit_button = Gtk3::Button->new("Edit Chan (" . $cfg->{'key_mem_edit'} . ")");
    $mem_edit_button->set_tooltip_text("Add or Edit Memory slot");
@@ -595,7 +601,7 @@ sub draw_main_win {
 
    # XXX: ACCEL-Replace these with a global function
    $w_main_accel->connect(ord($cfg->{'key_freq'}), $cfg->{'shortcut_key'}, 'visible', sub {
-      $vfo_freq_entry->grab_focus();
+      $vfo_freq_entry->grab_focus();  
    });
 
    $vfo_freq_entry->signal_connect('button-press-event' => sub {
@@ -657,6 +663,7 @@ sub draw_main_win {
    # XXX: ACCEL-Replace these with a global function
    $w_main_accel->connect(ord($cfg->{'key_mode'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $mode_entry->grab_focus();
+      $mode_entry->popup();
    });
    $mode_entry->set_active(0);
 
@@ -681,6 +688,7 @@ sub draw_main_win {
    # XXX: ACCEL-Replace these with a global function
    $w_main_accel->connect(ord($cfg->{'key_width'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $width_entry->grab_focus();
+      $width_entry->popup();
    });
    refresh_available_widths();
 
