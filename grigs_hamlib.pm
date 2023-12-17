@@ -1,4 +1,3 @@
-# grigs_hamlib.pm
 package grigs_hamlib;
 use Carp;
 use Glib qw(TRUE FALSE);
@@ -227,6 +226,7 @@ sub setup_hamlib {
 
    carp("[hamlib/info] connecting to $host");
 
+#  XXX: hamlib seems to immediately return success, even before trying to connect...
 #   $w_main->set_title("grigs: Connecting to $host");
 #   if ($rig->open() != $Hamlib::RIG_OK) {
    my $rv = $rig->open();

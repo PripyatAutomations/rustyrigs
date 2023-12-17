@@ -2,3 +2,14 @@
 * Implement ncurses or similar TUI
 * Fix the bugs
 * Better icons
+# TODO:
+# * More keyboard controls! make it so you can type to search the boxes
+# * Replace freq entry with a normal text box, tune up/down buttons, and a step combo
+# * Support for multiple VFOs is not yet usable
+# * When user starts typing in the frequency field, suspend actions on the field and allow typing normally
+# * Add some holdoff before actually sending commands to the rig
+# * Tune button (ON/OFF/AUTO)
+# * PTT button &T Light
+# * Move all the polling and setting into read_rig and write_rig
+#  - Call these periodically, if needed, but throttled best we can
+# * Make it so the right click/icon menu can't be opened twice

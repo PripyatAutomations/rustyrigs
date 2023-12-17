@@ -1,4 +1,3 @@
-# grigs_settings.pm
 package grigs_settings;
 use Carp;
 use Data::Dumper;
@@ -15,7 +14,6 @@ my $hamlib_debug;
 my $temp_cfg;
 my $w_main;
 
-###########################################################
 sub print_signal_info {
    my ($widget, $signal_name) = @_;
    print "Signal emitted by $widget: $signal_name\n";
@@ -37,22 +35,19 @@ sub save_settings {
    print "Apply settings\n";
    apply_settings();
    main::save_config();
-
    $settings_open = 0;
-   $w_settings->destroy(); # Close the configuration window after OK is clicked
+   $w_settings->destroy();
 }
 
 sub combobox_keys {
    my ($widget, $event) = @_;
    if ($event->keyval == 65289) {
       print "[ui/debug]: next!\n";
-#      $w_settings->child_focus('tab-forward');
       $w_settings->child_focus('down');
-      return TRUE; # Stop further handling
+      return TRUE; 	# Stop further handling
    } else {
-#      Gtk3->main->signal_emit_by_name("key_press_event", $event);
       print "xxx: keyval - " . $event->keyval . "\n";
-      return FALSE; # Continue default handling
+      return FALSE; 	# Continue default handling
    }
 }
 
@@ -63,7 +58,8 @@ sub show_settings {
 
    # if settings window is already open raise it instead
    if ($settings_open) {
-      $w_settings->show();
+      $w_settings->present();
+      $w_settings->grab_focus();
       return TRUE;
    }
 
@@ -73,8 +69,6 @@ sub show_settings {
       decorated => TRUE,
       destroy_with_parent => TRUE,
       title => "Settings",
-      modal => TRUE,
-      resizable => FALSE,
       border_width => 10,
       position => 'center'
    );
@@ -82,10 +76,12 @@ sub show_settings {
    $w_settings->set_transient_for($w_main);
    $w_settings->set_default_size(300, 200);
    $w_settings->set_keep_above(1);
-#   $w_settings->set_modal(1);
+   $w_settings->set_modal(1);
+   $w_settings->set_resizable(0);
    main::set_settings_icon($w_settings);
 
    # Bind 'Escape' key press to close the settings window with confirmation
+   # XXX: Figure out why fallthrough events do not work regardless of returning TRUE or FALSE :\
 #   $w_settings->signal_connect(key_press_event => sub {
 #       my ($widget, $event) = @_;
 #
@@ -113,10 +109,6 @@ sub show_settings {
        my ($width, $height) = $widget->get_size();
        my ($x, $y) = $widget->get_position();
 
-       # Store these values in variables or perform other actions
-       # For example, print the values:
-#       Log "ui", $LOG_DEBUG, "Width: $width, Height: $height, X: $x, Y: $y\n";
-
        # Save the data...
        $cfg->{'win_settings_x'} = $x;
        $cfg->{'win_settings_y'} = $y;
@@ -126,18 +118,6 @@ sub show_settings {
        # Return FALSE to allow the event to propagate
        return FALSE;
    });
-
-#   my $mode_label = Gtk3::Label->new('Mode');
-#   my $mode_box = Gtk3::ComboBoxText->new();
-#   $mode_box->append_text('D-U');
-#   $mode_box->set_active(0);  # Set the default active item (e.g., Option 1)
-#   $box->pack_start($mode_label, FALSE, FALSE, 0);
-#   $box->pack_start($mode_box, FALSE, FALSE, 0);
-#   # Callback function to handle selection change
-#   $mode_box->signal_connect(changed => sub {
-#       my $selected_item = $mode_box->get_active_text();
-#       print "Mode Selected: $selected_item\n";  # Print the selected item (for demonstration)
-#   });
 
    $w_settings->signal_connect(delete_event => sub {
        close_settings();
@@ -192,7 +172,6 @@ sub show_settings {
    my $i = 0;
    for our $cl_dbg_opt (keys %woodpile::Log::log_levels) {
       if ($cl_dbg_opt eq $cfg->{'log_level'}) {
-#         print "current log level $cl_dbg_opt ($i)\n";
          $curr_cl_dbg = $i;
       }
 
@@ -302,10 +281,6 @@ sub show_settings {
 
 # Function to close the settings window
 sub close_settings {
-    my $s_modal = $w_settings->get_modal();
-    $w_settings->set_keep_above(0);
-    $w_settings->set_modal(0);
-
     my $dialog = Gtk3::MessageDialog->new(
         $w_settings,
         'destroy-with-parent',
@@ -329,8 +304,6 @@ sub close_settings {
        $settings_open = 0;
     } else {
        $dialog->destroy();
-       $w_settings->set_keep_above(1);
-       $w_settings->set_modal(1);
        $w_settings->present();
        $w_settings->grab_focus();
     }

@@ -1,19 +1,7 @@
 #!/usr/bin/perl
-# grigs.pl
-# GTK rigctld frontend for the system tray
-# You need to run rigctld with -o such as:
-# 	rigctld -P RIG -r /dev/ttyUSB0 -s 38400 -vvvv -t 4532 -m 1036 -o
-# TODO:
-# * More keyboard controls! make it so you can type to search the boxes
-# * Replace freq entry with a normal text box, tune up/down buttons, and a step combo
-# * Support for multiple VFOs is not yet usable
-# * When user starts typing in the frequency field, suspend actions on the field and allow typing normally
-# * Add some holdoff before actually sending commands to the rig
-# * Tune button (ON/OFF/AUTO)
-# * PTT button &T Light
-# * Move all the polling and setting into read_rig and write_rig
-#  - Call these periodically, if needed, but throttled best we can
-# * Make it so the right click/icon menu can't be opened twice
+# grigs.pl: GTK rigctld frontend for the system tray
+# You need to run rigctld with -o such as in ./run-dummy-rigctld
+
 use strict;
 use warnings;
 use Scalar::Util qw(looks_like_number);
@@ -31,6 +19,7 @@ use lib $FindBin::Bin;
 use woodpile;
 use grigs_hamlib;
 use grigs_settings;
+use grigs_fm;
 use grigs_memory;
 use Getopt::Long;
 
@@ -116,10 +105,11 @@ my $def_cfg = {
    win_height => 1024,
    win_width => 682,
    win_border => 10,
-   win_mem_add_x => 1,
-   win_mem_add_y => 1,
-   win_mem_add_height => 278,
-   win_mem_add_width => 479,
+   win_resizable => 1,			# 1 means main window is resizable
+   win_mem_edit_x => 1,
+   win_mem_edit_y => 1,
+   win_mem_edit_height => 278,
+   win_mem_edit_width => 479,
    win_settings_x => 183,
    win_settings_y => 318,
    win_settings_height => 278,
@@ -144,6 +134,7 @@ my $cfg = $def_cfg;
 my $cfg_p;
 
 # Function to resize window height based on visible boxes
+# Call this when widgets in a window are hidden or shown, to calculate needed dimensions
 sub autosize_height {
     my ($window) = @_;
 
@@ -154,6 +145,7 @@ sub autosize_height {
     $window->resize($window->get_allocated_width(), $min_height);
 }
 
+# main menu
 my $main_menu_open = 0;
 sub main_menu_item_clicked {
    my ($item, $window, $menu) = @_;
@@ -175,6 +167,7 @@ sub main_menu {
    if ($main_menu_open) {
       return;
    }
+
    $main_menu_open = 1;
    my $menu = Gtk3::Menu->new();
    my $sep1 = Gtk3::SeparatorMenuItem->new();
@@ -445,29 +438,27 @@ sub refresh_available_widths {
    $width_entry->set_active($rv);
 }
 
-sub refresh_tone_freqs {
-   my $curr_vfo = $cfg->{'active_vfo'};
-   my $vfo = $vfos->{$curr_vfo};
-   my $rv = -1;
+sub channel_list {
+    my $store = Gtk3::ListStore->new('Glib::String', 'Glib::String', 'Glib::String');
 
-   # empty the lists
-   $tone_freq_rx_entry->remove_all();
-   $tone_freq_tx_entry->remove_all();
+    my $iter = $store->append();
+    $store->set($iter, 0, '1', 1, ' WWV 5MHz', 2, ' 5,000.000 KHz AM');
 
-   foreach my $val (@pl_tones) {
-      $tone_freq_rx_entry->append_text($val);
-      $tone_freq_tx_entry->append_text($val);
-   }
+    $iter = $store->append();
+    $store->set($iter, 0, '2', 1, ' WWV 10MHz', 2, ' 10,000.000 KHz AM');
 
-   if (defined($vfo->{'fm'}{'tone_freq_rx'})) {
-      my $rx_tone = find_offset(\@pl_tones, $vfo->{'fm'}{'tone_freq_rx'});
-      $tone_freq_rx_entry->set_active($rx_tone);
-   }
+    $iter = $store->append();
+    $store->set($iter, 0, '3', 1, ' WWV 15MHz', 2, ' 15,000.000 KHz AM');
 
-   if (defined($vfo->{'fm'}{'tone_freq_tx'})) {
-      my $tx_tone = find_offset(\@pl_tones, $vfo->{'fm'}{'tone_freq_tx'});
-      $tone_freq_tx_entry->set_active($tx_tone);
-   }
+    $iter = $store->append();
+    $store->set($iter, 0, '4', 1, ' WWV 20MHz', 2, ' 20,000.000 KHz AM');
+
+    $iter = $store->append();
+    $store->set($iter, 0, '5', 1, ' WWV 25MHz', 2, ' 25,000.000 KHz AM');
+
+
+#$combo->set_active(1);
+    return $store;
 }
 
 sub draw_main_win {
@@ -477,16 +468,25 @@ sub draw_main_win {
    $w_main->set_title("grigs: Not connected");
    $w_main->set_default_size($cfg->{'win_width'}, $cfg->{'win_height'});
    $w_main->set_border_width($cfg->{'win_border'});
-   $w_main->signal_connect('button-press-event' => \&w_main_click);
-   $w_main->signal_connect(delete_event => \&close_main_win);
-   $w_main->signal_connect(window_state_event => \&w_main_state);
-   $w_main->signal_connect('key-press-event' => \&w_main_keypress);
-   $w_main->set_default_size($cfg->{'win_width'}, $cfg->{'win_height'});  # Replace $width and $height with desired values
-   $w_main->move($cfg->{'win_x'}, $cfg->{'win_y'});  # Replace $x and $y with desired coordinates
+   my $resizable = 0;
+
+   if (defined($cfg->{'win_resizable'})) {
+      $resizable = $cfg->{'win_resizable'};
+   }
+
+   $w_main->set_resizable($resizable);
 
    if ($cfg->{'always_on_top'}) {
       w_main_ontop(1)
    }
+
+   $w_main->set_default_size($cfg->{'win_width'}, $cfg->{'win_height'});  # Replace $width and $height with desired values
+   $w_main->move($cfg->{'win_x'}, $cfg->{'win_y'});  # Replace $x and $y with desired coordinates
+
+   $w_main->signal_connect('button-press-event' => \&w_main_click);
+   $w_main->signal_connect(delete_event => \&close_main_win);
+   $w_main->signal_connect(window_state_event => \&w_main_state);
+   $w_main->signal_connect('key-press-event' => \&w_main_keypress);
 
    $w_main->signal_connect('configure-event' => sub {
        my ($widget, $event) = @_;
@@ -517,7 +517,21 @@ sub draw_main_win {
       $curr_vfo = $cfg->{active_vfo} = 'A';
    }
 
-   # XXX: Show the channel choser combobox
+   # Show the channel choser combobox
+   my $chan_combo = Gtk3::ComboBox->new_with_model(channel_list());
+   $chan_combo->set_active(1);
+   $chan_combo->set_entry_text_column(1);
+   my $render1 = Gtk3::CellRendererText->new();
+   $chan_combo->pack_start($render1, FALSE);
+   $chan_combo->add_attribute($render1, text => 0);
+   my $render2 = Gtk3::CellRendererText->new();
+   $chan_combo->pack_start($render2, FALSE);
+   $chan_combo->add_attribute($render2, text => 1);
+   my $render3 = Gtk3::CellRendererText->new();
+   $chan_combo->pack_start($render3, FALSE);
+   $chan_combo->add_attribute($render3, text => 2);
+   $box->pack_start($chan_combo, FALSE, FALSE, 0);
+
    # Memory edit button
    my $mem_edit_button = Gtk3::Button->new("Edit Chan (" . $cfg->{'key_mem_edit'} . ")");
    $mem_edit_button->set_tooltip_text("Add or Edit Memory slot");
@@ -526,7 +540,8 @@ sub draw_main_win {
       grigs_memory::show_window();
    });
    $mem_edit_button->grab_focus();
-   $box->add($mem_edit_button);
+   $box->pack_start($mem_edit_button, FALSE, FALSE, 0);
+   # XXX: ACCEL-Replace these with a global function
    $w_main_accel->connect(ord($cfg->{'key_mem_edit'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $mem_edit_button->grab_focus();
       grigs_memory::show_window();
@@ -540,7 +555,8 @@ sub draw_main_win {
       next_vfo();
    });
    $vfo_sel_button->grab_focus();
-   $box->add($vfo_sel_button);
+   $box->pack_start($vfo_sel_button, FALSE, FALSE, 0);
+   # XXX: ACCEL-Replace these with a global function
    $w_main_accel->connect(ord($cfg->{'key_vfo'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $vfo_sel_button->grab_focus();
       next_vfo();
@@ -555,6 +571,7 @@ sub draw_main_win {
    $rig_vol_entry->set_value_pos('right');  # Set the position of the value indicator
    $rig_vol_entry->set_value($cfg->{'rig_volume'});
    $rig_vol_entry->set_tooltip_text("Please click and drag to set RX volume");
+   # XXX: ACCEL-Replace these with a global function
    $w_main_accel->connect(ord($cfg->{'key_volume'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $rig_vol_entry->grab_focus();
    });
@@ -576,6 +593,7 @@ sub draw_main_win {
        return FALSE;
    });
 
+   # XXX: ACCEL-Replace these with a global function
    $w_main_accel->connect(ord($cfg->{'key_freq'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $vfo_freq_entry->grab_focus();
    });
@@ -636,6 +654,7 @@ sub draw_main_win {
    $mode_entry->append_text('AM');
    $mode_entry->append_text('C4FM');
    $mode_entry->append_text('CW');
+   # XXX: ACCEL-Replace these with a global function
    $w_main_accel->connect(ord($cfg->{'key_mode'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $mode_entry->grab_focus();
    });
@@ -659,6 +678,7 @@ sub draw_main_win {
    my $width_label = Gtk3::Label->new('Width (hz) (' . $cfg->{'key_width'} . ')');
    $width_entry = Gtk3::ComboBoxText->new();
    $width_entry->set_tooltip_text("Modulation bandwidth");
+   # XXX: ACCEL-Replace these with a global function
    $w_main_accel->connect(ord($cfg->{'key_width'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $width_entry->grab_focus();
    });
@@ -683,6 +703,7 @@ sub draw_main_win {
    $rf_gain_entry->set_value_pos('right');  # Set the position of the value indicator
    $rf_gain_entry->set_value($vfos->{$curr_vfo}{'rf_gain'});
    $rf_gain_entry->set_tooltip_text("Please Click and DRAG to change RF gain");
+   # XXX: ACCEL-Replace these with a global function
    $w_main_accel->connect(ord($cfg->{'key_rf_gain'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $rf_gain_entry->grab_focus();
    });
@@ -703,6 +724,7 @@ sub draw_main_win {
    $vfo_power_entry->set_value_pos('right');  # Set the position of the value indicator
    $vfo_power_entry->set_value($vfos->{$curr_vfo}{'power'});
    $vfo_power_entry->set_tooltip_text("Please Click and DRAG to change TX power");
+   # XXX: ACCEL-Replace these with a global function
    $w_main_accel->connect(ord($cfg->{'key_power'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $vfo_power_entry->grab_focus();
    });
@@ -774,120 +796,8 @@ sub draw_main_win {
        return FALSE;  # Propagate the event further
    });
 
-   # Create the FM settings box and hide it
-   ########################################
-   my $fm_label = Gtk3::Label->new("---- FM ----");
-   my $split_mode_label = Gtk3::Label->new("Split Mode (" . $cfg->{'key_split'} . ")");
-   my $split_mode_entry = Gtk3::ComboBoxText->new();
-   $split_mode_entry->append_text("+");
-   $split_mode_entry->append_text("-");
-   $split_mode_entry->append_text("OFF");
-   $split_mode_entry->append_text("RX");
-   $split_mode_entry->set_active(2);
-   $w_main_accel->connect(ord($cfg->{'key_split'}), $cfg->{'shortcut_key'}, 'visible', sub {
-      $split_mode_entry->grab_focus();
-   });
-   $split_mode_entry->signal_connect(changed => sub {
-       my $curr_vfo = $cfg->{'active_vfo'};
-       my $vfo = $vfos->{$curr_vfo};
-       my $value = $split_mode_entry->get_active_text();
-       $vfo->{'fm'}{'split_mode'} = $value;
-   });
-
-   my $offset_label = Gtk3::Label->new("Offset kHz (" . $cfg->{'key_offset'} . ")");
-   my $offset_entry = Gtk3::ComboBoxText->new();
-   $offset_entry->append_text("0");
-   $offset_entry->append_text("100KHz");
-   $offset_entry->append_text("500KHz");
-   $offset_entry->append_text("600KHz");
-   $offset_entry->append_text("1.0MHz");
-   $offset_entry->append_text("1.6MHz");
-   $offset_entry->append_text("5.0MHz");
-   $offset_entry->append_text("12.0MHz");
-   $offset_entry->append_text("12.5MHz");
-   $offset_entry->append_text("20.0MHz");
-   $offset_entry->append_text("25.0MHz");
-   $offset_entry->set_active(0);
-   $w_main_accel->connect(ord($cfg->{'key_offset'}), $cfg->{'shortcut_key'}, 'visible', sub {
-      $offset_entry->grab_focus();
-   });
-   $offset_entry->signal_connect(changed => sub {
-       my $curr_vfo = $cfg->{'active_vfo'};
-       my $vfo = $vfos->{$curr_vfo};
-       my $value = $offset_entry->get_active_text();
-       $vfo->{'fm'}{'split_offset'} = $value;
-   });
-
-   my $tone_mode_label = Gtk3::Label->new("Tone Mode (" . $cfg->{'key_tone_mode'} . ")");
-   my $tone_mode_entry = Gtk3::ComboBoxText->new();
-   $tone_mode_entry->append_text("OPEN");
-   $tone_mode_entry->append_text("R-PL");
-   $tone_mode_entry->append_text("T-PL");
-   $tone_mode_entry->append_text("RT-PL");
-   $tone_mode_entry->append_text("R-DCS");
-   $tone_mode_entry->append_text("T-DCS");
-   $tone_mode_entry->append_text("RT-DCS");
-   $tone_mode_entry->append_text("Carrier");
-   $tone_mode_entry->set_active(0);
-   $w_main_accel->connect(ord($cfg->{'key_tone_mode'}), $cfg->{'shortcut_key'}, 'visible', sub {
-      $tone_mode_entry->grab_focus();
-   });
-   $tone_mode_entry->signal_connect(changed => sub {
-      my $curr_vfo = $cfg->{'active_vfo'};
-      my $vfo = $vfos->{$curr_vfo};
-      my $value = $tone_mode_entry->get_active_text();
-      $vfo->{'fm'}{'tone_mode'} = $value;
-      refresh_tone_freqs();
-   });
-
-   my $tone_freq_rx_label = Gtk3::Label->new("Tone Freq RX (" . $cfg->{'key_tone_freq_rx'} . ")");
-   $tone_freq_rx_entry = Gtk3::ComboBoxText->new();
-   $w_main_accel->connect(ord($cfg->{'key_tone_freq_rx'}), $cfg->{'shortcut_key'}, 'visible', sub {
-      $tone_freq_rx_entry->grab_focus();
-   });
-   $tone_freq_rx_entry->signal_connect(changed => sub {
-      my $curr_vfo = $cfg->{'active_vfo'};
-      my $vfo = $vfos->{$curr_vfo};
-      my $rrv = $tone_freq_rx_entry->get_active_text();
-      $vfo->{'fm'}{'tone_freq_rx'} = $rrv;
-
-      # If the TX PL is empty, set it to the RX tone
-      my $rro = find_offset(\@pl_tones, $rrv);
-      my $trv = $tone_freq_tx_entry->get_active_text();
-      my $tro = find_offset(\@pl_tones, $trv);
-
-      # If PL is empty or both boxes are the same, change it along
-      if (!defined($trv) || ($rro - 1) == $tro || ($tro - 1) == $rro) {
-         $tone_freq_tx_entry->set_active(find_offset(\@pl_tones, $rrv));
-      }
-   });
-
-   my $tone_freq_tx_label = Gtk3::Label->new("Tone Freq TX (" . $cfg->{'key_tone_freq_tx'} . ")");
-   $tone_freq_tx_entry = Gtk3::ComboBoxText->new();
-   $w_main_accel->connect(ord($cfg->{'key_tone_freq_tx'}), $cfg->{'shortcut_key'}, 'visible', sub {
-      $tone_freq_tx_entry->grab_focus();
-   });
-   $tone_freq_tx_entry->signal_connect(changed => sub {
-      my $curr_vfo = $cfg->{'active_vfo'};
-      my $vfo = $vfos->{$curr_vfo};
-      my $value = $tone_freq_tx_entry->get_active_text();
-      $vfo->{'fm'}{'tone_freq_tx'} = $value;
-   });
-
-   refresh_tone_freqs();
-
-   $fm_box = Gtk3::Box->new('vertical', 5);
-   $fm_box->pack_start($fm_label, FALSE, FALSE, 0);
-   $fm_box->pack_start($split_mode_label, FALSE, FALSE, 0);
-   $fm_box->pack_start($split_mode_entry, FALSE, FALSE, 0);
-   $fm_box->pack_start($offset_label, FALSE, FALSE, 0);
-   $fm_box->pack_start($offset_entry, FALSE, FALSE, 0);
-   $fm_box->pack_start($tone_mode_label, FALSE, FALSE, 0);
-   $fm_box->pack_start($tone_mode_entry, FALSE, FALSE, 0);
-   $fm_box->pack_start($tone_freq_rx_label, FALSE, FALSE, 0);
-   $fm_box->pack_start($tone_freq_rx_entry, FALSE, FALSE, 0);
-   $fm_box->pack_start($tone_freq_tx_label, FALSE, FALSE, 0);
-   $fm_box->pack_start($tone_freq_tx_entry, FALSE, FALSE, 0);
+   # XXX: This will change soon as _accel will be wrapped in window object
+   $fm_box = grigs_fm::new($cfg, $w_main, $w_main_accel);
 
    #########
    $box->pack_start($vfo_freq_label, FALSE, FALSE, 0);
@@ -922,6 +832,7 @@ sub draw_main_win {
    $box->pack_start($settings_button, FALSE, FALSE, 0);
    $box->pack_start($quit_button, FALSE, FALSE, 0);
    $w_main->add($box);
+
 
    # Draw it and hide the FM box
    w_main_show();
@@ -964,6 +875,7 @@ sub set_tray_icon {
    my $status = shift;
 
    my $connected_txt = '';
+
    if ($status eq "idle") {
       $connected_txt = "Connected";
    } else {
@@ -1049,6 +961,7 @@ sub show_help {
 }
 
 ###########################################################
+# scratch space for cmdline arguments
 my $cl_show_help = 0;
 my $cl_ontop;		# always on top?
 my $cl_x;		# cmdline X pos of main win
@@ -1056,6 +969,7 @@ my $cl_y;		# cmdline Y pos of main win
 my $cl_s_x;		# cmdline X pos of settings win
 my $cl_s_y;		# cmdline Y pos of settings win
 
+# Parse command line options
 GetOptions(
    "a" => \$cl_ontop,		# -a for always on top
    "f=s" => \$cfg_file,    	# -f to specify the config file
