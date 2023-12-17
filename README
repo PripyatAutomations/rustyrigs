@@ -1,1 +1,7 @@
+This is a small gtk3 and perl frontend for rigctld.
+
+Configuration will be created at ~/.config/grigs.yaml or the location given by -f the first time its started and either settings/Save clicked or exited.
+
+Install needed perl packages--
+
 sudo apt install -y libproc-daemon-perl
