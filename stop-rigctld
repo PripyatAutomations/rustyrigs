@@ -1,0 +1,4 @@
+#!/bin/bash
+killall -TERM rigctld
+sleep 1
+killall -KILL rigctld

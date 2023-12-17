@@ -1,0 +1,13 @@
+#!/bin/sh
+LOGFILE=/tmp/rigctld.log
+RIGCTLD_PID=$(pidof rigctld)
+PORT=4532
+
+if [ -z "${RIGCTLD_PID}" ]; then
+   rigctld -P RIG -vvvv -t ${PORT} -m 1 -o -Z 2>&1 | tee -a $LOGFILE &
+   RIGCTLD_PID=$1
+   echo "* backgrounded - listening on port ${PORT} with pid ${RIGCTLD_PID}"
+else
+   echo "* rigctld is already running with pid ${RIGCTLD_PID}"
+   ss -ntlp|grep rigctld
+fi
