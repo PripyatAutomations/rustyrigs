@@ -118,6 +118,7 @@ my $def_cfg = {
    key_freq => 'F',
    key_rf_gain => 'G',
    key_mem_edit => 'E',
+   key_mem_load => 'L',
    key_mode => 'M',
    key_offset => 'O',
    key_ptt => 'A',
@@ -517,6 +518,8 @@ sub draw_main_win {
    if ($curr_vfo eq '') {
       $curr_vfo = $cfg->{active_vfo} = 'A';
    }
+   my $chan_label = Gtk3::Label->new("Channel (" . $cfg->{'key_chan'} . ")");
+   $box->pack_start($chan_label, FALSE, FALSE, 0);
 
    # Show the channel choser combobox
    my $chan_combo = Gtk3::ComboBox->new_with_model(channel_list());
@@ -538,6 +541,27 @@ sub draw_main_win {
       $chan_combo->popup();
    });
 
+   my $mem_btn_box = Gtk3::Box->new('horizontal', 5);
+
+   # Memory load button
+   my $mem_load_button = Gtk3::Button->new("Load Chan (" . $cfg->{'key_mem_load'} . ")");
+   $mem_load_button->set_tooltip_text("(re)load the channel memory");
+
+   $mem_load_button->signal_connect(clicked => sub {
+      # XXX: Apply the settings from the memory entry into the active VFO
+      # apply_mem_to_vfo();
+   });
+
+   $mem_load_button->grab_focus();
+   $mem_btn_box->pack_start($mem_load_button, TRUE, TRUE, 0);
+   $box->pack_start($mem_btn_box, FALSE, FALSE, 0);
+   # XXX: ACCEL-Replace these with a global function
+   $w_main_accel->connect(ord($cfg->{'key_mem_load'}), $cfg->{'shortcut_key'}, 'visible', sub {
+      $mem_load_button->grab_focus();
+      # XXX: Apply the settings from the memory entry into active VFO
+      # apply_mem_to_vfo();
+   });
+
    # Memory edit button
    my $mem_edit_button = Gtk3::Button->new("Edit Chan (" . $cfg->{'key_mem_edit'} . ")");
    $mem_edit_button->set_tooltip_text("Add or Edit Memory slot");
@@ -546,7 +570,8 @@ sub draw_main_win {
       grigs_memory::show_window();
    });
    $mem_edit_button->grab_focus();
-   $box->pack_start($mem_edit_button, FALSE, FALSE, 0);
+   $mem_btn_box->pack_start($mem_edit_button, TRUE, TRUE, 0);
+   $box->pack_start($mem_btn_box, FALSE, FALSE, 0);
    # XXX: ACCEL-Replace these with a global function
    $w_main_accel->connect(ord($cfg->{'key_mem_edit'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $mem_edit_button->grab_focus();
