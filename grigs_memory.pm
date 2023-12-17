@@ -14,16 +14,13 @@ my $cfg;
 my $w_main;
 
 sub show_window {
-   my $button_box = Gtk3::Box->new('vertical', 5);
-
-   if (!defined($w_main)) {
-      $w_main = shift;
-   }
-
    if ($w_mem_add_open) {
-      $w_mem_add->show();
+      $w_mem_add->present();
+      $w_mem_add->grab_focus();
       return TRUE;
    }
+   my $button_box = Gtk3::Box->new('vertical', 5);
+
    $w_mem_add_open = 1;
    $w_mem_add = Gtk3::Window->new('toplevel',
       decorated => TRUE,
@@ -78,6 +75,9 @@ sub show_window {
 }
 
 sub close_window {
+    if (!$w_mem_add_open) {
+       return;
+    }
     my $s_modal = $w_mem_add->get_modal();
     $w_mem_add->set_keep_above(0);
     $w_mem_add->set_modal(0);
@@ -111,6 +111,7 @@ sub close_window {
        $w_mem_add->grab_focus();
     }
 }
+
 
 sub init {
   $cfg = shift;

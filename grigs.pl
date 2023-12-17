@@ -523,13 +523,13 @@ sub draw_main_win {
    $mem_edit_button->set_tooltip_text("Add or Edit Memory slot");
 
    $mem_edit_button->signal_connect(clicked => sub {
-      grigs_memory::show_window($w_main);
+      grigs_memory::show_window();
    });
    $mem_edit_button->grab_focus();
    $box->add($mem_edit_button);
    $w_main_accel->connect(ord($cfg->{'key_mem_edit'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $mem_edit_button->grab_focus();
-      grigs_memory::show_window($w_main);
+      grigs_memory::show_window();
    });
 
    # VFO choser:
