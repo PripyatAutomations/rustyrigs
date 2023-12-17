@@ -485,6 +485,9 @@ sub draw_main_win {
    $w_main->set_default_size($cfg->{'win_width'}, $cfg->{'win_height'});  # Replace $width and $height with desired values
    $w_main->move($cfg->{'win_x'}, $cfg->{'win_y'});  # Replace $x and $y with desired coordinates
 
+   ##############################
+   # Capture the window signals #
+   ##############################
    $w_main->signal_connect('button-press-event' => \&w_main_click);
    $w_main->signal_connect(delete_event => \&close_main_win);
    $w_main->signal_connect(window_state_event => \&w_main_state);
@@ -518,8 +521,14 @@ sub draw_main_win {
    if ($curr_vfo eq '') {
       $curr_vfo = $cfg->{active_vfo} = 'A';
    }
+
+
+   #################
+   # Channel stuff #
+   #################
+   my $chan_box = Gtk3::Box->new('vertical', 5);
    my $chan_label = Gtk3::Label->new("Channel (" . $cfg->{'key_chan'} . ")");
-   $box->pack_start($chan_label, FALSE, FALSE, 0);
+   $chan_box->pack_start($chan_label, FALSE, FALSE, 0);
 
    # Show the channel choser combobox
    my $chan_combo = Gtk3::ComboBox->new_with_model(channel_list());
@@ -534,7 +543,8 @@ sub draw_main_win {
    my $render3 = Gtk3::CellRendererText->new();
    $chan_combo->pack_start($render3, FALSE);
    $chan_combo->add_attribute($render3, text => 2);
-   $box->pack_start($chan_combo, FALSE, FALSE, 0);
+
+   $chan_box->pack_start($chan_combo, FALSE, FALSE, 0);
 
    $w_main_accel->connect(ord($cfg->{'key_chan'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $chan_combo->grab_focus();
@@ -554,7 +564,7 @@ sub draw_main_win {
 
    $mem_load_button->grab_focus();
    $mem_btn_box->pack_start($mem_load_button, TRUE, TRUE, 0);
-   $box->pack_start($mem_btn_box, FALSE, FALSE, 0);
+
    # XXX: ACCEL-Replace these with a global function
    $w_main_accel->connect(ord($cfg->{'key_mem_load'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $mem_load_button->grab_focus();
@@ -571,12 +581,25 @@ sub draw_main_win {
    });
    $mem_edit_button->grab_focus();
    $mem_btn_box->pack_start($mem_edit_button, TRUE, TRUE, 0);
-   $box->pack_start($mem_btn_box, FALSE, FALSE, 0);
    # XXX: ACCEL-Replace these with a global function
    $w_main_accel->connect(ord($cfg->{'key_mem_edit'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $mem_edit_button->grab_focus();
       grigs_memory::show_window();
    });
+   $chan_box->pack_start($mem_btn_box, FALSE, FALSE, 0);
+
+   # ignore this...
+   my $status_box = Gtk3::Box->new('vertical', 5);
+   my $chan_sep = Gtk3::Separator->new('horizontal');
+   $status_box->set_size_request(-1, 30);
+   $status_box->override_background_color('normal', Gtk3::Gdk::RGBA->new(0.5, 0.5, 0.5, 1.0)); # Set background color
+   $chan_sep->set_size_request(-1, 15);
+   $chan_sep->override_background_color('normal', Gtk3::Gdk::RGBA->new(0.75, 0.5, 0.5, 1.0)); # Set background color
+   $status_box->pack_start($chan_sep, FALSE, FALSE, 0);
+   $chan_box->pack_start($status_box, TRUE, TRUE, 0);
+
+   # add to the main window
+   $box->pack_start($chan_box, FALSE, FALSE, 0);
 
    # VFO choser:
    $vfo_sel_button = Gtk3::Button->new("VFO: " . $curr_vfo . " (" . $cfg->{'key_vfo'} . ")");
