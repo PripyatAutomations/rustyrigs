@@ -47,11 +47,11 @@ sub combobox_keys {
    if ($event->keyval == 65289) {
       print "[ui/debug]: next!\n";
 #      $w_settings->child_focus('tab-forward');
-#      $w_settings->child_focus('down');
+      $w_settings->child_focus('down');
       return TRUE; # Stop further handling
    } else {
 #      Gtk3->main->signal_emit_by_name("key_press_event", $event);
-      print "xxx: keval - " . $event->keyval . "\n";
+      print "xxx: keyval - " . $event->keyval . "\n";
       return FALSE; # Continue default handling
    }
 }
@@ -207,7 +207,6 @@ sub show_settings {
       $core_debug->set_active(0);
    }
    $core_debug->set_can_focus(1);
-   $core_debug->signal_connect(key_release_event => \&combobox_keys);
 
    # create hamlib debug level entry
    my $hamlib_debug_label = Gtk3::Label->new('Hamlib log level');
@@ -295,6 +294,7 @@ sub show_settings {
    $config_box->pack_end($button_box, FALSE, FALSE, 0);
 
    # Add the config box, show the window, and focus first input
+   $w_settings->signal_connect(key_release_event => \&combobox_keys);
    $w_settings->add($config_box);
    $w_settings->show_all();
    $address_entry->grab_focus();
