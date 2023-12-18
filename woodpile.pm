@@ -1,4 +1,4 @@
-# woodpile.pm
+# woodpile.pm contains an assortment of junk i commonly use
 package woodpile;
 use strict;
 use warnings;

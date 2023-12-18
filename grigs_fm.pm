@@ -1,3 +1,6 @@
+# Here we generate a box packed with the FM mode settings
+# which can be inserted/removed on the main window as needed
+
 package grigs_fm;
 use Carp;
 use Data::Dumper;

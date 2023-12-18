@@ -1,3 +1,4 @@
+# Here we handle the settings window
 package grigs_settings;
 use Carp;
 use Data::Dumper;
@@ -68,12 +69,12 @@ sub show_settings {
    $w_settings = Gtk3::Window->new('toplevel',
       decorated => TRUE,
       destroy_with_parent => TRUE,
-      title => "Settings",
-      border_width => 10,
       position => 'center'
    );
    # this makes the stacking order reasonable
    $w_settings->set_transient_for($w_main);
+   $w_settings->set_title("Settings");
+   $w_settings->set_border_width(5);
    $w_settings->set_default_size(300, 200);
    $w_settings->set_keep_above(1);
    $w_settings->set_modal(1);

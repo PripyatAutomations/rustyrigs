@@ -17,7 +17,7 @@ my $w_main;
 
 sub save_memory {
    my $channel = shift;
-   close_window();
+   close_window(TRUE);
    $mem_edit_open = 0;
 };
 
@@ -32,17 +32,16 @@ sub show_window {
    $w_mem_edit = Gtk3::Window->new('toplevel',
       decorated => TRUE,
       destroy_with_parent => TRUE,
-      title => "Add/Edit Memory",
-      resizable => FALSE,
-      bord_width => 5,
       position => "center"
    );
    $w_mem_edit->set_transient_for($w_main);
    $w_mem_edit->set_keep_above(1);
    $w_mem_edit->set_modal(1);
    $w_mem_edit->set_resizable(0);
+   $w_mem_edit->set_title("Memory Editor");
 
-   # XXX: Set icon instead of using main
+   # set the icon to show it's a settings window
+   main::set_settings_icon($w_mem_edit);
 
    # Place the window and size it
    $w_mem_edit->set_default_size($cfg->{'win_mem_edit_width'},
@@ -65,6 +64,10 @@ sub show_window {
    $mem_edit_box->pack_end($button_box, FALSE, FALSE, 0);
    $w_mem_edit->add($mem_edit_box);
 
+
+   #########
+   # Signal handlers
+   #########
    # Handle moves and resizes
    $w_mem_edit->signal_connect('configure-event' => sub {
       my ($widget, $event) = @_;
@@ -86,36 +89,48 @@ sub show_window {
 }
 
 sub close_window {
+    my $quiet = shift;
     if (!$mem_edit_open || !defined($w_mem_edit)) {
        return;
     }
-    my $s_modal = $w_mem_edit->get_modal();
-    $w_mem_edit->set_keep_above(0);
-    $w_mem_edit->set_modal(0);
 
-    my $dialog = Gtk3::MessageDialog->new(
-        $w_mem_edit,
-        'destroy-with-parent',
-        'warning',
-	'yes_no',
-        "Close settings window? Unsaved changes will be lost."
-    );
-    $dialog->set_title('Confirm close memory editor?');
-    $dialog->set_default_response('no');
-    $dialog->set_transient_for($w_mem_edit);
-    $dialog->set_modal(1);
-    $dialog->set_keep_above(1);
-    $dialog->present();
-    $dialog->grab_focus();
+    my $response = 'yes';
+    my $dialog;
 
-    my $response = $dialog->run();
+    # skip this if quiet is passed
+    if (!defined($quiet) || !$quiet) {
+       my $s_modal = $w_mem_edit->get_modal();
+       $w_mem_edit->set_keep_above(0);
+       $w_mem_edit->set_modal(0);
+
+       $dialog = Gtk3::MessageDialog->new(
+           $w_mem_edit,
+           'destroy-with-parent',
+           'warning',
+           'yes_no',
+           "Close settings window? Unsaved changes will be lost."
+       );
+       $dialog->set_title('Confirm close memory editor?');
+       $dialog->set_default_response('no');
+       $dialog->set_transient_for($w_mem_edit);
+       $dialog->set_modal(1);
+       $dialog->set_keep_above(1);
+       $dialog->present();
+       $dialog->grab_focus();
+
+       $response = $dialog->run();
+    }
 
     if ($response eq 'yes') {
-       $dialog->destroy();
+       if (defined($dialog)) {
+          $dialog->destroy();
+       }
        $w_mem_edit->destroy();
        $mem_edit_open = 0;
     } else {
-       $dialog->destroy();
+       if (defined($dialog)) {
+          $dialog->destroy();
+       }
        $w_mem_edit->set_keep_above(1);
        $w_mem_edit->set_modal(1);
        $w_mem_edit->present();

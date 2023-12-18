@@ -21,6 +21,7 @@ use grigs_hamlib;
 use grigs_settings;
 use grigs_fm;
 use grigs_memory;
+use grigs_defconfig;
 use Getopt::Long;
 
 # project settings
@@ -30,6 +31,8 @@ my $app_descr = "GTK frontend for rigctld";
 my $default_cfg_file = $ENV{"HOME"} . "/.config/${app_name}.yaml";
 my $cfg_file = $default_cfg_file;
 my $log_file = $ENV{"HOME"} . "/${app_name}.log";
+
+my $def_cfg = $grigs_defconfig::def_cfg;
 
 # Start logging in debug mode until config is loaded and we quiet down...
 our $log = woodpile::Log->new($log_file, "debug");
@@ -78,59 +81,6 @@ my $icon_transmit_pix;
 
 my $cfg_readonly = 0;
 
-# - Default configuration
-my $def_cfg = {
-   active_vfo => 'A',
-   always_on_top => 0,		# 1 will keep window always on top by default
-   autoload_memories => 0,	# 1 will automatically load memory channels when selected in list
-   default_icon => 'actions-gtk-save',
-   hamlib_loglevel => "bug",		# bug err warn verbose trace cache
-   log_level => "debug",
-   icon_error => "error.png",
-   icon_idle => "idle.png",
-   icon_settings => "settings.png",
-   icon_transmit => "transmit.png",
-   res_dir => "./res",
-   rigctl_addr => 'localhost:4532',
-   rigctl_model => $Hamlib::RIG_MODEL_NETRIGCTL,
-   poll_interval => 1000,		# every 1 sec
-   poll_tray_every => 10,		# at 1/10th the rate of normal
-#   shortcut_key => 'control-mask',	# ctrl
-   shortcut_key => 'mod1-mask',	# alt
-   stay_hidden => 0,
-   rig_volume => 0,
-   win_visible => 0,
-   win_x => 2252,
-   win_y => 49,
-   win_height => 1024,
-   win_width => 682,
-   win_border => 10,
-   win_resizable => 1,			# 1 means main window is resizable
-   win_mem_edit_x => 1,
-   win_mem_edit_y => 1,
-   win_mem_edit_height => 278,
-   win_mem_edit_width => 479,
-   win_settings_x => 183,
-   win_settings_y => 318,
-   win_settings_height => 278,
-   win_settings_width => 489,
-   key_chan => 'C',			# open channel dropbown
-   key_freq => 'F',
-   key_rf_gain => 'G',
-   key_mem_edit => 'E',
-   key_mem_load => 'L',
-   key_mode => 'M',
-   key_offset => 'O',
-   key_ptt => 'A',
-   key_power => 'P',
-   key_split => 'X',
-   key_tone_freq_tx => 'T',
-   key_tone_freq_rx => 'R',
-   key_tone_mode => 'N',
-   key_vfo => 'V',
-   key_volume => 'K',
-   key_width => 'W'
-};
 # Set config to defconfig, until we load config...
 my $cfg = $def_cfg;
 my $cfg_p;
@@ -590,12 +540,20 @@ sub draw_main_win {
 
    # ignore this...
    my $status_box = Gtk3::Box->new('vertical', 5);
-   my $chan_sep = Gtk3::Separator->new('horizontal');
-   $status_box->set_size_request(-1, 30);
-   $status_box->override_background_color('normal', Gtk3::Gdk::RGBA->new(0.5, 0.5, 0.5, 1.0)); # Set background color
-   $chan_sep->set_size_request(-1, 15);
-   $chan_sep->override_background_color('normal', Gtk3::Gdk::RGBA->new(0.75, 0.5, 0.5, 1.0)); # Set background color
-   $status_box->pack_start($chan_sep, FALSE, FALSE, 0);
+   my $pow_bar = Gtk3::Box->new('vertical', 0);
+   my $swr_bar = Gtk3::Box->new('vertical', 0);
+   my $pow_bar_sep = Gtk3::Separator->new('horizontal');
+   my $swr_bar_sep = Gtk3::Separator->new('horizontal');
+   $status_box->set_size_request(-1, 60);
+#   $status_box->override_background_color('normal', Gtk3::Gdk::RGBA->new(0.5, 0.5, 0.5, 1.0)); # Set background color
+   $pow_bar_sep->set_size_request(-1, 30);
+   $pow_bar_sep->override_background_color('normal', Gtk3::Gdk::RGBA->new(0.75, 0.5, 0.5, 1.0)); # Set background color
+   $swr_bar_sep->set_size_request(-1, 30);
+   $swr_bar_sep->override_background_color('normal', Gtk3::Gdk::RGBA->new(0.5, 0.5, 0.5, 1.0)); # Set background color
+   $pow_bar->pack_start($pow_bar_sep, FALSE, FALSE, 0);
+   $swr_bar->pack_start($swr_bar_sep, FALSE, FALSE, 0);
+   $status_box->pack_start($pow_bar, FALSE, FALSE, 0);
+   $status_box->pack_start($swr_bar, FALSE, FALSE, 0);
    $chan_box->pack_start($status_box, TRUE, TRUE, 0);
 
    # add to the main window
@@ -751,8 +709,8 @@ sub draw_main_win {
        }
    });
 
-   my $rf_gain_label = Gtk3::Label->new('RF Gain (' . $cfg->{'key_rf_gain'} . ')');
-   my $rf_gain_entry = Gtk3::Scale->new_with_range('horizontal', 0, 40, 1);
+   my $rf_gain_label = Gtk3::Label->new('RF Gain / Atten. (' . $cfg->{'key_rf_gain'} . ')');
+   my $rf_gain_entry = Gtk3::Scale->new_with_range('horizontal', -40, 40, 1);
    $rf_gain_entry->set_digits(0);           # Disable decimal places
    $rf_gain_entry->set_draw_value(TRUE);    # Display the current value on the slider
    $rf_gain_entry->set_has_origin(FALSE);   # Disable origin value
