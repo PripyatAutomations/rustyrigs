@@ -4,5 +4,5 @@ Configuration will be created at ~/.config/grigs.yaml or the location given by -
 
 Install needed perl packages--
 
-sudo apt install -y libproc-daemon-perl libgtk3-perl libglib-perl libyaml-perl
+sudo apt install -y libproc-daemon-perl libgtk3-perl libglib-perl libyaml-perl libhamlib-perl
 
