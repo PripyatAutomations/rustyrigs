@@ -4,25 +4,26 @@
 
 use strict;
 use warnings;
+use Hamlib;
 use Scalar::Util qw(looks_like_number);
 use Sys::Hostname;
 use Data::Dumper;
-use Hamlib;
+use Data::Structure::Util qw/unbless/;
 use YAML::XS;
 use POSIX qw(strftime);
 use Time::HiRes qw(gettimeofday tv_interval usleep);
 use Gtk3 '-init';
 use Glib qw(TRUE FALSE);
-use Data::Structure::Util qw/unbless/;
 use FindBin;
 use lib $FindBin::Bin;
+use Getopt::Long;
 use woodpile;
+use grigs_defconfig;
 use grigs_hamlib;
 use grigs_settings;
 use grigs_fm;
 use grigs_memory;
-use grigs_defconfig;
-use Getopt::Long;
+use grigs_meter;
 
 # project settings
 my $app_name = 'grigs';
@@ -538,23 +539,9 @@ sub draw_main_win {
    });
    $chan_box->pack_start($mem_btn_box, FALSE, FALSE, 0);
 
-   # ignore this...
-   my $status_box = Gtk3::Box->new('vertical', 5);
-   my $pow_bar = Gtk3::Box->new('vertical', 0);
-   my $swr_bar = Gtk3::Box->new('vertical', 0);
-   my $pow_bar_sep = Gtk3::Separator->new('horizontal');
-   my $swr_bar_sep = Gtk3::Separator->new('horizontal');
-   $status_box->set_size_request(-1, 60);
-#   $status_box->override_background_color('normal', Gtk3::Gdk::RGBA->new(0.5, 0.5, 0.5, 1.0)); # Set background color
-   $pow_bar_sep->set_size_request(-1, 30);
-   $pow_bar_sep->override_background_color('normal', Gtk3::Gdk::RGBA->new(0.75, 0.5, 0.5, 1.0)); # Set background color
-   $swr_bar_sep->set_size_request(-1, 30);
-   $swr_bar_sep->override_background_color('normal', Gtk3::Gdk::RGBA->new(0.5, 0.5, 0.5, 1.0)); # Set background color
-   $pow_bar->pack_start($pow_bar_sep, FALSE, FALSE, 0);
-   $swr_bar->pack_start($swr_bar_sep, FALSE, FALSE, 0);
-   $status_box->pack_start($pow_bar, FALSE, FALSE, 0);
-   $status_box->pack_start($swr_bar, FALSE, FALSE, 0);
-   $chan_box->pack_start($status_box, TRUE, TRUE, 0);
+   # Add status meter widget to the window
+   my $status_box = grigs_meter::new($cfg, $vfos);
+   $chan_box->pack_start($status_box->{'box'}, TRUE, TRUE, 0);
 
    # add to the main window
    $box->pack_start($chan_box, FALSE, FALSE, 0);

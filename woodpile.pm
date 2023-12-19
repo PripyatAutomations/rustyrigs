@@ -2,6 +2,19 @@
 package woodpile;
 use strict;
 use warnings;
+use Gtk3 '-init';
+
+sub hex_to_gdk_rgba {
+    my ($hex_color) = @_;
+
+    # Convert hex color value to RGBA components
+    my ($r, $g, $b) = map { hex($_) / 255 } $hex_color =~ m/[\da-f]{2}/ig;
+
+    # Create a Gtk3::Gdk::RGBA object using the calculated RGBA components
+    my $rgba_color = Gtk3::Gdk::RGBA->new($r, $g, $b, 1.0); # 1.0 is alpha (fully opaque)
+    
+    return $rgba_color;
+}
 
 package woodpile::Log;
 use strict;
