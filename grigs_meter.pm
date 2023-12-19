@@ -10,6 +10,23 @@ my $cfg;
 my $vfos;
 my $w_main;
 
+# XXX: Make methods for these
+#	- SetValue
+#	- Zero
+sub set_value {
+}
+
+sub zero {
+}
+
+# This needs sorted out so it makes only one widget.
+# The widget will need supplied the following parameters
+#	- Name
+#	- Height, Width
+#	- Fill color
+#	- Active fill color
+#	- Label text
+
 sub new {
    ( $cfg, $vfos, $w_main ) = @_;
    my $status_box = Gtk3::Box->new('vertical', 5);
