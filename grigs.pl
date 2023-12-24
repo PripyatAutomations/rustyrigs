@@ -19,6 +19,7 @@ use lib $FindBin::Bin;
 use Getopt::Long;
 use woodpile;
 use grigs_defconfig;
+use grigs_doc;
 use grigs_hamlib;
 use grigs_settings;
 use grigs_fm;
@@ -28,18 +29,15 @@ use grigs_meter;
 # project settings
 my $app_name = 'grigs';
 my $app_descr = "GTK frontend for rigctld";
-
 my $default_cfg_file = $ENV{"HOME"} . "/.config/${app_name}.yaml";
 my $cfg_file = $default_cfg_file;
 my $log_file = $ENV{"HOME"} . "/${app_name}.log";
-
 my $def_cfg = $grigs_defconfig::def_cfg;
 
 # Start logging in debug mode until config is loaded and we quiet down...
 our $log = woodpile::Log->new($log_file, "debug");
 
-################################################
-
+# XXX: belongs in hamlib bits
 our @vfo_widths_fm = ( 12500, 25000 );
 our @vfo_widths_am = ( 6000, 5000, 3800, 3200, 3000, 2800 );
 our @vfo_widths_ssb = ( 3000, 3800, 3200, 2800, 2700, 2500 );
@@ -50,10 +48,12 @@ my @pl_tones = (
     241.8, 250.3
 );
 
-############################
-# Configuration File Stuff #
-############################
-# run-time state
+##################
+# Run time state #
+##################
+my $main_menu;
+my $main_menu_open = 0;
+my $locked = FALSE;
 my $vfos = $grigs_hamlib::vfos;
 my $settings_open = 0;
 my $tray_icon;		# systray icon
@@ -72,14 +72,12 @@ my $width_entry;
 my $box;
 my $fm_box;
 my $rig;
-
-# icons for our various run-time states
+my $lock_button;
 my $icon_error_pix;
 my $icon_idle_pix;
 my $icon_main_pix;
 my $icon_settings_pix;
 my $icon_transmit_pix;
-
 my $cfg_readonly = 0;
 
 # Set config to defconfig, until we load config...
@@ -89,17 +87,26 @@ my $cfg_p;
 # Function to resize window height based on visible boxes
 # Call this when widgets in a window are hidden or shown, to calculate needed dimensions
 sub autosize_height {
-    my ($window) = @_;
+   my ($window) = @_;
 
-    # Get preferred height for the current width
-    my ($min_height, $nat_height) = $box->get_preferred_height_for_width($cfg->{'win_x'});
+   # Get preferred height for the current width
+   my ($min_height, $nat_height) = $box->get_preferred_height_for_width($cfg->{'win_x'});
 
-    # Set window height based on the preferred height of visible boxes
-    $window->resize($window->get_allocated_width(), $min_height);
+   # Set window height based on the preferred height of visible boxes
+   $window->resize($window->get_allocated_width(), $min_height);
+}
+
+sub toggle_locked {
+   my $origin = shift;
+
+   if (!$locked) {
+      $lock_button->set_active(0);
+   } else {
+      $lock_button->set_active(1);
+   }
 }
 
 # main menu
-my $main_menu_open = 0;
 sub main_menu_item_clicked {
    my ($item, $window, $menu) = @_;
 
@@ -117,30 +124,44 @@ sub main_menu_item_clicked {
 
 sub main_menu {
    my ($status_icon, $button, $time) = @_;
+
    if ($main_menu_open) {
+      $main_menu->show();
       return;
    }
 
    $main_menu_open = 1;
-   my $menu = Gtk3::Menu->new();
+   $main_menu = Gtk3::Menu->new();
    my $sep1 = Gtk3::SeparatorMenuItem->new();
    my $sep2 = Gtk3::SeparatorMenuItem->new();
    my $toggle_item = Gtk3::MenuItem->new("Toggle Window");
-   $toggle_item->signal_connect(activate => sub { main_menu_item_clicked($toggle_item, $w_main, $menu) });
-   $menu->append($toggle_item);
-   $menu->append($sep1);
+   $toggle_item->signal_connect(activate => sub { main_menu_item_clicked($toggle_item, $w_main, $main_menu) });
+   $main_menu->append($toggle_item);
+   $main_menu->append($sep1);
 
    my $settings_item = Gtk3::MenuItem->new("Settings");
-   $settings_item->signal_connect(activate => sub { main_menu_item_clicked($settings_item, $w_main, $menu) });
-   $menu->append($settings_item);
-   $menu->append($sep2);
+   $settings_item->signal_connect(activate => sub { main_menu_item_clicked($settings_item, $w_main, $main_menu) });
+   $main_menu->append($settings_item);
+   $main_menu->append($sep2);
+
+   my $lock_item = Gtk3::CheckMenuItem->new("Locked");
+   $lock_item->signal_connect(toggled => sub {
+      my $widget = shift;
+
+      toggle_locked();
+      $main_menu_open = 0;
+      $main_menu->hide(); # Hide the menu after the choice is made
+      $log->Log("ui", "debug", "Closing the main menu");
+      return FALSE;
+   });
+   $main_menu->append($lock_item);
 
    my $quit_item = Gtk3::MenuItem->new("Quit");
-   $quit_item->signal_connect(activate => sub { main_menu_item_clicked($quit_item, $w_main, $menu) });
-   $menu->append($quit_item);
+   $quit_item->signal_connect(activate => sub { main_menu_item_clicked($quit_item, $w_main, $main_menu) });
+   $main_menu->append($quit_item);
 
-   $menu->show_all();
-   $menu->popup(undef, undef, undef, undef, $button, $time);
+   $main_menu->show_all();
+   $main_menu->popup(undef, undef, undef, undef, $button, $time);
 }
 
 sub save_config {
@@ -414,6 +435,7 @@ sub channel_list {
     return $store;
 }
 
+
 sub draw_main_win {
    $w_main = Gtk3::Window->new('toplevel');
 
@@ -662,17 +684,17 @@ sub draw_main_win {
 
    # Callback function to handle selection change
    $mode_entry->signal_connect(changed => sub {
-       my $selected_item = $mode_entry->get_active_text();
-       print "Mode Selected: $selected_item\n";  # Print the selected item (for demonstration)
-       my $curr_vfo = $cfg->{'active_vfo'};
-       my $vfo = $vfos->{$curr_vfo};
-       my $mode = uc($vfo->{'mode'});
-       $vfo->{'mode'} = uc($selected_item);
-       # apply it
-#       grigs_hamlib::set_mode($curr_vfo, $mode);
-       # update the GUI
-       w_main_fm_toggle();
-       refresh_available_widths();
+      my $selected_item = $mode_entry->get_active_text();
+      print "Mode Selected: $selected_item\n";  # Print the selected item (for demonstration)
+      my $curr_vfo = $cfg->{'active_vfo'};
+      my $vfo = $vfos->{$curr_vfo};
+      my $mode = uc($vfo->{'mode'});
+      $vfo->{'mode'} = uc($selected_item);
+      # apply it
+#      grigs_hamlib::set_mode($curr_vfo, $mode);
+      # update the GUI
+      w_main_fm_toggle();
+      refresh_available_widths();
    });
 
    my $width_label = Gtk3::Label->new('Width (hz) (' . $cfg->{'key_width'} . ')');
@@ -687,13 +709,13 @@ sub draw_main_win {
 
    # Callback function to handle selection change
    $width_entry->signal_connect(changed => sub {
-       my $selected_item = $width_entry->get_active_text();
-       if (defined($selected_item)) {
-          $log->Log("ui", "debug", "Width Selected: $selected_item\n");  # Print the selected item (for demonstration)
-          my $curr_vfo = $cfg->{'active_vfo'};
-          my $vfo = $vfos->{$curr_vfo};
-          $vfo->{'width'} = $selected_item;
-       }
+      my $selected_item = $width_entry->get_active_text();
+      if (defined($selected_item)) {
+         $log->Log("ui", "debug", "Width Selected: $selected_item\n");  # Print the selected item (for demonstration)
+         my $curr_vfo = $cfg->{'active_vfo'};
+         my $vfo = $vfos->{$curr_vfo};
+         $vfo->{'width'} = $selected_item;
+      }
    });
 
    my $rf_gain_label = Gtk3::Label->new('RF Gain / Atten. (' . $cfg->{'key_rf_gain'} . ')');
@@ -709,10 +731,10 @@ sub draw_main_win {
       $rf_gain_entry->grab_focus();
    });
    $rf_gain_entry->signal_connect(value_changed => sub {
-       my $curr_vfo = $cfg->{'active_vfo'};
-       my $vfo = $vfos->{$curr_vfo};
-       my $value = $rf_gain_entry->get_value();
-       $vfo->{'rf_gain'} = $value;
+      my $curr_vfo = $cfg->{'active_vfo'};
+      my $vfo = $vfos->{$curr_vfo};
+      my $value = $rf_gain_entry->get_value();
+      $vfo->{'rf_gain'} = $value;
    });
    # Variable to track if the scale is being dragged
    my $dragging = 0;
@@ -733,72 +755,93 @@ sub draw_main_win {
    #### Here we do some ugly stuff to try and prevent sudden jumps in power ####
    # Connect a signal to track button press
    $vfo_power_entry->signal_connect('button-press-event' => sub {
-       my ($widget, $event) = @_;
-       $dragging = 1;  # Set dragging flag when the slider is clicked
+      my ($widget, $event) = @_;
+      $dragging = 1;  # Set dragging flag when the slider is clicked
 
-       # reset the value to our stored state to discard this change
-       return FALSE;   # Prevent the default behavior
+      # reset the value to our stored state to discard this change
+      return FALSE;   # Prevent the default behavior
    });
 
    # Connect a signal to track button release
    $vfo_power_entry->signal_connect('button-release-event' => sub {
-       $dragging = 0;  # Reset dragging flag on button release
-       if (!defined($vfos->{$curr_vfo}{'power'}) ||$vfos->{$curr_vfo}{'power'} eq "") {
-          $vfos->{$curr_vfo}{'power'} = $rig->get_vfo();
-       }
-       # reset it
-       $vfo_power_entry->set_value($vfos->{$curr_vfo}{'power'});
-       return FALSE;
+      $dragging = 0;  # Reset dragging flag on button release
+      if (!defined($vfos->{$curr_vfo}{'power'}) ||$vfos->{$curr_vfo}{'power'} eq "") {
+         $vfos->{$curr_vfo}{'power'} = $rig->get_vfo();
+      }
+      # reset it
+      $vfo_power_entry->set_value($vfos->{$curr_vfo}{'power'});
+      return FALSE;
    });
 
    $vfo_power_entry->signal_connect(value_changed => sub {
-       my $value = $vfo_power_entry->get_value();
-       my $oldval = $vfos->{$curr_vfo}{'power'};
-       my $change = 0;
-       my $step = $vfos->{$curr_vfo}{'power_step'};
+      my $value = $vfo_power_entry->get_value();
+      my $oldval = $vfos->{$curr_vfo}{'power'};
+      my $change = 0;
+      my $step = $vfos->{$curr_vfo}{'power_step'};
 
-       if (!defined($oldval) || !defined($step)) {
-          $oldval = 0;
-          $step = 2;
-       }
+      if (!defined($oldval) || !defined($step)) {
+         $oldval = 0;
+         $step = 2;
+      }
 
-       my $max_change = $step * 5;
+      my $max_change = $step * 5;
 
-       # round it
-       $value = int($value + 0.5);
+      # round it
+      $value = int($value + 0.5);
 
-       # calculate how much change occurred
-       if ($value > $oldval) {
-          $change = $value - $oldval;
-       }  elsif ($value < $oldval) {
-          $change = $oldval - $value;
-       }
+      # calculate how much change occurred
+      if ($value > $oldval) {
+         $change = $value - $oldval;
+      }  elsif ($value < $oldval) {
+         $change = $oldval - $value;
+      }
 
-#       $log->Log("ui", "debug", "change power: dragging: $dragging - change: $change. val $value oldval: $oldval");
+#      $log->Log("ui", "debug", "change power: dragging: $dragging - change: $change. val $value oldval: $oldval");
        
-       if ($dragging < 2) {
-          return FALSE;
-       }
+      if ($dragging < 2) {
+         return FALSE;
+      }
 
-       # Ensure no abrupt changes occurred
-       if ($change <= $max_change) {
-          $vfos->{$curr_vfo}{'power'} = $value;
-          # XXX: Send hamlib command for power
-          # grigs_hamlib::set_power($curr_vfo);
-       } else {		# reject change otherwise
-          return FALSE;
-       }
-       return TRUE;
+      # Ensure no abrupt changes occurred
+      if ($change <= $max_change) {
+         $vfos->{$curr_vfo}{'power'} = $value;
+         # XXX: Send hamlib command for power
+         # grigs_hamlib::set_power($curr_vfo);
+      } else {		# reject change otherwise
+         return FALSE;
+      }
+      return TRUE;
    });
 
    $vfo_power_entry->signal_connect('motion-notify-event' => sub {
-       my ($widget, $event) = @_;
-       $dragging = 2;
-       return FALSE;  # Propagate the event further
+      my ($widget, $event) = @_;
+      $dragging = 2;
+      return FALSE;  # Propagate the event further
    });
 
    # XXX: This will change soon as _accel will be wrapped in window object
    $fm_box = grigs_fm::new($cfg, $w_main, $w_main_accel);
+
+   # Create a toggle button to represent the lock state
+   my $key_lock = $cfg->{'key_lock'};
+   $lock_button = Gtk3::ToggleButton->new_with_label("Lock ($key_lock)");
+   $lock_button->signal_connect(toggled => sub {
+      if ($locked) {
+         $locked = FALSE;
+      } else {
+         $locked = TRUE;
+      }
+    });
+
+   $w_main_accel->connect(ord($cfg->{'key_lock'}), $cfg->{'shortcut_key'}, 'visible', sub {
+      if ($lock_button->get_active()) {
+         $log->Log("ui", "info", "UNLOCKing controls");
+         $lock_button->set_active(0);
+      } else {
+         $log->Log("ui", "info", "LOCKing controls");
+         $lock_button->set_active(1);
+      }
+   });
 
    #########
    $box->pack_start($vfo_freq_label, FALSE, FALSE, 0);
@@ -814,6 +857,7 @@ sub draw_main_win {
    $box->pack_start($width_label, FALSE, FALSE, 0);
    $box->pack_start($width_entry, FALSE, FALSE, 0);
    $box->pack_start($fm_box, FALSE, FALSE, 0);
+   $box->pack_start($lock_button, FALSE, FALSE, 0);
 
    # Add the Buttons
    ##################
@@ -946,21 +990,6 @@ sub hamlib_init {
 }
 Glib::Timeout->add(1000, \&hamlib_init);
 
-sub show_help {
-   print "$app_name: $app_descr\n";
-   print "==== General Options ====\n";
-   print "\t-f <file>\t\tSpecify a configuration file for the rig\n";
-   print "\t-h\t\t\tDisplay this help message\n";
-   print "\t\t--help\n";
-   print "\t-r\t\t\tTreat the configuration file as read-only\n";
-   print "\n";
-   print "==== Window Placement ====\n";
-   print "\t-a\t\t\tAlways on top\n";
-   print "\t-x\t\t\tX position of main window\n";
-   print "\t-y\t\t\tY position of main window\n";
-   exit 0;
-}
-
 ###########################################################
 # scratch space for cmdline arguments
 my $cl_show_help = 0;
@@ -981,7 +1010,7 @@ GetOptions(
 ) or die "Invalid options - see --help\n";
 
 # Show help if requested
-if ($cl_show_help) { show_help(); }
+if ($cl_show_help) { grigs_doc::show_help($app_name, $app_descr); }
 
 # Load configuration
 $log->Log("core", "info", "$app_name is starting");
