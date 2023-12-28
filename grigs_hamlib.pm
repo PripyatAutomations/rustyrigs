@@ -38,6 +38,10 @@ our $vfos = {
      max_freq => 56000000,
      rf_gain => 0,
      vfo_step => 1000,
+     stats => {
+        attn => 0,
+        signal => 0,
+     },
      fm => {
         split_mode => "-",
         split_offset => "600KHz",
@@ -58,6 +62,10 @@ our $vfos = {
      max_freq => 56000000,
      rf_gain => 0,
      vfo_step => 1000,
+     stats => {
+        attn => 0,
+        signal => 0,
+     },
      fm => {
         split_mode => "-",
         split_offset => "600KHz",
@@ -164,20 +172,30 @@ sub next_vfo {
 }
 
 sub read_rig {
-   my $curr_vfo = $cfg->{active_vfo} = vfo_name($rig->get_vfo());
+   my $curr_hlvfo = $rig->get_vfo();
+   my $curr_vfo = $cfg->{active_vfo} = vfo_name($curr_hlvfo);
 
    # XXX: Update the VFO select button if needed
    # Get the RX volume
-   $cfg->{'rx_volume'} = $rig->get_level($Hamlib::RIG_LEVEL_AF, $curr_vfo);
+   $cfg->{'rx_volume'} = $rig->get_level($Hamlib::RIG_LEVEL_AF, $curr_hlvfo);
 #   $rig_vol_entry->set_value($cfg->{'rx_volume'});
+
    # Get the frequency for current VFO
-   $vfos->{$curr_vfo}{'freq'} = $rig->get_freq();
-#   $vfo_freq_entry->set_value($vfos->{$curr_vfo}{'freq'});
+   $vfos->{$curr_vfo}{'freq'} = $rig->get_freq($curr_hlvfo);
+   $vfo_freq_entry->set_value($vfos->{$curr_vfo}{'freq'});
+   print "freq: " . $vfos->{$curr_vfo}{'freq'} . "\n";
 
 #   my $mode;
 #   $vfos->{$curr_vfo}{'mode'] = $mode;
 #   my $power;
 #   $vfos->{$curr_vfo}{'power'} = $power;
+    my $stats = $vfos->{$curr_vfo}{'stats'};
+    $stats->{'signal'} = $rig->get_level_i($curr_hlvfo, $Hamlib::RIG_LEVEL_STRENGTH);
+    print "strength:\t\t" . $stats->{'signal'} ."\n";
+
+#    my $atten = $rig->{caps}->{attenuator};
+#    $stats->{'atten'} = $atten;
+#    print "Attenuators:\t\t@$atten\n";
 }
 
 # state for our tray mode polling slowdown

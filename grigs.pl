@@ -99,11 +99,13 @@ sub autosize_height {
 sub toggle_locked {
    my $origin = shift;
 
-   if (!$locked) {
-      $lock_button->set_active(0);
+   if ($locked == TRUE) {
+      $locked = FALSE;
    } else {
-      $lock_button->set_active(1);
+      $locked = TRUE;
    }
+   $lock_button->set_active($locked);
+#   $log->Log("ui", "debug", "Toggling \$locked to $locked by $origin");
 }
 
 # main menu
@@ -119,15 +121,46 @@ sub main_menu_item_clicked {
    }
 
    $main_menu_open = 0;
-   $menu->hide(); # Hide the menu after the choice is made
+   $menu->destroy(); # Hide the menu after the choice is made
+}
+
+sub main_menu_state {
+   my ($widget, $event) = @_;
+   my $on_top = 0;
+   my $focused = 0;
+
+   if ($event->new_window_state =~ m/\biconified\b/) {
+      $w_main->deiconify();
+   }
+
+   if ($event->new_window_state =~ m/\bmaximized\b/) {
+      $w_main->unmaximize();
+   }
+
+   if ($event->new_window_state =~ m/\babove\b/) {
+      $on_top = 1;
+   }
+
+   if ($event->new_window_state =~ m/\bfocused\b/) {
+      $focused = 1;
+   }
+
+   # If menu becomes unfocused, destroy it...
+   if (!$focused) {
+      $widget->destroy();
+   }
+
+   if (defined($event->new_window_state)) {
+      $log->Log("ui", "debug", "main_menu window state event: " . $event->new_window_state . " (ontop: $on_top, focused: $focused)");
+   }
+   return FALSE;
 }
 
 sub main_menu {
    my ($status_icon, $button, $time) = @_;
 
    if ($main_menu_open) {
-      $main_menu->show();
-      return;
+      $main_menu->destroy();
    }
 
    $main_menu_open = 1;
@@ -147,13 +180,13 @@ sub main_menu {
    my $lock_item = Gtk3::CheckMenuItem->new("Locked");
    $lock_item->signal_connect(toggled => sub {
       my $widget = shift;
-
-      toggle_locked();
+      toggle_locked("menu");
       $main_menu_open = 0;
-      $main_menu->hide(); # Hide the menu after the choice is made
+      $main_menu->destroy(); # Hide the menu after the choice is made
       $log->Log("ui", "debug", "Closing the main menu");
       return FALSE;
    });
+   $lock_item->set_active($locked);
    $main_menu->append($lock_item);
 
    my $quit_item = Gtk3::MenuItem->new("Quit");
@@ -162,6 +195,10 @@ sub main_menu {
 
    $main_menu->show_all();
    $main_menu->popup(undef, undef, undef, undef, $button, $time);
+
+   # XXX: We need to add an event to destroy the menu if it loses focus
+   $main_menu->signal_connect(window_state_event => \&main_menu_state);
+
 }
 
 sub save_config {
