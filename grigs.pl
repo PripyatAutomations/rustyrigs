@@ -1,7 +1,6 @@
 #!/usr/bin/perl
 # grigs.pl: GTK rigctld frontend for the system tray
 # You need to run rigctld with -o such as in ./run-dummy-rigctld
-
 use strict;
 use warnings;
 use Hamlib;
@@ -38,9 +37,9 @@ my $def_cfg = $grigs_defconfig::def_cfg;
 our $log = woodpile::Log->new($log_file, "debug");
 
 # XXX: belongs in hamlib bits
-our @vfo_widths_fm = ( 12500, 25000 );
+our @vfo_widths_fm = ( 25000, 12500 );
 our @vfo_widths_am = ( 6000, 5000, 3800, 3200, 3000, 2800 );
-our @vfo_widths_ssb = ( 3000, 3800, 3200, 2800, 2700, 2500 );
+our @vfo_widths_ssb = ( 3800, 3000, 3200, 2800, 2700, 2500 );
 my @pl_tones = (
     67.0, 71.9, 77.0, 88.5, 94.8, 100.0, 103.5, 107.2, 110.9, 114.8,
     118.8, 123.0, 127.3, 131.8, 136.5, 141.3, 146.2, 151.4, 156.7, 162.2,
@@ -79,6 +78,7 @@ my $icon_main_pix;
 my $icon_settings_pix;
 my $icon_transmit_pix;
 my $cfg_readonly = 0;
+my $lock_item;
 
 # Set config to defconfig, until we load config...
 my $cfg = $def_cfg;
@@ -171,13 +171,14 @@ sub main_menu {
    $toggle_item->signal_connect(activate => sub { main_menu_item_clicked($toggle_item, $w_main, $main_menu) });
    $main_menu->append($toggle_item);
    $main_menu->append($sep1);
+#   $main_menu->signal_connect(destroy => sub { undef $lock_item; });
 
    my $settings_item = Gtk3::MenuItem->new("Settings");
    $settings_item->signal_connect(activate => sub { main_menu_item_clicked($settings_item, $w_main, $main_menu) });
    $main_menu->append($settings_item);
    $main_menu->append($sep2);
 
-   my $lock_item = Gtk3::CheckMenuItem->new("Locked");
+   $lock_item = Gtk3::CheckMenuItem->new("Locked");
    $lock_item->signal_connect(toggled => sub {
       my $widget = shift;
       toggle_locked("menu");
@@ -1080,7 +1081,7 @@ draw_main_win();
 set_icon("connecting");
 grigs_memory::init($cfg, $w_main);
 
-# gtk main loop
+# gtk main loop, this will run until program exited
 Gtk3->main();
 
 # And say goodbye...

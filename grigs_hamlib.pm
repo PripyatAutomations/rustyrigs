@@ -1,6 +1,6 @@
 # Here we handle interaction with hamlib to talk to rigctld
 #
-# Try to stay frontend-agnostic here
+# Try to stay frontend-agnostic here, if possible
 package grigs_hamlib;
 use Carp;
 use Glib qw(TRUE FALSE);
