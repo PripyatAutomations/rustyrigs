@@ -49,7 +49,7 @@ sub on_drag_end {
     my $main_window = $widget->get_toplevel;
 
     # Reparent the widget back to the main window
-    $widget->reparent($main_window);
+    $widget->reparent($w-main);
 }
 
 # This needs sorted out so it makes only one widget.
