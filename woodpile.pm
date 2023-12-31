@@ -155,7 +155,8 @@ sub new {
       load_config => \&load_config,
       save_config => \&save_config,
       cfg_file => $cfg_file,
-      def_cfg => $def_cfg
+      def_cfg => $def_cfg,
+      log => $log
    };
 
    $self->{cfg} = load_config($self, $cfg_file, $def_cfg);

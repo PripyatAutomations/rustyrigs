@@ -3,6 +3,7 @@ package grigs_meter;
 use Carp;
 use Data::Dumper;
 use Glib qw(TRUE FALSE);
+use Data::Structure::Util qw/unbless/;
 use warnings;
 use strict;
 
@@ -19,10 +20,10 @@ sub set_label {
 }
 
 sub set_value {
-   ( my $self, my $value ) = @_;
-   die "self: " . Dump($self) . "\n";
-   $self->value = $value;
-   $self->val_label->set_label($value);
+   ( my $class, my $value ) = @_;
+   die "self: " . Dump($class) . "\n";
+   $class->value = $value;
+   $class->val_label->set_label($value);
 }
 
 sub zero {
@@ -36,11 +37,23 @@ sub zero {
 #	- Active fill color
 #	- Label text
 
+sub set_threshold {
+   ( my $class, my $min, my $max ) = @_;
+
+   if (!defined $class || !defined $min || !defined $max) {
+      die "Improper call to set_threshold - please pass TWO options: min, max!\n";
+   }
+
+   $class->{"threshold_min"} = $min;
+   $class->{"threshold_max"} = $max;
+}
+
 sub new {
-   ( $cfg, $vfos, $w_main, my $label, my $min_val, my $max_val ) = @_;
+   ( my $class, $cfg, $vfos, $w_main, my $label, my $min_val, my $max_val ) = @_;
    my $l = lc($label);
    my $s = "ui_${l}";
    my $bg = woodpile::hex_to_gdk_rgba($cfg->{"${s}_bg"});
+   my $alt_bg = woodpile::hex_to_gdk_rgba($cfg->{"${s}_alt_bg"});
    my $fg = woodpile::hex_to_gdk_rgba($cfg->{"${s}_fg"});
    my $txt_fg = woodpile::hex_to_gdk_rgba($cfg->{"${s}_text"});
    my $txt_font = $cfg->{"${s}_font"};
@@ -51,12 +64,29 @@ sub new {
       $monospace_font->set_family('Monospace');
    }
 
-   my $box = Gtk3::Box->new('vertical', 0);
-   my $bar = Gtk3::Box->new('horizontal', 0);
-   my $bar_sep = Gtk3::Separator->new('horizontal');
-   my $val_sep = Gtk3::Separator->new('horizontal');
+   my $grid = Gtk3::Grid->new();
+   $grid->set_column_homogeneous(FALSE);
+   $grid->set_row_homogeneous(FALSE);
+   
    my $bar_label = Gtk3::Label->new($label);
    my $val_label = Gtk3::Label->new($value);
+   $bar_label->set_width_chars(6);
+   $val_label->set_width_chars(6);
+   $bar_label->override_font($monospace_font);
+   $val_label->override_font($monospace_font);
+
+   my $bar_sep = Gtk3::Separator->new('horizontal');
+   my $val_sep = Gtk3::Separator->new('horizontal');
+   $bar_sep->set_size_request(30, 30);
+   $val_sep->set_size_request(30, 30);
+   $bar_sep->override_background_color('normal', $bg);
+   $val_sep->override_background_color('normal', $fg);
+
+   my $bar = Gtk3::Box->new('horizontal', 0);
+   $bar_sep = Gtk3::Separator->new('horizontal');
+   $val_sep = Gtk3::Separator->new('horizontal');
+   $bar_label = Gtk3::Label->new($label);
+   $val_label = Gtk3::Label->new($value);
    $bar_label->set_width_chars(6);
    $val_label->set_width_chars(6);
    $bar_label->override_font($monospace_font);
@@ -65,29 +95,44 @@ sub new {
    $bar_sep->override_background_color('normal', $bg);
    $val_sep->override_background_color('normal', $fg);
    $bar_sep->set_size_request(30, 30);
-   $bar->pack_start($bar_label, FALSE, FALSE, 0);
-   $bar->pack_start($bar_sep, TRUE, TRUE, 10);
-   $bar->pack_start($val_sep, FALSE, FALSE, 10);
-   $bar->pack_start($val_label, FALSE, FALSE, 0);
-   $box->pack_start($bar, TRUE, TRUE, 0);
 
+   $grid->attach($bar_label, 0, 0, 1, 1);
+   $grid->attach($bar_sep, 1, 0, 1, 1);
+   $grid->attach($val_sep, 1, 0, 1, 1);
+   $grid->attach($val_label, 2, 0, 1, 1);
+   $grid->set_column_homogeneous(FALSE);
+   $bar_sep->set_hexpand(TRUE);
+   $val_sep->set_hexpand(FALSE);
+   $grid->set_column_spacing(10);
+ 
+   # XXX: We need to calculate min/max to get a percentage of fill
+   # XXX: Then determine how many pixels that is and set width appropriately
+   # XXX: on $act_sep
    $value = "1.0";
    $val_label->set_label($value);
-   $bar_sep->set_size_request(10, 30);
+   $val_sep->set_size_request(0, 30);
 
-   my $rv = {
-      bar => $bar,
-      bar_label => $bar_label,
-      bar_sep => $bar_sep,
-      box => $box,
-      min => $min_val,
-      max => $max_val,
-      set_label => \&set_label,
-      set_value => \&set_value,
-      value => $value,
-      val_sep => $val_sep
+   my $self = {
+       grid => $grid,
+       bar_label => $bar_label,
+       bar_sep => $bar_sep,
+#       box => $box,
+       min => $min_val,
+       max => $max_val,
+       min_threshold => -1,
+       max_threshold => -1,
+       set_label => \&set_label,
+       set_threshold => \&set_threshold,
+       set_value => \&set_value,
+       value => $value,
+       val_sep => $val_sep
    };
-   return $rv;
+   bless $self, $class;
+   return $self;
+}
+
+sub DESTROY {
+   my ( $class ) = @_;
 }
 
 1;

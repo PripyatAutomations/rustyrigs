@@ -12,8 +12,10 @@ my $poll_interval_entry;
 my $poll_tray_entry;
 my $core_debug;
 my $hamlib_debug;
-my $temp_cfg;
+my $tmp_cfg;
 my $w_main;
+my $changes = 0;
+my $cfg = $main::cfg;
 
 sub print_signal_info {
    my ($widget, $signal_name) = @_;
@@ -25,11 +27,11 @@ sub apply_settings {
 }
 
 sub save_settings {
-   if (defined($temp_cfg)) {
+   if ($changes && defined $tmp_cfg) {
       print "Merging settings into in-memory config\n";
       my $tmp = {%$cfg, %$tmp_cfg};
-      $cfg = $tmp;
-      print "settings: " . Dumper($tmp) . "\n";
+      $cfg = \$tmp;
+      $main::cfg = \$tmp;
    } else {
       print "no tmpconfig\n";
    }
@@ -52,8 +54,9 @@ sub combobox_keys {
    }
 }
 
+
 sub show_settings {
-   my $cfg = shift;
+   $cfg = shift;
    my $mainwin = shift;
    $w_main = $mainwin;
 
@@ -148,6 +151,7 @@ sub show_settings {
    $poll_interval_entry->signal_connect(value_changed => sub {
        my $val = $poll_interval_entry->get_value();
        $tmp_cfg->{'poll_interval'} = $val;
+       $changes++;
    });
 
    # poll interval: in tray
@@ -163,6 +167,7 @@ sub show_settings {
    $poll_tray_entry->signal_connect(value_changed => sub {
        my $val = $poll_tray_entry->get_value();
        $tmp_cfg->{'poll_tray_every'} = $val;
+       $changes++;
    });
 
    # system log level
@@ -211,6 +216,10 @@ sub show_settings {
    $hamlib_debug->set_can_focus(1);
    $hamlib_debug->signal_connect(key_release_event => \&combobox_keys);
 
+   my $window_options_box = Gtk3::Box->new('vertical', 5);
+   my $window_options_label = Gtk3::Label->new('Window Behaviour');
+   $window_options_box->pack_start($window_options_label, FALSE, FALSE, 0);
+
    my $autohide_toggle = Gtk3::CheckButton->new();
    $autohide_toggle->set_label('Restore minimized state?');
    $autohide_toggle->set_active($cfg->{'stay_hidden'});
@@ -221,6 +230,7 @@ sub show_settings {
       } else {
          $tmp_cfg->{'stay_hidden'} = 0;
       }
+      $changes++;
    });
    $autohide_toggle->set_can_focus(1);
 
@@ -235,8 +245,109 @@ sub show_settings {
       } else {
          $tmp_cfg->{'always_on_top'} = 0;
       }
+      $changes++;
    });
+   $window_options_box->pack_start($autohide_toggle, FALSE, FALSE, 0);
+   $window_options_box->pack_start($ontop_button, FALSE, FALSE, 0);
 
+###########
+   my $meter_choices_box = Gtk3::Box->new('vertical', 5);
+   my $meters_label = Gtk3::Label->new('Displayed Meters');
+   # XXX: Make this 2 checkboxes per row: main dialog & meter popup
+
+   $meter_choices_box->pack_start($meters_label, FALSE, FALSE, 0);
+
+   my $alc_toggle = Gtk3::CheckButton->new();
+   $alc_toggle->set_label('Show ALC meter?');
+   $alc_toggle->set_active($cfg->{'show_alc'});
+   $alc_toggle->signal_connect('toggled' => sub {
+      my $button = shift;
+      if ($button->get_active()) {
+         $tmp_cfg->{'show_alc'} = 1;
+      } else {
+         $tmp_cfg->{'show_alc'} = 0;
+      }
+      $changes++;
+   });
+   $alc_toggle->set_can_focus(1);
+   $meter_choices_box->pack_start($alc_toggle, FALSE, FALSE, 0);
+
+   my $cmp_toggle = Gtk3::CheckButton->new();
+   $cmp_toggle->set_label('Show ALC meter?');
+   $cmp_toggle->set_active($cfg->{'show_cmp'});
+   $cmp_toggle->signal_connect('toggled' => sub {
+      my $button = shift;
+      if ($button->get_active()) {
+         $tmp_cfg->{'show_cmp'} = 1;
+      } else {
+         $tmp_cfg->{'show_cmp'} = 0;
+      }
+      $changes++;
+   });
+   $cmp_toggle->set_can_focus(1);
+   $meter_choices_box->pack_start($cmp_toggle, FALSE, FALSE, 0);
+
+   my $pow_toggle = Gtk3::CheckButton->new();
+   $pow_toggle->set_label('Show power meter?');
+   $pow_toggle->set_active($cfg->{'show_pow'});
+   $pow_toggle->signal_connect('toggled' => sub {
+      my $button = shift;
+      if ($button->get_active()) {
+         $tmp_cfg->{'show_pow'} = 1;
+      } else {
+         $tmp_cfg->{'show_pow'} = 0;
+      }
+      $changes++;
+   });
+   $pow_toggle->set_can_focus(1);
+   $meter_choices_box->pack_start($pow_toggle, FALSE, FALSE, 0);
+
+   my $swr_toggle = Gtk3::CheckButton->new();
+   $swr_toggle->set_label('Show SWR meter?');
+   $swr_toggle->set_active($cfg->{'show_swr'});
+   $swr_toggle->signal_connect('toggled' => sub {
+      my $button = shift;
+      if ($button->get_active()) {
+         $tmp_cfg->{'show_swr'} = 1;
+      } else {
+         $tmp_cfg->{'show_swr'} = 0;
+      }
+      $changes++;
+   });
+   $swr_toggle->set_can_focus(1);
+   $meter_choices_box->pack_start($swr_toggle, FALSE, FALSE, 0);
+
+   my $tmp_toggle = Gtk3::CheckButton->new();
+   $tmp_toggle->set_label('Show temp meter?');
+   $tmp_toggle->set_active($cfg->{'show_tmp'});
+   $tmp_toggle->signal_connect('toggled' => sub {
+      my $button = shift;
+      if ($button->get_active()) {
+         $tmp_cfg->{'show_tmp'} = 1;
+      } else {
+         $tmp_cfg->{'show_tmp'} = 0;
+      }
+      $changes++;
+   });
+   $tmp_toggle->set_can_focus(1);
+   $meter_choices_box->pack_start($tmp_toggle, FALSE, FALSE, 0);
+
+   my $vdd_toggle = Gtk3::CheckButton->new();
+   $vdd_toggle->set_label('Show VDD meter?');
+   $vdd_toggle->set_active($cfg->{'show_vdd'});
+   $vdd_toggle->signal_connect('toggled' => sub {
+      my $button = shift;
+      if ($button->get_active()) {
+         $vdd_cfg->{'show_vdd'} = 1;
+      } else {
+         $vdd_cfg->{'show_vdd'} = 0;
+      }
+      $changes++;
+   });
+   $vdd_toggle->set_can_focus(1);
+   $meter_choices_box->pack_start($vdd_toggle, FALSE, FALSE, 0);
+
+###########
    # We want Save and Cancel next to each other, so use a box to wrap
    my $button_box = Gtk3::Box->new('horizontal', 5);
 
@@ -244,13 +355,13 @@ sub show_settings {
    my $save_button = Gtk3::Button->new('_Save');
    $save_button->set_tooltip_text("Save and apply changes");
    $save_button->set_can_focus(1);
-   $w_settings_accel->connect(ord('S'), $cfg->{'shortcut_key'}, 'visible', \&save_settings);
+   $w_settings_accel->connect(ord('S'), $cfg->{'shortcut_key'}, 'visible', sub { save_settings($tmp_cfg); });
 
    # Create a Cancel button to discard changes
    my $cancel_button = Gtk3::Button->new('_Cancel');
    $cancel_button->set_tooltip_text("Discard changes");
-   $save_button->signal_connect('activate' => \&save_settings);
-   $save_button->signal_connect('clicked' => \&save_settings );
+   $save_button->signal_connect('activate' => sub { save_settings($tmp_cfg); });
+   $save_button->signal_connect('clicked' => sub { save_settings($tmp_cfg); });
    $cancel_button->signal_connect('activate' => \&close_settings); 
    $cancel_button->signal_connect('clicked' => \&close_settings );
    $cancel_button->set_can_focus(1);
@@ -269,8 +380,8 @@ sub show_settings {
    $config_box->pack_start($core_debug, FALSE, FALSE, 0);
    $config_box->pack_start($hamlib_debug_label, FALSE, FALSE, 0);
    $config_box->pack_start($hamlib_debug, FALSE, FALSE, 0);
-   $config_box->pack_start($autohide_toggle, FALSE, FALSE, 0);
-   $config_box->pack_start($ontop_button, FALSE, FALSE, 0);
+   $config_box->pack_start($window_options_box, FALSE, FALSE, 0);
+   $config_box->pack_start($meter_choices_box, FALSE, FALSE, 0);
    $config_box->pack_end($button_box, FALSE, FALSE, 0);
 
    # Add the config box, show the window, and focus first input

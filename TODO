@@ -13,3 +13,5 @@
 # * Move all the polling and setting into read_rig and write_rig
 #  - Call these periodically, if needed, but throttled best we can
 # * Make it so the right click/icon menu can't be opened twice
+* Combined meter view for RX/TX in one line
+  - Toggle on click with full view

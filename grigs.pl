@@ -199,7 +199,6 @@ sub main_menu {
 
    # XXX: We need to add an event to destroy the menu if it loses focus
    $main_menu->signal_connect(window_state_event => \&main_menu_state);
-
 }
 
 sub save_config {
@@ -602,24 +601,25 @@ sub draw_main_win {
    $box->pack_start($chan_box, FALSE, FALSE, 0);
 
    # Add the meters
-   my $stat_alc = grigs_meter::new($cfg, $vfos, $w_main, "ALC", 0, 10);
+   my $stat_alc = grigs_meter->new($cfg, $vfos, $w_main, "ALC", 0, 10);
 #   $stat_alc->set_value(0);
-   $box->pack_start($stat_alc->{'box'}, TRUE, TRUE, 0);
-   my $stat_comp = grigs_meter::new($cfg, $vfos, $w_main, "CMP", 0, 10);
+   $stat_alc->set_threshold($cfg->{'thresh_alc_min'}, $cfg->{'thresh_alc_max'});
+   $box->pack_start($stat_alc->{'grid'}, TRUE, TRUE, 0);
+   my $stat_comp = grigs_meter->new($cfg, $vfos, $w_main, "CMP", 0, 10);
 #   $stat_comp->set_value(0);
-   $box->pack_start($stat_comp->{'box'}, TRUE, TRUE, 0);
-   my $stat_pow = grigs_meter::new($cfg, $vfos, $w_main, "POW", 0, 1500);
+   $box->pack_start($stat_comp->{'grid'}, TRUE, TRUE, 0);
+   my $stat_pow = grigs_meter->new($cfg, $vfos, $w_main, "POW", 0, 100);
 #   $stat_pow->set_value(0);
-   $box->pack_start($stat_pow->{'box'}, TRUE, TRUE, 0);
-   my $stat_swr = grigs_meter::new($cfg, $vfos, $w_main, "SWR", 0, 9000);
+   $box->pack_start($stat_pow->{'grid'}, TRUE, TRUE, 0);
+   my $stat_swr = grigs_meter->new($cfg, $vfos, $w_main, "SWR", 0, 50);
 #   $stat_swr->set_value(0);
-   $box->pack_start($stat_swr->{'box'}, TRUE, TRUE, 0);
-   my $stat_tmp = grigs_meter::new($cfg, $vfos, $w_main, "TMP", 0, 200);
+   $box->pack_start($stat_swr->{'grid'}, TRUE, TRUE, 0);
+   my $stat_tmp = grigs_meter->new($cfg, $vfos, $w_main, "TMP", 0, 200);
 #   $stat_tmp->set_value(0);
-   $box->pack_start($stat_tmp->{'box'}, TRUE, TRUE, 0);
-   my $stat_vdd = grigs_meter::new($cfg, $vfos, $w_main, "VDD", 0, 50);
+   $box->pack_start($stat_tmp->{'grid'}, TRUE, TRUE, 0);
+   my $stat_vdd = grigs_meter->new($cfg, $vfos, $w_main, "VDD", 0, 50);
 #   $stat_vdd->set_value(0);
-   $box->pack_start($stat_vdd->{'box'}, TRUE, TRUE, 0);
+   $box->pack_start($stat_vdd->{'grid'}, TRUE, TRUE, 0);
 
    # VFO choser:
    $vfo_sel_button = Gtk3::Button->new("VFO: " . $curr_vfo . " (" . $cfg->{'key_vfo'} . ")");
@@ -873,7 +873,8 @@ sub draw_main_win {
    });
 
    # XXX: This will change soon as _accel will be wrapped in window object
-   $fm_box = grigs_fm::new($cfg, $w_main, $w_main_accel);
+   my $fm_p  = grigs_fm->new($cfg, $w_main, $w_main_accel);
+   $fm_box = $fm_p->{box};
 
    # Create a toggle button to represent the lock state
    my $key_lock = $cfg->{'key_lock'};
@@ -1026,6 +1027,7 @@ sub set_icon {
    $w_main->set_icon($icon);
    set_tray_icon($state);
 }
+
 
 my $on_init = 0;
 

@@ -4,6 +4,7 @@
 package grigs_fm;
 use Carp;
 use Data::Dumper;
+use Data::Structure::Util qw/unbless/;
 #use strict;
 use warnings;
 use Glib qw(TRUE FALSE);
@@ -44,9 +45,7 @@ sub refresh_tone_freqs {
 }
 
 sub new {
-   my $cfg = shift;
-   my $w_main = shift;
-   my $w_main_accel = shift;		# XXX: get rid of this shite
+   ( my $class, my $cfg, my $w_main, my $w_main_accel ) = @_;
 
    $curr_vfo = $cfg->{'active_vfo'};
    $vfo = $vfos->{$curr_vfo};
@@ -176,7 +175,11 @@ sub new {
    $fm_box->pack_start($tone_freq_rx_entry, FALSE, FALSE, 0);
    $fm_box->pack_start($tone_freq_tx_label, FALSE, FALSE, 0);
    $fm_box->pack_start($tone_freq_tx_entry, FALSE, FALSE, 0);
-   return $fm_box;
+   my $self = {
+      box => $fm_box
+   };
+   bless $self, $class;
+   return $self;
 }
 
 1;
