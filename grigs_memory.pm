@@ -16,9 +16,8 @@ my $cfg;
 my $w_main;
 
 sub save_memory {
-   my $channel = shift;
+   ( my $channel ) = @_;
    close_window(TRUE);
-   $mem_edit_open = 0;
 };
 
 sub show_window {
@@ -122,19 +121,21 @@ sub close_window {
     }
 
     if ($response eq 'yes') {
-       if (defined($dialog)) {
-          $dialog->destroy();
-       }
        $w_mem_edit->destroy();
        $mem_edit_open = 0;
-    } else {
+       undef $w_mem_edit;
+
        if (defined($dialog)) {
           $dialog->destroy();
        }
+    } else {
        $w_mem_edit->set_keep_above(1);
        $w_mem_edit->set_modal(1);
        $w_mem_edit->present();
        $w_mem_edit->grab_focus();
+       if (defined($dialog)) {
+          $dialog->destroy();
+       }
     }
 }
 
