@@ -533,7 +533,6 @@ sub draw_main_win {
       $curr_vfo = $cfg->{active_vfo} = 'A';
    }
 
-
    #################
    # Channel stuff #
    #################
@@ -599,12 +598,28 @@ sub draw_main_win {
    });
    $chan_box->pack_start($mem_btn_box, FALSE, FALSE, 0);
 
-   # Add status meter widget to the window
-   my $status_box = grigs_meter::new($cfg, $vfos);
-   $chan_box->pack_start($status_box->{'box'}, TRUE, TRUE, 0);
-
    # add to the main window
    $box->pack_start($chan_box, FALSE, FALSE, 0);
+
+   # Add the meters
+   my $stat_alc = grigs_meter::new($cfg, $vfos, $w_main, "ALC", 0, 10);
+#   $stat_alc->set_value(0);
+   $box->pack_start($stat_alc->{'box'}, TRUE, TRUE, 0);
+   my $stat_comp = grigs_meter::new($cfg, $vfos, $w_main, "CMP", 0, 10);
+#   $stat_comp->set_value(0);
+   $box->pack_start($stat_comp->{'box'}, TRUE, TRUE, 0);
+   my $stat_pow = grigs_meter::new($cfg, $vfos, $w_main, "POW", 0, 1500);
+#   $stat_pow->set_value(0);
+   $box->pack_start($stat_pow->{'box'}, TRUE, TRUE, 0);
+   my $stat_swr = grigs_meter::new($cfg, $vfos, $w_main, "SWR", 0, 9000);
+#   $stat_swr->set_value(0);
+   $box->pack_start($stat_swr->{'box'}, TRUE, TRUE, 0);
+   my $stat_tmp = grigs_meter::new($cfg, $vfos, $w_main, "TMP", 0, 200);
+#   $stat_tmp->set_value(0);
+   $box->pack_start($stat_tmp->{'box'}, TRUE, TRUE, 0);
+   my $stat_vdd = grigs_meter::new($cfg, $vfos, $w_main, "VDD", 0, 50);
+#   $stat_vdd->set_value(0);
+   $box->pack_start($stat_vdd->{'box'}, TRUE, TRUE, 0);
 
    # VFO choser:
    $vfo_sel_button = Gtk3::Button->new("VFO: " . $curr_vfo . " (" . $cfg->{'key_vfo'} . ")");

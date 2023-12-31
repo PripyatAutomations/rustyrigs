@@ -6,6 +6,8 @@ use Glib qw(TRUE FALSE);
 use warnings;
 use strict;
 
+my $monospace_font;
+
 my $cfg;
 my $vfos;
 my $w_main;
@@ -13,7 +15,14 @@ my $w_main;
 # XXX: Make methods for these
 #	- SetValue
 #	- Zero
+sub set_label {
+}
+
 sub set_value {
+   ( my $self, my $value ) = @_;
+   die "self: " . Dump($self) . "\n";
+   $self->value = $value;
+   $self->val_label->set_label($value);
 }
 
 sub zero {
@@ -28,49 +37,57 @@ sub zero {
 #	- Label text
 
 sub new {
-   ( $cfg, $vfos, $w_main ) = @_;
-   my $status_box = Gtk3::Box->new('vertical', 5);
-   $status_box->set_hexpand(TRUE);
-   $status_box->set_halign('fill');
-   my $pow_ovl = Gtk3::Overlay->new();
-   my $swr_ovl = Gtk3::Overlay->new();
-   my $pow_bar = Gtk3::Box->new('horizontal', 0);
-   my $swr_bar = Gtk3::Box->new('horizontal', 0);
-   my $pow_bar_sep = Gtk3::Separator->new('horizontal');
-   my $swr_bar_sep = Gtk3::Separator->new('horizontal');
-   my $pow_act_sep = Gtk3::Separator->new('horizontal');
-   my $swr_act_sep = Gtk3::Separator->new('horizontal');
-   my $swr_bar_label = Gtk3::Label->new('1.4:1');
-   my $pow_bar_label = Gtk3::Label->new(' 30W');
-   $pow_bar_sep->set_size_request(-1, 30);
-   $swr_bar_sep->set_size_request(-1, 30);
-   $pow_bar_sep->override_background_color('normal', woodpile::hex_to_gdk_rgba($cfg->{'ui_pow_bg'}));
-   $swr_bar_sep->override_background_color('normal', woodpile::hex_to_gdk_rgba($cfg->{'ui_swr_bg'}));
-   $pow_act_sep->override_background_color('normal', woodpile::hex_to_gdk_rgba($cfg->{'ui_pow_fg'}));
-   $swr_act_sep->override_background_color('normal', woodpile::hex_to_gdk_rgba($cfg->{'ui_swr_fg'}));
-   $pow_bar_sep->set_size_request(30, 30);
-   $swr_bar_sep->set_size_request(120, 30);
-   $pow_bar->pack_start($pow_bar_sep, TRUE, TRUE, 10);
-   $swr_bar->pack_start($swr_bar_sep, TRUE, TRUE, 10);
-   $pow_bar->pack_start($pow_bar_label, FALSE, FALSE, 0);
-   $swr_bar->pack_start($swr_bar_label, FALSE, FALSE, 0);
-#   $pow_ovl->add_overlay($pow_bar_sep);
-#   $pow_ovl->add_overlay($pow_act_sep);
-#   $pow_ovl->set_halign('start');
-#   $pow_ovl->set_valign('start');
-#   $pow_ovl->set_margin_start(10);
-#   $pow_ovl->set_margin_top(10);
+   ( $cfg, $vfos, $w_main, my $label, my $min_val, my $max_val ) = @_;
+   my $l = lc($label);
+   my $s = "ui_${l}";
+   my $bg = woodpile::hex_to_gdk_rgba($cfg->{"${s}_bg"});
+   my $fg = woodpile::hex_to_gdk_rgba($cfg->{"${s}_fg"});
+   my $txt_fg = woodpile::hex_to_gdk_rgba($cfg->{"${s}_text"});
+   my $txt_font = $cfg->{"${s}_font"};
+   my $value;
 
-   # add the power and swr widgets to a box
-   $status_box->pack_start($pow_bar, TRUE, FALSE, 0);
-#   $status_box->pack_start($pow_ovl, TRUE, TRUE, 0);
-   $status_box->pack_start($swr_bar, TRUE, FALSE, 0);
+   if (undef($monospace_font)) {
+      $monospace_font = Gtk3::Pango::FontDescription->new();;
+      $monospace_font->set_family('Monospace');
+   }
+
+   my $box = Gtk3::Box->new('vertical', 0);
+   my $bar = Gtk3::Box->new('horizontal', 0);
+   my $bar_sep = Gtk3::Separator->new('horizontal');
+   my $val_sep = Gtk3::Separator->new('horizontal');
+   my $bar_label = Gtk3::Label->new($label);
+   my $val_label = Gtk3::Label->new($value);
+   $bar_label->set_width_chars(6);
+   $val_label->set_width_chars(6);
+   $bar_label->override_font($monospace_font);
+   $val_label->override_font($monospace_font);
+   $bar_sep->set_size_request(-1, 30);
+   $bar_sep->override_background_color('normal', $bg);
+   $val_sep->override_background_color('normal', $fg);
+   $bar_sep->set_size_request(30, 30);
+   $bar->pack_start($bar_label, FALSE, FALSE, 0);
+   $bar->pack_start($bar_sep, TRUE, TRUE, 10);
+   $bar->pack_start($val_sep, FALSE, FALSE, 10);
+   $bar->pack_start($val_label, FALSE, FALSE, 0);
+   $box->pack_start($bar, TRUE, TRUE, 0);
+
+   $value = "1.0";
+   $val_label->set_label($value);
+   $bar_sep->set_size_request(10, 30);
 
    my $rv = {
-      box => $status_box,
-      set_swr => \&set_swr,
-      set_pwr => \&set_pwr
+      bar => $bar,
+      bar_label => $bar_label,
+      bar_sep => $bar_sep,
+      box => $box,
+      min => $min_val,
+      max => $max_val,
+      set_label => \&set_label,
+      set_value => \&set_value,
+      value => $value,
+      val_sep => $val_sep
    };
+   return $rv;
 }
 
 1;
