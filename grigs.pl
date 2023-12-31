@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 # grigs.pl: GTK rigctld frontend for the system tray
 # You need to run rigctld with -o such as in ./run-dummy-rigctld
+# XXX: Move all GUI bits to grigs_gtk.pm - so we can later add CLI frontend
 use strict;
 use warnings;
 use Hamlib;
@@ -32,20 +33,10 @@ my $default_cfg_file = $ENV{"HOME"} . "/.config/${app_name}.yaml";
 my $cfg_file = $default_cfg_file;
 my $log_file = $ENV{"HOME"} . "/${app_name}.log";
 my $def_cfg = $grigs_defconfig::def_cfg;
+my $mem_file;
 
 # Start logging in debug mode until config is loaded and we quiet down...
 our $log = woodpile::Log->new($log_file, "debug");
-
-# XXX: belongs in hamlib bits
-our @vfo_widths_fm = ( 25000, 12500 );
-our @vfo_widths_am = ( 6000, 5000, 3800, 3200, 3000, 2800 );
-our @vfo_widths_ssb = ( 3800, 3000, 3200, 2800, 2700, 2500 );
-my @pl_tones = (
-    67.0, 71.9, 77.0, 88.5, 94.8, 100.0, 103.5, 107.2, 110.9, 114.8,
-    118.8, 123.0, 127.3, 131.8, 136.5, 141.3, 146.2, 151.4, 156.7, 162.2,
-    167.9, 173.8, 179.9, 186.2, 192.8, 203.5, 210.7, 218.1, 225.7, 233.6,
-    241.8, 250.3
-);
 
 ##################
 # Run time state #
@@ -79,6 +70,7 @@ my $icon_settings_pix;
 my $icon_transmit_pix;
 my $cfg_readonly = 0;
 my $lock_item;
+my $channels;
 
 # Set config to defconfig, until we load config...
 my $cfg = $def_cfg;
@@ -396,20 +388,20 @@ sub refresh_available_widths {
    }
 
    if ($vfo->{'mode'} eq "FM") {
-      foreach my $value (@vfo_widths_fm) {
+      foreach my $value (@grigs_hamlib::vfo_widths_fm) {
          $width_entry->append_text($value);
       }
-      $rv = find_offset(\@vfo_widths_fm, $val);
+      $rv = woodpile::find_offset(\@grigs_hamlib::vfo_widths_fm, $val);
    } elsif ($vfo->{'mode'} =~ m/AM/) {
-      foreach my $value (@vfo_widths_am) {
+      foreach my $value (@grigs_hamlib::vfo_widths_am) {
          $width_entry->append_text($value);
       }
-      $rv = find_offset(\@vfo_widths_am, $val);
+      $rv = woodpile::find_offset(\@grigs_hamlib::vfo_widths_am, $val);
    } elsif ($vfo->{'mode'} =~ qr/(D-[UL]|USB|LSB)/) {
-      foreach my $value (@vfo_widths_ssb) {
+      foreach my $value (@grigs_hamlib::vfo_widths_ssb) {
          $width_entry->append_text($value);
       }
-      $rv = woodpile::find_offset(\@vfo_widths_ssb, $val);
+      $rv = woodpile::find_offset(\@grigs_hamlib::vfo_widths_ssb, $val);
    } elsif ($vfo->{'mode'} =~ m/C4FM/) {
       $width_entry->append_text(12500);
       $rv = 0;
@@ -421,6 +413,7 @@ sub refresh_available_widths {
    $width_entry->set_active($rv);
 }
 
+# XXX: Move this to $profile.memories.yaml where $profile is the $cfg_file minus the .yaml ;)
 sub channel_list {
     my $store = Gtk3::ListStore->new('Glib::String', 'Glib::String', 'Glib::String');
 
@@ -438,9 +431,7 @@ sub channel_list {
 
     $iter = $store->append();
     $store->set($iter, 0, '5', 1, ' WWV 25MHz', 2, ' 25,000.000 KHz AM');
-
-
-#$combo->set_active(1);
+    #$combo->set_active(1);
     return $store;
 }
 
@@ -1060,6 +1051,27 @@ GetOptions(
    "y=i" => \$cl_y,		# Y pos of main win
 ) or die "Invalid options - see --help\n";
 
+# Mutate the config file name to decide where to save memories...
+$mem_file = $cfg_file;
+
+if (defined $cfg->{'memory_file'}) {
+   $mem_file = $cfg->{'memory_file'};
+} else {
+   $mem_file =~ s/\.yaml$/.mem.yaml/;
+   $cfg->{'memory_file'} = $mem_file;
+}
+
+$channels = grigs_memory->new($cfg, $w_main, $mem_file);
+
+if (-f $mem_file) {
+   $channels->load_from_yaml();
+} else {
+   # Load default memories
+   $channels->load_defaults($grigs_defconfig::default_memories);
+
+   # Save default memories to memory file
+   $channels->save($mem_file);
+}
 # Show help if requested
 if ($cl_show_help) { grigs_doc::show_help($app_name, $app_descr); }
 
@@ -1092,7 +1104,6 @@ if (defined($cl_x) && defined($cl_y)) {
 load_icons();
 draw_main_win();
 set_icon("connecting");
-grigs_memory::init($cfg, $w_main);
 
 # gtk main loop, this will run until program exited
 Gtk3->main();

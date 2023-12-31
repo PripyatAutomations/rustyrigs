@@ -106,3 +106,8 @@ our $def_cfg = {
    win_settings_height => 278,
    win_settings_width => 489
 };
+
+our $default_memories = {
+   # stuff
+};
+

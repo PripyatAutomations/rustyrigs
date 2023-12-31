@@ -6,25 +6,11 @@
 *.o
 *.pm.tdy
 *.bs
-
-# Devel::Cover
-cover_db/
-
-# Devel::NYTProf
-nytprof.out
-
-# Dist::Zilla
 /.build/
-
-# Module::Build
 _build/
 Build
 Build.bat
-
-# Module::Install
 inc/
-
-# ExtUtils::MakeMaker
 /blib/
 /_eumm/
 /*.gz

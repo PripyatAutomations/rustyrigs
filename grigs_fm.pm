@@ -9,6 +9,8 @@ use woodpile;
 #use strict;
 use warnings;
 use Glib qw(TRUE FALSE);
+use grigs_hamlib;
+
 my $cfg;
 my $fm_box;
 my $vfos = $grigs_hamlib::vfos;
@@ -29,18 +31,18 @@ sub refresh_tone_freqs {
    $tone_freq_rx_entry->remove_all();
    $tone_freq_tx_entry->remove_all();
 
-   foreach my $val (@pl_tones) {
+   foreach my $val (@grigs_hamlib::pl_tones) {
       $tone_freq_rx_entry->append_text($val);
       $tone_freq_tx_entry->append_text($val);
    }
 
    if (defined($vfo->{'fm'}{'tone_freq_rx'})) {
-      my $rx_tone = woodpile::find_offset(\@pl_tones, $vfo->{'fm'}{'tone_freq_rx'});
+      my $rx_tone = woodpile::find_offset(\@grigs_hamlib::pl_tones, $vfo->{'fm'}{'tone_freq_rx'});
       $tone_freq_rx_entry->set_active($rx_tone);
    }
 
    if (defined($vfo->{'fm'}{'tone_freq_tx'})) {
-      my $tx_tone = woodpile::find_offset(\@pl_tones, $vfo->{'fm'}{'tone_freq_tx'});
+      my $tx_tone = woodpile::find_offset(\@grigs_hamlib::pl_tones, $vfo->{'fm'}{'tone_freq_tx'});
       $tone_freq_tx_entry->set_active($tx_tone);
    }
 }
@@ -138,13 +140,13 @@ sub new {
       $vfo->{'fm'}{'tone_freq_rx'} = $rrv;
 
       # If the TX PL is empty, set it to the RX tone
-      my $rro = woodpile::find_offset(\@pl_tones, $rrv);
+      my $rro = woodpile::find_offset(\@grigs_hamlib::pl_tones, $rrv);
       my $trv = $tone_freq_tx_entry->get_active_text();
-      my $tro = woodpile::find_offset(\@pl_tones, $trv);
+      my $tro = woodpile::find_offset(\@grigs_hamlib::pl_tones, $trv);
 
       # If PL is empty or both boxes are the same, change it along
       if (!defined($trv) || ($rro - 1) == $tro || ($tro - 1) == $rro) {
-         $tone_freq_tx_entry->set_active(woodpile::find_offset(\@pl_tones, $rrv));
+         $tone_freq_tx_entry->set_active(woodpile::find_offset(\@grigs_hamlib::pl_tones, $rrv));
       }
    });
 

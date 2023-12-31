@@ -6,6 +6,7 @@ use Carp;
 use Glib qw(TRUE FALSE);
 use Data::Dumper;
 
+my $mem_file;
 my $w_mem_edit;
 my $mem_edit_box = Gtk3::Box->new('vertical', 5);
 my $mem_edit_open = 0;
@@ -15,12 +16,13 @@ my $mem_edit_accel = Gtk3::AccelGroup->new();
 my $cfg;
 my $w_main;
 
-sub save_memory {
-   ( my $channel ) = @_;
+sub save {
+   ( my $class, my $channel ) = @_;
    close_window(TRUE);
 };
 
 sub show_window {
+   ( my $class ) = @_;
    if ($mem_edit_open) {
       $w_mem_edit->present();
       $w_mem_edit->grab_focus();
@@ -88,60 +90,83 @@ sub show_window {
 }
 
 sub close_window {
-    my $quiet = shift;
-    if (!$mem_edit_open || !defined($w_mem_edit)) {
-       return;
-    }
+   ( my $class, my $quiet ) = @_;
 
-    my $response = 'yes';
-    my $dialog;
+   if (!$mem_edit_open || !defined($w_mem_edit)) {
+      return;
+   }
 
-    # skip this if quiet is passed
-    if (!defined($quiet) || !$quiet) {
-       my $s_modal = $w_mem_edit->get_modal();
-       $w_mem_edit->set_keep_above(0);
-       $w_mem_edit->set_modal(0);
+   my $response = 'yes';
+   my $dialog;
 
-       $dialog = Gtk3::MessageDialog->new(
-           $w_mem_edit,
-           'destroy-with-parent',
-           'warning',
-           'yes_no',
-           "Close settings window? Unsaved changes will be lost."
-       );
-       $dialog->set_title('Confirm close memory editor?');
-       $dialog->set_default_response('no');
-       $dialog->set_transient_for($w_mem_edit);
-       $dialog->set_modal(1);
-       $dialog->set_keep_above(1);
-       $dialog->present();
-       $dialog->grab_focus();
+   # skip this if quiet is passed
+   if (!defined($quiet) || !$quiet) {
+      my $s_modal = $w_mem_edit->get_modal();
+      $w_mem_edit->set_keep_above(0);
+      $w_mem_edit->set_modal(0);
 
-       $response = $dialog->run();
-    }
+      $dialog = Gtk3::MessageDialog->new(
+          $w_mem_edit,
+          'destroy-with-parent',
+          'warning',
+          'yes_no',
+          "Close settings window? Unsaved changes will be lost."
+      );
+      $dialog->set_title('Confirm close memory editor?');
+      $dialog->set_default_response('no');
+      $dialog->set_transient_for($w_mem_edit);
+      $dialog->set_modal(1);
+      $dialog->set_keep_above(1);
+      $dialog->present();
+      $dialog->grab_focus();
 
-    if ($response eq 'yes') {
-       $w_mem_edit->destroy();
-       $mem_edit_open = 0;
-       undef $w_mem_edit;
+      $response = $dialog->run();
+   }
 
-       if (defined($dialog)) {
-          $dialog->destroy();
-       }
-    } else {
-       $w_mem_edit->set_keep_above(1);
-       $w_mem_edit->set_modal(1);
-       $w_mem_edit->present();
-       $w_mem_edit->grab_focus();
-       if (defined($dialog)) {
-          $dialog->destroy();
-       }
-    }
+   if ($response eq 'yes') {
+      $w_mem_edit->destroy();
+      $mem_edit_open = 0;
+      undef $w_mem_edit;
+
+      if (defined($dialog)) {
+         $dialog->destroy();
+      }
+   } else {
+      $w_mem_edit->set_keep_above(1);
+      $w_mem_edit->set_modal(1);
+      $w_mem_edit->present();
+      $w_mem_edit->grab_focus();
+      if (defined($dialog)) {
+         $dialog->destroy();
+      }
+   }
 }
 
-sub init {
-  $cfg = shift;
-  $w_main = shift;
+sub load_defaults {
+   ( my $class, my $defaults ) = @_;
+}
+
+sub load_from_yaml {
+   ( my $class, my $file ) = @_;
+}
+
+sub new {
+   ( my $class, $cfg, $w_main, $mem_file ) = @_;
+   my $self = {
+      file => $mem_file,
+      close_window => \&close_window,
+      load_defaults => \&load_defaults,
+      load_from_yaml => \&load_from_yaml,
+      save => \&save,
+      show_window => \&show_window
+   };
+
+   bless $self, $class;
+   return $self;
+}
+
+sub DESTROY {
+   ( my $class ) = @_;
 }
 
 1;
