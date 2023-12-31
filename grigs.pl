@@ -1000,11 +1000,11 @@ sub set_icon {
    my $state_txt = "unknown";
 
    if ($state eq "idle") {
-      $state_txt = "Connected to ";
+      $state_txt = "Connected to";
    } elsif ($state eq "connecting") {
-      $state_txt = "Connecting to ";
+      $state_txt = "Connecting to";
    } elsif ($state eq "transmit") {
-      $state_txt = "TRANSMIT - ";
+      $state_txt = "TRANSMIT -";
    }
    $w_main->set_title("$app_name: $state_txt " . $cfg->{'rigctl_addr'});
 

@@ -23,7 +23,7 @@ sub save {
 
 sub show_window {
    ( my $class ) = @_;
-   if ($mem_edit_open) {
+   if ($mem_edit_open && defined $w_mem_edit) {
       $w_mem_edit->present();
       $w_mem_edit->grab_focus();
       return TRUE;
@@ -82,7 +82,7 @@ sub show_window {
    });
    # Handle close button
    $w_mem_edit->signal_connect('delete-event' => sub {
-      close_window();
+      close_window(FALSE);
       return TRUE;
    });
 
@@ -92,7 +92,13 @@ sub show_window {
 sub close_window {
    ( my $class, my $quiet ) = @_;
 
-   if (!$mem_edit_open || !defined($w_mem_edit)) {
+   if (!defined $quiet) {
+      $quiet = FALSE;
+   }
+
+   print "Wut? quit: $quiet, meo: $mem_edit_open // wme: $w_mem_edit\n";
+
+   if (!$mem_edit_open || !defined $w_mem_edit) {
       return;
    }
 
@@ -124,8 +130,8 @@ sub close_window {
    }
 
    if ($response eq 'yes') {
-      $w_mem_edit->destroy();
       $mem_edit_open = 0;
+      $w_mem_edit->destroy();
       undef $w_mem_edit;
 
       if (defined($dialog)) {
@@ -136,6 +142,7 @@ sub close_window {
       $w_mem_edit->set_modal(1);
       $w_mem_edit->present();
       $w_mem_edit->grab_focus();
+
       if (defined($dialog)) {
          $dialog->destroy();
       }
