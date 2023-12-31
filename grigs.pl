@@ -445,6 +445,45 @@ sub channel_list {
 }
 
 
+sub render_meters {
+   # Add the meters
+   my $meter_box = Gtk3::Box->new('vertical', 5);
+   my $meter_label = Gtk3::Label->new("Meters");
+   $meter_box->pack_start($meter_label, FALSE, FALSE, 0);
+
+   my $stat_alc = grigs_meter->new($cfg, $vfos, $w_main, "ALC", 0, 10);
+   $stat_alc->set_value(0);
+   $stat_alc->set_threshold($cfg->{'thresh_alc_min'}, $cfg->{'thresh_alc_max'});
+   $meter_box->pack_start($stat_alc->{'grid'}, TRUE, TRUE, 0);
+
+   my $stat_comp = grigs_meter->new($cfg, $vfos, $w_main, "COMP", 0, 10);
+   $stat_comp->set_value(0);
+   $stat_comp->set_threshold($cfg->{'thresh_comp_min'}, $cfg->{'thresh_comp_max'});
+   $meter_box->pack_start($stat_comp->{'grid'}, TRUE, TRUE, 0);
+
+   my $stat_pow = grigs_meter->new($cfg, $vfos, $w_main, "POW", 0, 100);
+   $stat_pow->set_value(0);
+   $stat_pow->set_threshold($cfg->{'thresh_pow_min'}, $cfg->{'thresh_pow_max'});
+   $meter_box->pack_start($stat_pow->{'grid'}, TRUE, TRUE, 0);
+
+   my $stat_swr = grigs_meter->new($cfg, $vfos, $w_main, "SWR", 0, 50);
+   $stat_swr->set_value(0);
+   $stat_swr->set_threshold($cfg->{'thresh_swr_min'}, $cfg->{'thresh_swr_max'});
+   $meter_box->pack_start($stat_swr->{'grid'}, TRUE, TRUE, 0);
+
+   my $stat_temp = grigs_meter->new($cfg, $vfos, $w_main, "TEMP", 0, 200);
+   $stat_temp->set_value(0);
+   $stat_temp->set_threshold($cfg->{'thresh_temp_min'}, $cfg->{'thresh_temp_max'});
+   $meter_box->pack_start($stat_temp->{'grid'}, TRUE, TRUE, 0);
+
+   my $stat_vdd = grigs_meter->new($cfg, $vfos, $w_main, "VDD", 0, 50);
+   $stat_vdd->set_value(0);
+   $stat_vdd->set_threshold($cfg->{'thresh_vdd_min'}, $cfg->{'thresh_vdd_max'});
+   $meter_box->pack_start($stat_vdd->{'grid'}, TRUE, TRUE, 0);
+
+   return $meter_box;
+}
+
 sub draw_main_win {
    $w_main = Gtk3::Window->new('toplevel');
 
@@ -504,41 +543,7 @@ sub draw_main_win {
       $curr_vfo = $cfg->{active_vfo} = 'A';
    }
 
-   # Add the meters
-   my $meter_box = Gtk3::Box->new('vertical', 5);
-   my $meter_label = Gtk3::Label->new("Meters");
-   $meter_box->pack_start($meter_label, FALSE, FALSE, 0);
-
-   my $stat_alc = grigs_meter->new($cfg, $vfos, $w_main, "ALC", 0, 10);
-   $stat_alc->set_value(0);
-   $stat_alc->set_threshold($cfg->{'thresh_alc_min'}, $cfg->{'thresh_alc_max'});
-   $meter_box->pack_start($stat_alc->{'grid'}, TRUE, TRUE, 0);
-
-   my $stat_comp = grigs_meter->new($cfg, $vfos, $w_main, "COMP", 0, 10);
-   $stat_comp->set_value(0);
-   $stat_comp->set_threshold($cfg->{'thresh_comp_min'}, $cfg->{'thresh_comp_max'});
-   $meter_box->pack_start($stat_comp->{'grid'}, TRUE, TRUE, 0);
-
-   my $stat_pow = grigs_meter->new($cfg, $vfos, $w_main, "POW", 0, 100);
-   $stat_pow->set_value(0);
-   $stat_pow->set_threshold($cfg->{'thresh_pow_min'}, $cfg->{'thresh_pow_max'});
-   $meter_box->pack_start($stat_pow->{'grid'}, TRUE, TRUE, 0);
-
-   my $stat_swr = grigs_meter->new($cfg, $vfos, $w_main, "SWR", 0, 50);
-   $stat_swr->set_value(0);
-   $stat_swr->set_threshold($cfg->{'thresh_swr_min'}, $cfg->{'thresh_swr_max'});
-   $meter_box->pack_start($stat_swr->{'grid'}, TRUE, TRUE, 0);
-
-   my $stat_temp = grigs_meter->new($cfg, $vfos, $w_main, "TEMP", 0, 200);
-   $stat_temp->set_value(0);
-   $stat_temp->set_threshold($cfg->{'thresh_temp_min'}, $cfg->{'thresh_temp_max'});
-   $meter_box->pack_start($stat_temp->{'grid'}, TRUE, TRUE, 0);
-
-   my $stat_vdd = grigs_meter->new($cfg, $vfos, $w_main, "VDD", 0, 50);
-   $stat_vdd->set_value(0);
-   $stat_vdd->set_threshold($cfg->{'thresh_vdd_min'}, $cfg->{'thresh_vdd_max'});
-   $meter_box->pack_start($stat_vdd->{'grid'}, TRUE, TRUE, 0);
-
+   my $meter_box = render_meters();
    $box->pack_start($meter_box, TRUE, TRUE, 0);
 
    #################
@@ -1024,7 +1029,9 @@ my $on_init = 0;
 sub hamlib_init {
    return if $on_init;
 
-   $rig = grigs_hamlib::setup_hamlib($cfg);
+   my $rig_p = grigs_hamlib->new($cfg);
+   $rig = $rig_p->{rig};
+
    if (defined($rig)) {
       set_icon("idle");
    } else {

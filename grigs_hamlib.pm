@@ -1,6 +1,7 @@
 # Here we handle interaction with hamlib to talk to rigctld
 #
 # Try to stay frontend-agnostic here, if possible
+#
 package grigs_hamlib;
 use Carp;
 use Glib qw(TRUE FALSE);
@@ -8,6 +9,7 @@ use Glib qw(TRUE FALSE);
 use warnings;
 
 my $cfg;
+my $rig;
 
 our %hamlib_debug_levels = (
    'none' => $Hamlib::RIG_DEBUG_NONE,
@@ -231,8 +233,8 @@ sub exec_read_rig {
    return TRUE;			# ensure we're called again
 }
 
-sub setup_hamlib {
-   $cfg = shift;
+sub new {
+   ( my $class, $cfg ) = @_;
    our $rig;
    Hamlib::rig_set_debug(hamlib_debug_level($cfg->{'hamlib_loglevel'}));
    my $model = $cfg->{'rigctl_model'};
@@ -272,7 +274,14 @@ sub setup_hamlib {
    my $poll_interval = $cfg->{'poll_interval'};
    # Start a timer for it
    $rig_timer = Glib::Timeout->add_seconds($poll_interval, \&exec_read_rig);
-   return $rig;
+   my $self = {
+      rig => $rig,
+      exec_read_rig => \&exec_read_rig
+   };
+   return $self;
+}
+
+sub DESTROY {
 }
 
 1;
