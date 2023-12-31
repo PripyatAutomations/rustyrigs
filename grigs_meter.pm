@@ -21,12 +21,35 @@ sub set_label {
 
 sub set_value {
    ( my $class, my $value ) = @_;
-   die "self: " . Dump($class) . "\n";
-   $class->value = $value;
-   $class->val_label->set_label($value);
+   $class->{value} = $value;
+   $class->{val_label}->set_label($value);
 }
 
 sub zero {
+}
+
+sub on_drag_begin {
+    my ($widget, $context) = @_;
+    
+    # Create a new window to hold the dragged widget
+    my $new_window = Gtk3::Window->new('toplevel');
+    $new_window->set_default_size(200, 200);
+
+    # Remove the widget from its original parent (main window)
+    $widget->reparent($new_window);
+    
+    # Show the new window
+    $new_window->show_all();
+}
+
+sub on_drag_end {
+    my ($widget, $context) = @_;
+    
+    # Get the main window
+    my $main_window = $widget->get_toplevel;
+
+    # Reparent the widget back to the main window
+    $widget->reparent($main_window);
 }
 
 # This needs sorted out so it makes only one widget.
@@ -41,7 +64,7 @@ sub set_threshold {
    ( my $class, my $min, my $max ) = @_;
 
    if (!defined $class || !defined $min || !defined $max) {
-      die "Improper call to set_threshold - please pass TWO options: min, max!\n";
+      die "Improper call to set_threshold - please pass TWO options: min, max! Got ($min, $max)\n";
    }
 
    $class->{"threshold_min"} = $min;
@@ -125,6 +148,7 @@ sub new {
        set_threshold => \&set_threshold,
        set_value => \&set_value,
        value => $value,
+       val_label => $val_label,
        val_sep => $val_sep
    };
    bless $self, $class;

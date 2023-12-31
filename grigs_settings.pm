@@ -250,6 +250,21 @@ sub show_settings {
    $window_options_box->pack_start($autohide_toggle, FALSE, FALSE, 0);
    $window_options_box->pack_start($ontop_button, FALSE, FALSE, 0);
 
+   my $meter_ontop_button = Gtk3::CheckButton->new();
+   $meter_ontop_button->set_label('Keep meters window above others?');
+   $meter_ontop_button->set_active($cfg->{'always_on_top_meters'});
+   $meter_ontop_button->set_can_focus(1);
+   $meter_ontop_button->signal_connect('toggled' => sub {
+      my $button = shift;
+      if ($button->get_active()) {
+         $tmp_cfg->{'always_on_top_meters'} = 1;
+      } else {
+         $tmp_cfg->{'always_on_top_meters'} = 0;
+      }
+      $changes++;
+   });
+   $window_options_box->pack_start($meter_ontop_button, FALSE, FALSE, 0);
+
 ###########
    my $meter_choices_box = Gtk3::Box->new('vertical', 5);
    my $meters_label = Gtk3::Label->new('Displayed Meters');
@@ -272,20 +287,20 @@ sub show_settings {
    $alc_toggle->set_can_focus(1);
    $meter_choices_box->pack_start($alc_toggle, FALSE, FALSE, 0);
 
-   my $cmp_toggle = Gtk3::CheckButton->new();
-   $cmp_toggle->set_label('Show ALC meter?');
-   $cmp_toggle->set_active($cfg->{'show_cmp'});
-   $cmp_toggle->signal_connect('toggled' => sub {
+   my $comp_toggle = Gtk3::CheckButton->new();
+   $comp_toggle->set_label('Show ALC meter?');
+   $comp_toggle->set_active($cfg->{'show_comp'});
+   $comp_toggle->signal_connect('toggled' => sub {
       my $button = shift;
       if ($button->get_active()) {
-         $tmp_cfg->{'show_cmp'} = 1;
+         $tmp_cfg->{'show_comp'} = 1;
       } else {
-         $tmp_cfg->{'show_cmp'} = 0;
+         $tmp_cfg->{'show_comp'} = 0;
       }
       $changes++;
    });
-   $cmp_toggle->set_can_focus(1);
-   $meter_choices_box->pack_start($cmp_toggle, FALSE, FALSE, 0);
+   $comp_toggle->set_can_focus(1);
+   $meter_choices_box->pack_start($comp_toggle, FALSE, FALSE, 0);
 
    my $pow_toggle = Gtk3::CheckButton->new();
    $pow_toggle->set_label('Show power meter?');
@@ -317,20 +332,20 @@ sub show_settings {
    $swr_toggle->set_can_focus(1);
    $meter_choices_box->pack_start($swr_toggle, FALSE, FALSE, 0);
 
-   my $tmp_toggle = Gtk3::CheckButton->new();
-   $tmp_toggle->set_label('Show temp meter?');
-   $tmp_toggle->set_active($cfg->{'show_tmp'});
-   $tmp_toggle->signal_connect('toggled' => sub {
+   my $temp_toggle = Gtk3::CheckButton->new();
+   $temp_toggle->set_label('Show temp meter?');
+   $temp_toggle->set_active($cfg->{'show_temp'});
+   $temp_toggle->signal_connect('toggled' => sub {
       my $button = shift;
       if ($button->get_active()) {
-         $tmp_cfg->{'show_tmp'} = 1;
+         $tmp_cfg->{'show_temp'} = 1;
       } else {
-         $tmp_cfg->{'show_tmp'} = 0;
+         $tmp_cfg->{'show_temp'} = 0;
       }
       $changes++;
    });
-   $tmp_toggle->set_can_focus(1);
-   $meter_choices_box->pack_start($tmp_toggle, FALSE, FALSE, 0);
+   $temp_toggle->set_can_focus(1);
+   $meter_choices_box->pack_start($temp_toggle, FALSE, FALSE, 0);
 
    my $vdd_toggle = Gtk3::CheckButton->new();
    $vdd_toggle->set_label('Show VDD meter?');

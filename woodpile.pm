@@ -2,18 +2,50 @@
 package woodpile;
 use strict;
 use warnings;
+use Scalar::Util qw(looks_like_number);
 use Gtk3 '-init';
 
 sub hex_to_gdk_rgba {
     my ($hex_color) = @_;
 
     # Convert hex color value to RGBA components
+    if (!defined $hex_color) {
+       die "Invalid color (from: " . (caller(1))[3] . ")!\n";
+    }
     my ($r, $g, $b) = map { hex($_) / 255 } $hex_color =~ m/[\da-f]{2}/ig;
 
     # Create a Gtk3::Gdk::RGBA object using the calculated RGBA components
     my $rgba_color = Gtk3::Gdk::RGBA->new($r, $g, $b, 1.0); # 1.0 is alpha (fully opaque)
     
     return $rgba_color;
+}
+
+sub find_offset {
+    my $array_ref = shift;
+    my @a = @$array_ref;
+    my $val = shift;
+    my $index = -1;
+
+    if (!defined($val)) {
+       return -1;
+    }
+
+    for my $i (0 .. $#a) {
+        if (looks_like_number($a[$i]) && looks_like_number($val)) {
+            # Compare as numbers if both values are numeric
+            if ($a[$i] == $val) {
+                $index = $i;
+                last;
+            }
+        } else {
+            # Compare as strings if either value is non-numeric
+            if ("$a[$i]" eq "$val") {
+                $index = $i;
+                last;
+            }
+        }
+    }
+    return $index;
 }
 
 package woodpile::Log;
