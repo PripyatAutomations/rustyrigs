@@ -7,6 +7,7 @@
 * Replace freq entry with a normal text box, tune up/down buttons, and a step combo
 * When user starts typing in the frequency field, suspend actions on the field and allow typing normally
 * More keyboard controls! make it so you can type to search the boxes
+* Add speech for blind users
 * Finish GTK3 GUI
 * Tune button (ON/OFF/AUTO)
 * Support for multiple VFOs is not yet usable
