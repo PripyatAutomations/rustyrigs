@@ -49,7 +49,7 @@ sub on_drag_end {
     my $main_window = $widget->get_toplevel;
 
     # Reparent the widget back to the main window
-    $widget->reparent($w-main);
+    $widget->reparent($w_main);
 }
 
 # This needs sorted out so it makes only one widget.
@@ -139,7 +139,6 @@ sub new {
        grid => $grid,
        bar_label => $bar_label,
        bar_sep => $bar_sep,
-#       box => $box,
        min => $min_val,
        max => $max_val,
        min_threshold => -1,
@@ -149,7 +148,8 @@ sub new {
        set_value => \&set_value,
        value => $value,
        val_label => $val_label,
-       val_sep => $val_sep
+       val_sep => $val_sep,
+       zero => \&zero
    };
    bless $self, $class;
    return $self;
