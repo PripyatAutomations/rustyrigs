@@ -7,6 +7,7 @@ LIB_DIR ?= ${PREFIX}/lib/grigs
 
 NEED_PKG := libgtk3-perl libglib-perl libyaml-perl libhamlib-perl
 NEED_PKG += devscripts dh-make-perl
+
 # Documentation 
 DOCS := $(wildcard doc/*)
 
@@ -21,10 +22,12 @@ clean_files := $(wildcard *~ *.tmp *.out x y z)
 
 SUDO := $(shell command -v sudo 2> /dev/null)
 
+ifneq (root, $(shell whoami))
 ifndef SUDO
 $(warning sudo is not installed or not found in PATH)
 #else
 #$(info sudo found at $(SUDO))
+endif
 endif
 
 ##############################################################
@@ -46,19 +49,19 @@ install: install-dirs install-lib install-bin install-docs install-res
 uninstall: uninstall-bin uninstall-lib uinstall-res uninstall-docs
 
 install-dirs:
-	install -d -m 0755 ${DOC_DIR}
-	install -d -m 0755 ${LIB_DIR}
-	install -d -m 0755 ${RES_DIR}
+	${SUDO} install -d -m 0755 ${DOC_DIR}
+	${SUDO} install -d -m 0755 ${LIB_DIR}
+	${SUDO} install -d -m 0755 ${RES_DIR}
 
 install-bin:
-	install -m 0755 grigs.pl ${BIN_DIR}/grigs
+	${SUDO} install -m 0755 grigs.pl ${BIN_DIR}/grigs
 
 uninstall-bin:
 	${RM} ${BIN_DIR}/grigs
 
 install-docs:
 ifneq (${DOCS},)
-	install -m 0644 ${DOCS} ${DOC_DIR}
+	${SUDO} install -m 0644 ${DOCS} ${DOC_DIR}
 endif
 
 uninstall-docs:
@@ -69,16 +72,16 @@ endif
 install-res: $(addprefix ${RES_DIR}/, $(notdir ${RSRC_FILES})) $(addprefix ${RES_DIR}/, $(RSRC_DIRS))
 
 install-lib:
-	install -m 0644 ${LIBS} ${LIB_DIR}
+	${SUDO} install -m 0644 ${LIBS} ${LIB_DIR}
 
 uninstall-libs:
 	${RM} $(foreach x,${LIBS},${LIB_DIR}/${x})
 
 ${RES_DIR}/%: res/%
-	@install -m 0644 $< $@
+	@${SUDO} install -m 0644 $< $@
 
 ${RES_DIR}/%/: res/%/
-	@install -d -m 0755 $<
+	@${SUDO} install -d -m 0755 $<
 
 uninstall-res:
 ifneq (${RSRC},)
