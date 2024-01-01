@@ -25,6 +25,7 @@ my $cfg_file = $default_cfg_file;
 my $log_file = $ENV{"HOME"} . "/${app_name}.log";
 
 # local bits and pieces...
+use lib '/usr/lib/grigs/';
 use woodpile;
 use grigs_defconfig;
 use grigs_cmdline;
@@ -74,6 +75,9 @@ my $channels;
 # Set config to defconfig, until we load config...
 my $cfg = $def_cfg;
 my $cfg_p;
+
+# Start things up...
+$log->Log("core", "info", $app_name . " is starting");
 
 # Function to resize window height based on visible boxes
 # Call this when widgets in a window are hidden or shown, to calculate needed dimensions
@@ -1002,7 +1006,6 @@ Glib::Timeout->add(1000, \&hamlib_init);
 grigs_cmdline::parse_cmdline($cfg, $cfg_file);
 
 # Load configuration
-$log->Log("core", "info", $app_name . " is starting");
 $cfg_p = woodpile::Config->new($log, $cfg_file, $def_cfg);
 $cfg = $cfg_p->{cfg};
 
