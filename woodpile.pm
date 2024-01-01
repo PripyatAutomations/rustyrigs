@@ -127,8 +127,6 @@ use warnings;
 use YAML::XS;
 use Data::Dumper;
 use Data::Structure::Util qw/unbless/;
-
-my $settings_open = 0;
 my $cfg_readonly = 0;		# if 1, config won't be written out
 
 sub load_config {

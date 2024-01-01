@@ -413,7 +413,7 @@ sub refresh_available_widths {
    $width_entry->set_active($rv);
 }
 
-# XXX: Move this to $profile.memories.yaml where $profile is the $cfg_file minus the .yaml ;)
+# XXX: Move this to ${profile}.mem.yaml where $profile is the $cfg_file minus the .yaml ;)
 sub channel_list {
     my $store = Gtk3::ListStore->new('Glib::String', 'Glib::String', 'Glib::String');
 
@@ -433,46 +433,6 @@ sub channel_list {
     $store->set($iter, 0, '5', 1, ' WWV 25MHz', 2, ' 25,000.000 KHz AM');
     #$combo->set_active(1);
     return $store;
-}
-
-
-sub render_meters {
-   # Add the meters
-   my $meter_box = Gtk3::Box->new('vertical', 5);
-   my $meter_label = Gtk3::Label->new("Meters");
-   $meter_box->pack_start($meter_label, FALSE, FALSE, 0);
-
-   my $stat_alc = grigs_meter->new($cfg, $vfos, $w_main, "ALC", 0, 10);
-   $stat_alc->set_value(0);
-   $stat_alc->set_threshold($cfg->{'thresh_alc_min'}, $cfg->{'thresh_alc_max'});
-   $meter_box->pack_start($stat_alc->{'grid'}, TRUE, TRUE, 0);
-
-   my $stat_comp = grigs_meter->new($cfg, $vfos, $w_main, "COMP", 0, 10);
-   $stat_comp->set_value(0);
-   $stat_comp->set_threshold($cfg->{'thresh_comp_min'}, $cfg->{'thresh_comp_max'});
-   $meter_box->pack_start($stat_comp->{'grid'}, TRUE, TRUE, 0);
-
-   my $stat_pow = grigs_meter->new($cfg, $vfos, $w_main, "POW", 0, 100);
-   $stat_pow->set_value(0);
-   $stat_pow->set_threshold($cfg->{'thresh_pow_min'}, $cfg->{'thresh_pow_max'});
-   $meter_box->pack_start($stat_pow->{'grid'}, TRUE, TRUE, 0);
-
-   my $stat_swr = grigs_meter->new($cfg, $vfos, $w_main, "SWR", 0, 50);
-   $stat_swr->set_value(0);
-   $stat_swr->set_threshold($cfg->{'thresh_swr_min'}, $cfg->{'thresh_swr_max'});
-   $meter_box->pack_start($stat_swr->{'grid'}, TRUE, TRUE, 0);
-
-   my $stat_temp = grigs_meter->new($cfg, $vfos, $w_main, "TEMP", 0, 200);
-   $stat_temp->set_value(0);
-   $stat_temp->set_threshold($cfg->{'thresh_temp_min'}, $cfg->{'thresh_temp_max'});
-   $meter_box->pack_start($stat_temp->{'grid'}, TRUE, TRUE, 0);
-
-   my $stat_vdd = grigs_meter->new($cfg, $vfos, $w_main, "VDD", 0, 50);
-   $stat_vdd->set_value(0);
-   $stat_vdd->set_threshold($cfg->{'thresh_vdd_min'}, $cfg->{'thresh_vdd_max'});
-   $meter_box->pack_start($stat_vdd->{'grid'}, TRUE, TRUE, 0);
-
-   return $meter_box;
 }
 
 sub draw_main_win {
@@ -534,7 +494,7 @@ sub draw_main_win {
       $curr_vfo = $cfg->{active_vfo} = 'A';
    }
 
-   my $meter_box = render_meters();
+   my $meter_box = grigs_meter::render_meters($cfg, $vfos, $w_main);
    $box->pack_start($meter_box, TRUE, TRUE, 0);
 
    #################

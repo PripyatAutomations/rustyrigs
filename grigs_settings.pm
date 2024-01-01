@@ -2,7 +2,7 @@
 package grigs_settings;
 use Carp;
 use Data::Dumper;
-#use strict;
+use strict;
 use Glib qw(TRUE FALSE);
 use warnings;
 
@@ -16,6 +16,8 @@ my $tmp_cfg;
 my $w_main;
 my $changes = 0;
 my $cfg = $main::cfg;
+my $settings_open = 0;
+my $w_settings;
 
 sub print_signal_info {
    my ($widget, $signal_name) = @_;
@@ -23,7 +25,7 @@ sub print_signal_info {
 }
 
 sub apply_settings {
-   main::w_main_ontop($cfg->{'always_on_top'});
+   main::w_main_ontop($main::cfg->{'always_on_top'});
 }
 
 sub save_settings {
@@ -54,11 +56,8 @@ sub combobox_keys {
    }
 }
 
-
 sub show_settings {
-   $cfg = shift;
-   my $mainwin = shift;
-   $w_main = $mainwin;
+   ( $cfg, my $mainwin, $w_main ) = @_;
 
    # if settings window is already open raise it instead
    if ($settings_open) {
@@ -353,9 +352,9 @@ sub show_settings {
    $vdd_toggle->signal_connect('toggled' => sub {
       my $button = shift;
       if ($button->get_active()) {
-         $vdd_cfg->{'show_vdd'} = 1;
+         $tmp_cfg->{'show_vdd'} = 1;
       } else {
-         $vdd_cfg->{'show_vdd'} = 0;
+         $tmp_cfg->{'show_vdd'} = 0;
       }
       $changes++;
    });
@@ -381,8 +380,8 @@ sub show_settings {
    $cancel_button->signal_connect('clicked' => \&close_settings );
    $cancel_button->set_can_focus(1);
    $w_settings_accel->connect(ord('C'), 'mod1-mask', 'visible', \&close_settings);
-   $button_box->pack_start($save_button, FALSE, FALSE, 0);
-   $button_box->pack_start($cancel_button, FALSE, FALSE, 0);
+   $button_box->pack_start($save_button, TRUE, TRUE, 0);
+   $button_box->pack_start($cancel_button, TRUE, TRUE, 0);
 
    # place the widgets
    $config_box->pack_start($address_label, FALSE, FALSE, 0);
