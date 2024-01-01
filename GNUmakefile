@@ -5,6 +5,8 @@ DOC_DIR ?= ${PREFIX}/share/doc
 BIN_DIR ?= ${PREFIX}/bin
 LIB_DIR ?= ${PREFIX}/lib/grigs
 
+NEED_PKG := libgtk3-perl libglib-perl libyaml-perl libhamlib-perl
+NEED_PKG += devscripts dh-make-perl
 # Documentation 
 DOCS := $(wildcard doc/*)
 
@@ -16,6 +18,14 @@ RSRC := $(wildcard res/*)
 
 # files to remove in 'make clean'
 clean_files := $(wildcard *~ *.tmp *.out x y z)
+
+SUDO := $(shell command -v sudo 2> /dev/null)
+
+ifndef SUDO
+$(warning sudo is not installed or not found in PATH)
+#else
+#$(info sudo found at $(SUDO))
+endif
 
 ##############################################################
 
@@ -75,8 +85,10 @@ ifneq (${RSRC},)
 	${RM} $(foreach x,${RSRC},${RES_DIR}/${x})
 endif
 
+################
+# Debian stuff #
+################
+deb: install-deb-deps
 
-######################
-# Build .deb package #
-######################
-deb:
+install-deb-deps:
+	${SUDO} apt install -y ${NEED_PKG}
