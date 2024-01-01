@@ -17,6 +17,13 @@ use Glib qw(TRUE FALSE);
 use FindBin;
 use lib $FindBin::Bin;
 
+# project settings
+my $app_name = 'grigs';
+my $app_descr = "GTK frontend for rigctld";
+my $default_cfg_file = $ENV{"HOME"} . "/.config/${app_name}.yaml";
+my $cfg_file = $default_cfg_file;
+my $log_file = $ENV{"HOME"} . "/${app_name}.log";
+
 # local bits and pieces...
 use woodpile;
 use grigs_defconfig;
@@ -28,12 +35,6 @@ use grigs_fm;
 use grigs_memory;
 use grigs_meter;
 
-# project settings
-my $app_name = 'grigs';
-my $app_descr = "GTK frontend for rigctld";
-my $default_cfg_file = $ENV{"HOME"} . "/.config/${app_name}.yaml";
-my $cfg_file = $default_cfg_file;
-my $log_file = $ENV{"HOME"} . "/${app_name}.log";
 my $def_cfg = $grigs_defconfig::def_cfg;
 
 # Start logging in debug mode until config is loaded and we quiet down...
@@ -54,8 +55,6 @@ my $hamlib_riginfo;
 my $w_settings;
 my $mode_entry;
 my $rig_vol_entry;
-my $tone_freq_tx_entry;
-my $tone_freq_rx_entry;
 my $vfo_freq_entry;
 my $vfo_sel_button;
 my $width_entry;
@@ -183,7 +182,7 @@ sub main_menu {
       $log->Log("ui", "debug", "Closing the main menu");
       return FALSE;
    });
-   print "*** locked: $locked\n";
+   $log->Log("core", "debug", "*** locked: $locked");
    $lock_item->set_active($locked);
    $main_menu->append($lock_item);
 
@@ -377,7 +376,7 @@ sub w_main_ontop {
 sub next_vfo {
     my $nval = grigs_hamlib::next_vfo($cfg->{'active_vfo'});
     switch_vfo($nval);
-    print "nval: $nval, curr: " . $cfg->{'active_vfo'} . "\n";
+    $log->Log("ui", "debug", "nval: $nval, curr: " . $cfg->{'active_vfo'});
     return FALSE;
 }
 
@@ -634,7 +633,7 @@ sub draw_main_win {
 #           my $clipboard = Gtk3::Clipboard->get();
            my $menu_item_copy = Gtk3::MenuItem->new_with_label('Copy');
 #           $menu_item_copy->signal_connect('activate' => sub {
-#              print "Copy to clipboard\n";
+#              $log->Log("ui", "debug", "Copy to clipboard");
 #              # Get the text from the SpinButton and copy it to the clipboard
 #              my $text = $vfo_freq_entry->get_text();
 #              $clipboard->set_text($text, -1); # Use -1 to indicate automatic length detection
@@ -656,7 +655,7 @@ sub draw_main_win {
            # Create menu items
            my $menu_item_step = Gtk3::MenuItem->new_with_label('Set step');
            $menu_item_step->signal_connect('activate' => sub {
-               print "show freq step menu!\n"; # Perform your custom action here
+               $log->Log("ui", "debug","show freq step menu!");
            });
            $menu->append($menu_item_step);
 
@@ -690,7 +689,7 @@ sub draw_main_win {
    # Callback function to handle selection change
    $mode_entry->signal_connect(changed => sub {
       my $selected_item = $mode_entry->get_active_text();
-      print "Mode Selected: $selected_item\n";  # Print the selected item (for demonstration)
+      $log->Log("ui", "debug", "Mode Selected: $selected_item");
       my $curr_vfo = $cfg->{'active_vfo'};
       my $vfo = $vfos->{$curr_vfo};
       my $mode = uc($vfo->{'mode'});
@@ -985,7 +984,7 @@ sub set_icon {
 
 my $on_init = 0;
 
-# Delay the hamlib
+# Delay the hamlib init at least a second...
 sub hamlib_init {
    return if $on_init;
 

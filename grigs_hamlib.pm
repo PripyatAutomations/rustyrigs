@@ -198,7 +198,7 @@ sub read_rig {
    # Get the frequency for current VFO
    $vfos->{$curr_vfo}{'freq'} = $rig->get_freq($curr_hlvfo);
    $main::vfo_freq_entry->set_value($vfos->{$curr_vfo}{'freq'});
-   print "freq: " . $vfos->{$curr_vfo}{'freq'} . "\n";
+   $main::log->Log("hamlib", "debug", "freq: " . $vfos->{$curr_vfo}{'freq'});
 
 #   my $mode;
 #   $vfos->{$curr_vfo}{'mode'] = $mode;
@@ -206,11 +206,11 @@ sub read_rig {
 #   $vfos->{$curr_vfo}{'power'} = $power;
     my $stats = $vfos->{$curr_vfo}{'stats'};
     $stats->{'signal'} = $rig->get_level_i($curr_hlvfo, $Hamlib::RIG_LEVEL_STRENGTH);
-    print "strength:\t\t" . $stats->{'signal'} ."\n";
+    $main::log->Log("hamlib", "debug", "strength:\t\t" . $stats->{'signal'});
 
 #    my $atten = $rig->{caps}->{attenuator};
 #    $stats->{'atten'} = $atten;
-#    print "Attenuators:\t\t@$atten\n";
+#    $main::log->Log("hamlib", "debug", "Attenuators:\t\t@$atten");
 }
 
 # state for our tray mode polling slowdown
@@ -275,7 +275,6 @@ sub new {
 
    # enable polling of the rig
    $main::connected = 1;
-#   $w_main->set_title("grigs: Connected to $host");
    my $riginfo = $rig->get_info();
    $main::log->Log("hamlib", "info", "Backend copyright:\t$rig->{caps}->{copyright}");
    $main::log->Log("hamlib", "info", "Model:\t\t$rig->{caps}->{model_name}");

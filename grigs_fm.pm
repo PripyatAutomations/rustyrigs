@@ -6,7 +6,7 @@ use Carp;
 use Data::Dumper;
 use Data::Structure::Util qw/unbless/;
 use woodpile;
-#use strict;
+use strict;
 use warnings;
 use Glib qw(TRUE FALSE);
 use grigs_hamlib;
@@ -16,13 +16,15 @@ my $fm_box;
 my $vfos = $grigs_hamlib::vfos;
 my $curr_vfo;
 my $vfo;
+my $tone_freq_tx_entry;
+my $tone_freq_rx_entry;
 
 sub refresh_tone_freqs {
    my $curr_vfo = $cfg->{'active_vfo'};
    if (defined($curr_vfo)) {
       $vfo = $vfos->{$curr_vfo};
    } else {
-      print "refresh_tone_freqs: no active VFO\n";
+      $main::log->Log("ui", "debug", "refresh_tone_freqs: no active VFO");
       $vfo = $Hamlib::RIG_VFO_A;
    }
    my $rv = -1;

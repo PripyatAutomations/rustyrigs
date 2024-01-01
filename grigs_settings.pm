@@ -21,7 +21,7 @@ my $w_settings;
 
 sub print_signal_info {
    my ($widget, $signal_name) = @_;
-   print "Signal emitted by $widget: $signal_name\n";
+   $main::log->Log("ui", "debug", "Signal emitted by $widget: $signal_name");
 }
 
 sub apply_settings {
@@ -33,21 +33,18 @@ sub apply_settings {
       } else {
          main->w_main_ontop(1);
       }
-   } else {
-      print "*** No \$cfg ***\n";
    }
 }
 
 sub save_settings {
    if ($changes && defined $tmp_cfg) {
-      print "Merging settings into in-memory config\n";
+      $main::log->Log("config", "info", "Merging settings into in-memory config");
       my $tmp = {%$cfg, %$tmp_cfg};
       $main::cfg = $cfg = $tmp;
-      print "cfg: " . Dumper($main::cfg) . "\n";
+      $main::log->Log("ui", "core", "cfg: " . Dumper($main::cfg));
    } else {
-      print "no tmpconfig\n";
+      $main::log->Log("config", "info", "no changes to save");
    }
-   print "Apply settings\n";
    apply_settings();
    main::save_config();
    $settings_open = 0;
@@ -57,11 +54,11 @@ sub save_settings {
 sub combobox_keys {
    my ($widget, $event) = @_;
    if ($event->keyval == 65289) {
-      print "[ui/debug]: next!\n";
+      $main::log->Log("ui", "debug", "settings next!");
       $w_settings->child_focus('down');
       return TRUE; 	# Stop further handling
    } else {
-      print "xxx: keyval - " . $event->keyval . "\n";
+      $main::log->Log("ui", "debug", "xxx: keyval - " . $event->keyval);
       return FALSE; 	# Continue default handling
    }
 }
