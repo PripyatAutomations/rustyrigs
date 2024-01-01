@@ -112,9 +112,8 @@ sub hamlib_debug_level {
       my $val = $hamlib_debug_levels{$new_lvl};
       return $val;
    } else {
-     carp("[hamlib/warn] hamlib_debug_level: returning default Warnings: $new_lvl unrecognized!");
-
-     return $Hamlib::RIG_DEBUG_WARN;
+      $main::log->Log("hamlib", "warn", "hamlib_debug_level: returning default Warnings: $new_lvl unrecognized!");
+      return $Hamlib::RIG_DEBUG_WARN;
    }
 }
 
@@ -122,7 +121,7 @@ sub ptt_off {
    ( my $class, my $vfo ) = @_;
    my $curr_vfo = $cfg->{active_vfo};
 
-   carp("[ptt/info] Clearing PTT...");
+   $main::log->Log("ptt", "info", "Clearing PTT...");
    $rig->set_ptt($vfo, $Hamlib::RIG_PTT_OFF);
 }
 
@@ -130,7 +129,7 @@ sub ptt_on {
    ( my $class, my $vfo ) = @_;
    my $curr_vfo = $cfg->{active_vfo};
 
-   carp("[ptt/info] Setting PTT...");
+   $main::log->Log("ptt", "info", "Setting PTT...");
    $rig->set_ptt($vfo, $Hamlib::RIG_PTT_ON);
 }
 
@@ -219,10 +218,12 @@ my $tray_iterations = 0;
 my $update_needed = 0;
 
 sub exec_read_rig {
+   ( my $class ) = @_;
+
    my $tray_every = $cfg->{'poll_tray_every'};
 
    if (!$main::connected) {
-      carp("[rig/debug] skipping rig read (not connected)");
+      $main::log->Log("hamlib", "debug", "skipping rig read (not connected)");
    }
 
    # Slow down status updates when not actively displayed
@@ -244,6 +245,7 @@ sub exec_read_rig {
       $update_needed = 0;
    }
 
+   print ".\n";
    return TRUE;			# ensure we're called again
 }
 
@@ -261,7 +263,7 @@ sub new {
    $rig->set_conf("retry", "50");
    $rig->set_conf('rig_pathname', $host);
 
-   carp("[hamlib/info] connecting to $host");
+   $main::log->Log("hamlib", "info", "connecting to $host");
 
 #  XXX: hamlib seems to immediately return success, even before trying to connect...
 #   $w_main->set_title("grigs: Connecting to $host");
@@ -275,22 +277,25 @@ sub new {
    $main::connected = 1;
 #   $w_main->set_title("grigs: Connected to $host");
    my $riginfo = $rig->get_info();
-   carp("[hamlib/info] Backend copyright:\t$rig->{caps}->{copyright}");
-   carp("[hamlib/info] Model:\t\t$rig->{caps}->{model_name}");
-   carp("[hamlib/info] Manufacturer:\t\t$rig->{caps}->{mfg_name}");
-   carp("[hamlib/info] Backend version:\t$rig->{caps}->{version}");
+   $main::log->Log("hamlib", "info", "Backend copyright:\t$rig->{caps}->{copyright}");
+   $main::log->Log("hamlib", "info", "Model:\t\t$rig->{caps}->{model_name}");
+   $main::log->Log("hamlib", "info", "Manufacturer:\t\t$rig->{caps}->{mfg_name}");
+   $main::log->Log("hamlib", "info", "Backend version:\t$rig->{caps}->{version}");
 
    if (defined $riginfo) {
-     carp("[hamlib/info] Connected Rig:\t$riginfo");
+      $riginfo =~ s/\n$//;
+      $main::log->Log("hamlib", "info", "Connected Rig:\t$riginfo");
    }
 
    my $poll_interval = $cfg->{'poll_interval'};
+
    # Start a timer for it
-   $main::rig_timer = Glib::Timeout->add_seconds($poll_interval, \&exec_read_rig);
+   my $rig_timer = Glib::Timeout->add_seconds($poll_interval, \&exec_read_rig);
    my $self = {
       rig => $rig,
       exec_read_rig => \&exec_read_rig,
-      set_freq => \&set_freq
+      set_freq => \&set_freq,
+      timer => $rig_timer
    };
    bless $self, $class;
 

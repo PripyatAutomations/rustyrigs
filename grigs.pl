@@ -16,9 +16,11 @@ use Gtk3 '-init';
 use Glib qw(TRUE FALSE);
 use FindBin;
 use lib $FindBin::Bin;
-use Getopt::Long;
+
+# local bits and pieces...
 use woodpile;
 use grigs_defconfig;
+use grigs_cmdline;
 use grigs_doc;
 use grigs_hamlib;
 use grigs_settings;
@@ -33,7 +35,6 @@ my $default_cfg_file = $ENV{"HOME"} . "/.config/${app_name}.yaml";
 my $cfg_file = $default_cfg_file;
 my $log_file = $ENV{"HOME"} . "/${app_name}.log";
 my $def_cfg = $grigs_defconfig::def_cfg;
-my $mem_file;
 
 # Start logging in debug mode until config is loaded and we quiet down...
 our $log = woodpile::Log->new($log_file, "debug");
@@ -48,7 +49,6 @@ my $vfos = $grigs_hamlib::vfos;
 my $settings_open = 0;
 my $tray_icon;		# systray icon
 my $w_main;		# main window
-my $rig_timer;	# the timer for rig loop, so we can cancel and restart it
 my $connected = 0;
 my $hamlib_riginfo;
 my $w_settings;
@@ -200,6 +200,7 @@ sub main_menu {
 
 sub save_config {
    if (!$cfg_readonly && (!defined($cfg->{'readonly'}) || !$cfg->{'readonly'})) {
+      $log->Log("core", "info", "Saved configuration to $cfg_file");
       $cfg_p->save($cfg_file);
    } else {
       $log->Log("core", "info", "Not saving configuration as it's read-only");
@@ -999,39 +1000,22 @@ sub hamlib_init {
    $on_init = 1;
 }
 Glib::Timeout->add(1000, \&hamlib_init);
+grigs_cmdline::parse_cmdline($cfg, $cfg_file);
 
-###########################################################
-# scratch space for cmdline arguments
-my $cl_show_help = 0;
-my $cl_ontop;		# always on top?
-my $cl_x;		# cmdline X pos of main win
-my $cl_y;		# cmdline Y pos of main win
-my $cl_s_x;		# cmdline X pos of settings win
-my $cl_s_y;		# cmdline Y pos of settings win
+# Load configuration
+$log->Log("core", "info", $app_name . " is starting");
+$cfg_p = woodpile::Config->new($log, $cfg_file, $def_cfg);
+$cfg = $cfg_p->{cfg};
 
-# Parse command line options
-GetOptions(
-   "a" => \$cl_ontop,		# -a for always on top
-   "f=s" => \$cfg_file,    	# -f to specify the config file
-   "r" => \$cfg_readonly, 	# -r for read-only config
-   "h|help" => \$cl_show_help,     # -h or --help for help
-   "x=i" => \$cl_x,		# X pos of main win
-   "y=i" => \$cl_y,		# Y pos of main win
-) or die "Invalid options - see --help\n";
-
-# Mutate the config file name to decide where to save memories...
-$mem_file = $cfg_file;
-
-if (defined $cfg->{'memory_file'}) {
-   $mem_file = $cfg->{'memory_file'};
-} else {
-   $mem_file =~ s/\.yaml$/.mem.yaml/;
-   $cfg->{'memory_file'} = $mem_file;
+if ($cfg_readonly) {
+   $log->Log("core", "info", "using configuration read-only");
+   $cfg->{'read_only'} = 1;
 }
 
-$channels = grigs_memory->new($cfg, $w_main, $mem_file);
+# load channel memory
+$channels = grigs_memory->new($cfg, $w_main);
 
-if (-f $mem_file) {
+if (-f $cfg->{'mem_file'}) {
    $channels->load_from_yaml();
 } else {
    # Load default memories
@@ -1039,37 +1023,9 @@ if (-f $mem_file) {
 
    # Save default memories to memory file
    # XXX: Save memories
-#   $channels->save($mem_file);
-}
-# Show help if requested
-if ($cl_show_help) { grigs_doc::show_help($app_name, $app_descr); }
-
-# Load configuration
-$log->Log("core", "info", "$app_name is starting");
-$cfg_p = woodpile::Config->new($log, $cfg_file, $def_cfg);
-$cfg = $cfg_p->{cfg};
-
-# Merge commandline options, overriding config file
-if ($cfg_readonly) {
-   $log->Log("core", "info", "using configuration read-only");
-   $cfg->{'read_only'} = 1;
+#   $channels->save($cfg->{'mem_file'});
 }
 
-if (defined($cl_ontop)) {
-   $log->Log("ui", "info", "Forcing always on top due to -a cmdline option");
-   $cfg->{'always_on_top'} = 1;
-}
-
-if (defined($cl_x) && defined($cl_y)) {
-   $log->Log("ui", "info", "Placing main window at $cl_x, $cl_y at cmdline request");
-   $cfg->{'win_x'} = $cl_x;
-   $cfg->{'win_y'} = $cl_y;
-} elsif (defined($cl_x) || defined($cl_y)) {
-   $log->Log("ui", "error", "You must specify both -x and -y options to place the window at startup");
-   exit 1;
-}
-
-# Setup the GUI
 load_icons();
 draw_main_win();
 set_icon("connecting");

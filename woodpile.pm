@@ -145,13 +145,13 @@ sub load {
       my $new_cfg = YAML::XS::Load($yaml_content);
 
       if (defined($def_cfg) && defined($new_cfg)) {
-         print "[config/info] merging config\n";
+         $main::log->Log("config", "info", "merging config");
          $rv = {%$def_cfg, %$new_cfg};
       } elsif (defined($new_cfg)) {
-         print "[config/info] using only new config\n";
+         $main::log->Log("config", "info", "using only new config");
          $rv = $new_cfg;
       } else {
-         print "[config/info] using only default config\n";
+         $main::log->Log("config", "info", "using only default config");
          $rv = $def_cfg;
       }
    } else {

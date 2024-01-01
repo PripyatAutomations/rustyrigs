@@ -28,7 +28,11 @@ sub apply_settings {
    $cfg = $main::cfg;
 
    if (defined $cfg) {
-      main::w_main_ontop($cfg->{'always_on_top'});
+      if ($cfg->{'always_on_top'}) {
+         main->w_main_ontop(1);
+      } else {
+         main->w_main_ontop(1);
+      }
    } else {
       print "*** No \$cfg ***\n";
    }
@@ -38,8 +42,8 @@ sub save_settings {
    if ($changes && defined $tmp_cfg) {
       print "Merging settings into in-memory config\n";
       my $tmp = {%$cfg, %$tmp_cfg};
-      $cfg = \$tmp;
-      $main::cfg = \$tmp;
+      $main::cfg = $cfg = $tmp;
+      print "cfg: " . Dumper($main::cfg) . "\n";
    } else {
       print "no tmpconfig\n";
    }
