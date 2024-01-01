@@ -15,7 +15,7 @@ my $hamlib_debug;
 my $tmp_cfg;
 my $w_main;
 my $changes = 0;
-my $cfg = $main::cfg;
+my $cfg;
 my $settings_open = 0;
 my $w_settings;
 
@@ -25,7 +25,13 @@ sub print_signal_info {
 }
 
 sub apply_settings {
-   main::w_main_ontop($main::cfg->{'always_on_top'});
+   $cfg = $main::cfg;
+
+   if (defined $cfg) {
+      main::w_main_ontop($cfg->{'always_on_top'});
+   } else {
+      print "*** No \$cfg ***\n";
+   }
 }
 
 sub save_settings {

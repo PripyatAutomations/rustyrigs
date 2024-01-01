@@ -96,8 +96,12 @@ sub toggle_locked {
    } else {
       $locked = TRUE;
    }
-   $lock_button->set_active($locked);
-#   $log->Log("ui", "debug", "Toggling \$locked to $locked by $origin");
+
+   if (!$origin eq "button") {
+      $lock_button->set_active($locked);
+   }
+
+   $log->Log("ui", "debug", "Toggling \$locked to $locked by $origin");
 }
 
 # main menu
@@ -109,7 +113,7 @@ sub main_menu_item_clicked {
    } elsif ($item->get_label() eq 'Quit') {
       close_main_win();
    } elsif ($item->get_label() eq 'Settings') {
-      grigs_settings::show_settings($cfg, $window);
+      grigs_settings->show_settings($cfg, $window);
    }
 
    $main_menu_open = 0;
@@ -179,6 +183,7 @@ sub main_menu {
       $log->Log("ui", "debug", "Closing the main menu");
       return FALSE;
    });
+   print "*** locked: $locked\n";
    $lock_item->set_active($locked);
    $main_menu->append($lock_item);
 
@@ -195,7 +200,7 @@ sub main_menu {
 
 sub save_config {
    if (!$cfg_readonly && (!defined($cfg->{'readonly'}) || !$cfg->{'readonly'})) {
-      $cfg_p->save_config($cfg_file);
+      $cfg_p->save($cfg_file);
    } else {
       $log->Log("core", "info", "Not saving configuration as it's read-only");
    }
@@ -273,6 +278,7 @@ sub w_main_show {
    $w_main->deiconify();
    $w_main->set_visible(1);
    $w_main->show_all();
+   $w_main->move($cfg->{'win_x'}, $cfg->{'win_y'});
    w_main_fm_toggle();
 
    return FALSE; 
@@ -552,14 +558,14 @@ sub draw_main_win {
    $mem_edit_button->set_tooltip_text("Add or Edit Memory slot");
 
    $mem_edit_button->signal_connect(clicked => sub {
-      grigs_memory::show_window();
+      $channels->show_window();
    });
    $mem_edit_button->grab_focus();
    $mem_btn_box->pack_start($mem_edit_button, TRUE, TRUE, 0);
    # XXX: ACCEL-Replace these with a global function
    $w_main_accel->connect(ord($cfg->{'key_mem_edit'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $mem_edit_button->grab_focus();
-      grigs_memory::show_window();
+      $channels->show();
    });
    $chan_box->pack_start($mem_btn_box, FALSE, FALSE, 0);
 
@@ -608,7 +614,7 @@ sub draw_main_win {
 
        my $freq = $vfo_freq_entry->get_text();
        $log->Log("vfo", "debug", "Changing freq on VFO $curr_vfo to $freq");
-       grigs_hamlib::rig_set_freq($freq);
+       grigs_hamlib->rig_set_freq($freq);
        return FALSE;
    });
 
@@ -835,9 +841,11 @@ sub draw_main_win {
    $w_main_accel->connect(ord($cfg->{'key_lock'}), $cfg->{'shortcut_key'}, 'visible', sub {
       if ($lock_button->get_active()) {
          $log->Log("ui", "info", "UNLOCKing controls");
+         toggle_locked("hotkey");
          $lock_button->set_active(0);
       } else {
          $log->Log("ui", "info", "LOCKing controls");
+         toggle_locked("hotkey");
          $lock_button->set_active(1);
       }
    });
@@ -1030,7 +1038,8 @@ if (-f $mem_file) {
    $channels->load_defaults($grigs_defconfig::default_memories);
 
    # Save default memories to memory file
-   $channels->save($mem_file);
+   # XXX: Save memories
+#   $channels->save($mem_file);
 }
 # Show help if requested
 if ($cl_show_help) { grigs_doc::show_help($app_name, $app_descr); }

@@ -129,7 +129,7 @@ use Data::Dumper;
 use Data::Structure::Util qw/unbless/;
 my $cfg_readonly = 0;		# if 1, config won't be written out
 
-sub load_config {
+sub load {
    my ($self, $cfg_file, $def_cfg) = @_;
    my $rv;
 
@@ -161,7 +161,7 @@ sub load_config {
    return $rv;
 }
 
-sub save_config {
+sub save {
    my ($self, $cfg_file) = @_;
 
    if (!$cfg_readonly) {
@@ -182,14 +182,14 @@ sub new {
    my ($class, $log, $cfg_file, $def_cfg) = @_;
 
    my $self = {
-      load_config => \&load_config,
-      save_config => \&save_config,
+      load => \&load,
+      save => \&save,
       cfg_file => $cfg_file,
       def_cfg => $def_cfg,
       log => $log
    };
 
-   $self->{cfg} = load_config($self, $cfg_file, $def_cfg);
+   $self->{cfg} = load($self, $cfg_file, $def_cfg);
 
    bless $self, $class;
    return $self;

@@ -5,7 +5,7 @@
 package grigs_hamlib;
 use Carp;
 use Glib qw(TRUE FALSE);
-#use strict;
+use strict;
 use warnings;
 
 my $cfg;
@@ -105,6 +105,7 @@ my $pending_changes = {
 ########################################################################
 
 sub hamlib_debug_level {
+   ( my $class ) = @_;
    my $new_lvl = $_[0];
 
    if (exists $hamlib_debug_levels{$new_lvl}) {
@@ -118,7 +119,7 @@ sub hamlib_debug_level {
 }
 
 sub ptt_off {
-   my $vfo = shift;
+   ( my $class, my $vfo ) = @_;
    my $curr_vfo = $cfg->{active_vfo};
 
    carp("[ptt/info] Clearing PTT...");
@@ -126,24 +127,25 @@ sub ptt_off {
 }
 
 sub ptt_on {
-   my $vfo = shift;
+   ( my $class, my $vfo ) = @_;
    my $curr_vfo = $cfg->{active_vfo};
 
    carp("[ptt/info] Setting PTT...");
    $rig->set_ptt($vfo, $Hamlib::RIG_PTT_ON);
 }
 
-sub rig_set_freq {
-   my $freq = shift;
+sub set_freq {
+   ( my $class, my $freq ) = @_;
    my $curr_vfo = $cfg->{'active_vfo'};
    $vfos->{$curr_vfo}{'freq'} = $freq;
    $rig->set_freq($curr_vfo, $freq);
 }
 
 sub update_display {
+   ( my $class ) = @_;
    my $curr_vfo = $cfg->{'active_vfo'};
 
-   $vfo_freq_entry->set_value($vfos->{$curr_vfo}{'freq'});
+   $main::vfo_freq_entry->set_value($vfos->{$curr_vfo}{'freq'});
 }
 
 sub vfo_name {
@@ -184,6 +186,8 @@ sub next_vfo {
 }
 
 sub read_rig {
+   ( my $class ) = @_;
+
    my $curr_hlvfo = $rig->get_vfo();
    my $curr_vfo = $cfg->{active_vfo} = vfo_name($curr_hlvfo);
 
@@ -194,7 +198,7 @@ sub read_rig {
 
    # Get the frequency for current VFO
    $vfos->{$curr_vfo}{'freq'} = $rig->get_freq($curr_hlvfo);
-   $vfo_freq_entry->set_value($vfos->{$curr_vfo}{'freq'});
+   $main::vfo_freq_entry->set_value($vfos->{$curr_vfo}{'freq'});
    print "freq: " . $vfos->{$curr_vfo}{'freq'} . "\n";
 
 #   my $mode;
@@ -217,7 +221,7 @@ my $update_needed = 0;
 sub exec_read_rig {
    my $tray_every = $cfg->{'poll_tray_every'};
 
-   if (!$connected) {
+   if (!$main::connected) {
       carp("[rig/debug] skipping rig read (not connected)");
    }
 
@@ -245,7 +249,7 @@ sub exec_read_rig {
 
 sub new {
    ( my $class, $cfg ) = @_;
-   our $rig;
+
    Hamlib::rig_set_debug(hamlib_debug_level($cfg->{'hamlib_loglevel'}));
    my $model = $cfg->{'rigctl_model'};
    my $host = $cfg->{'rigctl_addr'};
@@ -268,8 +272,7 @@ sub new {
 #   }
 
    # enable polling of the rig
-   our $connected = \$main::connected;
-   $connected = 1;
+   $main::connected = 1;
 #   $w_main->set_title("grigs: Connected to $host");
    my $riginfo = $rig->get_info();
    carp("[hamlib/info] Backend copyright:\t$rig->{caps}->{copyright}");
@@ -283,11 +286,14 @@ sub new {
 
    my $poll_interval = $cfg->{'poll_interval'};
    # Start a timer for it
-   $rig_timer = Glib::Timeout->add_seconds($poll_interval, \&exec_read_rig);
+   $main::rig_timer = Glib::Timeout->add_seconds($poll_interval, \&exec_read_rig);
    my $self = {
       rig => $rig,
-      exec_read_rig => \&exec_read_rig
+      exec_read_rig => \&exec_read_rig,
+      set_freq => \&set_freq
    };
+   bless $self, $class;
+
    return $self;
 }
 

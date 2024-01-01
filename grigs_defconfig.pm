@@ -17,7 +17,6 @@ our $def_cfg = {
    icon_transmit => "transmit.png",
    key_chan => 'C',			# open channel dropbown
    key_freq => 'F',
-   key_rf_gain => 'G',
    key_lock => 'L',
    key_mem_edit => 'E',
    key_mem_load => 'D',
@@ -25,6 +24,7 @@ our $def_cfg = {
    key_offset => 'O',
    key_ptt => 'A',
    key_power => 'P',
+   key_rf_gain => 'G',
    key_split => 'X',
    key_tone_freq_tx => 'T',
    key_tone_freq_rx => 'R',
@@ -90,13 +90,13 @@ our $def_cfg = {
    ui_vdd_fg => '#70f070',		# VDD meter active color
    ui_vdd_font => 'Monospace',
    ui_vdd_text => '#000000',		# VDD meter text color
+   win_border => 10,
+   win_height => 1024,
+   win_resizable => 1,			# 1 means main window is resizable
+   win_width => 682,
    win_visible => 0,
    win_x => 2252,
    win_y => 49,
-   win_height => 1024,
-   win_width => 682,
-   win_border => 10,
-   win_resizable => 1,			# 1 means main window is resizable
    win_mem_edit_x => 1,
    win_mem_edit_y => 1,
    win_mem_edit_height => 278,
@@ -111,3 +111,4 @@ our $default_memories = {
    # stuff
 };
 
+1;
