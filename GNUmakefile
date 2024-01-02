@@ -46,7 +46,7 @@ clean:
 ###########
 install: install-dirs install-lib install-bin install-docs install-res
 
-uninstall: uninstall-bin uninstall-lib uinstall-res uninstall-docs
+uninstall: uninstall-bin uninstall-lib uninstall-res uninstall-docs
 
 install-dirs:
 	${SUDO} install -d -m 0755 ${DOC_DIR}
@@ -57,7 +57,7 @@ install-bin:
 	${SUDO} install -m 0755 grigs.pl ${BIN_DIR}/grigs
 
 uninstall-bin:
-	${RM} ${BIN_DIR}/grigs
+	${SUDO} ${RM} ${BIN_DIR}/grigs
 
 install-docs:
 ifneq (${DOCS},)
@@ -66,26 +66,27 @@ endif
 
 uninstall-docs:
 ifneq (${DOCS},)
-	${RM} $(foreach x,${DOCS},${DOC_DIR}/${x})
+	${SUDO} ${RM} $(foreach x,${DOCS},${DOC_DIR}/${x})
 endif
 
-install-res: $(addprefix ${RES_DIR}/, $(notdir ${RSRC_FILES})) $(addprefix ${RES_DIR}/, $(RSRC_DIRS))
+#install-res: $(addprefix ${RES_DIR}/, $(notdir ${RSRC})) $(addprefix ${RES_DIR}/, $(RSRC_DIRS))
+install-res: $(addprefix ${RES_DIR}/,$(notdir ${RSRC}))
 
 install-lib:
 	${SUDO} install -m 0644 ${LIBS} ${LIB_DIR}
 
-uninstall-libs:
-	${RM} $(foreach x,${LIBS},${LIB_DIR}/${x})
+uninstall-lib:
+	${SUDO} ${RM} $(foreach x,${LIBS},${LIB_DIR}/${x})
 
-${RES_DIR}/%: res/%
-	@${SUDO} install -m 0644 $< $@
+#${RES_DIR}/%: res/%
+#	@${SUDO} install -m 0644 $< $@
 
-${RES_DIR}/%/: res/%/
-	@${SUDO} install -d -m 0755 $<
+#${RES_DIR}/%/: res/%/
+#	@${SUDO} install -d -m 0755 $<
 
 uninstall-res:
 ifneq (${RSRC},)
-	${RM} $(foreach x,${RSRC},${RES_DIR}/${x})
+	${SUDO} ${RM} $(foreach x,${RSRC},${RES_DIR}/${x})
 endif
 
 ################

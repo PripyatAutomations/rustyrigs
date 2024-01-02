@@ -141,6 +141,7 @@ sub load {
    # If a config file exists, load it
    if (-f $cfg_file) {
       open my $fh, '<', $cfg_file or die "Can't open config file $cfg_file for reading: $!";
+      $main::log->Log("config", "info", "loading configuration from $cfg_file");
       my $yaml_content = do { local $/; <$fh> };
       my $new_cfg = YAML::XS::Load($yaml_content);
 

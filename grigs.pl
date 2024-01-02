@@ -25,7 +25,12 @@ my $cfg_file = $default_cfg_file;
 my $log_file = $ENV{"HOME"} . "/${app_name}.log";
 
 # local bits and pieces...
-use lib '/usr/lib/grigs/';
+if (-f './grigs_defconfig.pm') {
+   use lib './';
+} else {
+   use lib '/usr/lib/grigs/';
+}
+
 use woodpile;
 use grigs_defconfig;
 use grigs_cmdline;
@@ -562,7 +567,7 @@ sub draw_main_win {
    $mem_edit_button->set_tooltip_text("Add or Edit Memory slot");
 
    $mem_edit_button->signal_connect(clicked => sub {
-      $channels->show_window();
+      $channels->show();
    });
    $mem_edit_button->grab_focus();
    $mem_btn_box->pack_start($mem_edit_button, TRUE, TRUE, 0);
