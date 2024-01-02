@@ -27,6 +27,7 @@ my $log_file = $ENV{"HOME"} . "/${app_name}.log";
 # local bits and pieces...
 if (-f './grigs_defconfig.pm') {
    use lib './';
+   print "* It seems we're running in a $app_name source directory, so we'll use the libraries from there. *\n";
 } else {
    use lib '/usr/lib/grigs/';
 }
