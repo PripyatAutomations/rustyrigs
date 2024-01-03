@@ -1,3 +1,5 @@
+----- This is broken for the next few days while I try to move the code around, feel free to jump in and pick up where I left off... -----
+
 This is a small gtk3 and perl frontend for rigctld.
 
 Configuration will be created at ~/.config/grigs.yaml or the location given by -f the first time its started and either settings/Save clicked or exited.
