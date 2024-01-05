@@ -26,8 +26,8 @@ my $cfg_file = $default_cfg_file;
 my $log_file = $ENV{"HOME"} . "/${app_name}.log";
 
 # override with local bits and pieces if in source directory...
-if (-f './grigs_defconfig.pm') {
-   use lib './';
+if (-f 'grigs_defconfig.pm') {
+   use lib './lib';
    print "* It seems we're running in a $app_name source directory, so we'll use the libraries from there. *\n";
 } else {
    use lib '/usr/lib/grigs/';
@@ -59,6 +59,7 @@ my $hamlib_riginfo;
 my $rig;
 my $channels;
 my $gtk_ui;
+my $rig_p;
 
 #####################################################
 # Set config to defconfig, until we load config...
@@ -79,6 +80,7 @@ sub toggle_locked {
    }
 
    if (!$origin eq "button") {
+      # XXX: We need to check here if using GTK
       $gtk_ui->lock_button->set_active($locked);
    }
 
@@ -92,7 +94,40 @@ sub next_vfo {
     return FALSE;
 }
 
-# Delay the hamlib init at least a second...
+# Parse the command line
+grigs_cmdline::parse_cmdline($cfg, $cfg_file);
+
+# Load configuration
+$cfg_p = woodpile::Config->new($log, $cfg_file, $def_cfg);
+$cfg = $cfg_p->{cfg};
+
+if ($cfg_readonly) {
+   $log->Log("core", "info", "using configuration read-only");
+   $cfg->{'read_only'} = 1;
+}
+
+# Initialize the GTK GUI
+$gtk_ui = grigs_gtk_ui->new($cfg, $log);
+$gtk_ui->load_icons();
+
+# load channel memory
+#$channels = grigs_memory->new($cfg, $gtk_ui->w_main);
+
+#if (-f $cfg->{'mem_file'}) {
+#   $channels->load_from_yaml();
+#} else {
+#   # Load default memories
+#   $channels->load_defaults($grigs_defconfig::default_memories);
+#
+#   # Save default memories to memory file
+#   # XXX: Save memories
+##   $channels->save($cfg->{'mem_file'});
+#}
+
+$gtk_ui->draw_main_win();
+$gtk_ui->set_icon("connecting");
+
+# Delay the hamlib init at least a second, for reliability
 my $hamlib_initialized = 0;
 sub hamlib_init {
    return if $hamlib_initialized;
@@ -109,41 +144,6 @@ sub hamlib_init {
 }
 Glib::Timeout->add(1000, \&hamlib_init);
 
-# Parse the command line
-grigs_cmdline::parse_cmdline($cfg, $cfg_file);
-
-# Load configuration
-$cfg_p = woodpile::Config->new($log, $cfg_file, $def_cfg);
-$cfg = $cfg_p->{cfg};
-
-if ($cfg_readonly) {
-   $log->Log("core", "info", "using configuration read-only");
-   $cfg->{'read_only'} = 1;
-}
-
-# Initialize the GTK GUI
-$gtk_ui = grigs_gtk_ui::new($cfg);
-$gtk_ui->load_icons();
-
-# load channel memory
-$channels = grigs_memory->new($cfg, $gtk_ui->w_main);
-
-if (-f $cfg->{'mem_file'}) {
-   $channels->load_from_yaml();
-} else {
-   # Load default memories
-   $channels->load_defaults($grigs_defconfig::default_memories);
-
-   # Save default memories to memory file
-   # XXX: Save memories
-#   $channels->save($cfg->{'mem_file'});
-}
-
-$gtk_ui->draw_main_win();
-$gtk_ui->set_icon("connecting");
-
-# gtk main loop, this will run until program exited
+# Andd.... go!
 Gtk3->main();
-
-# And say goodbye...
 $log->Log("core", "info", "$app_name is shutting down!");

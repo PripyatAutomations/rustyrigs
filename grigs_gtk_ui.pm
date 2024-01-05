@@ -5,9 +5,9 @@ use strict;
 use Glib qw(TRUE FALSE);
 use warnings;
 
-my $vfos = \$grigs_hamlib::vfos;
+my $vfos;
 my $cfg;
-my $log = \$main::log;
+my $log;
 
 # resources
 my $icon_error_pix;
@@ -268,6 +268,8 @@ sub unload_icons {
 
 sub load_icons {
    my ($state) = @_;
+#   die "cfg: " . Dumper($cfg) . "\n";
+
    my $res = $cfg->{'res_dir'};
    my $icon_error = $res . "/" . $cfg->{'icon_error'};
    my $icon_idle = $res . "/" . $cfg->{'icon_idle'};
@@ -919,9 +921,63 @@ sub set_icon {
 }
 
 sub new {
-   ( my $class, $cfg ) = @_;
+   ( my $class, $cfg, $log ) = @_;
+
+   $vfos = \$grigs_hamlib::vfos;
+#   $cfg = \$main::cfg;
+#   $log = \$main::log;
+
    my $self = {
-      load_icons => \&load_icons
+   # Variables
+      icon_error_pix => \$icon_error_pix,
+      icon_idle_pix => \$icon_idle_pix,
+      icon_main_pix => \$icon_main_pix,
+      icon_settings_pix => \$icon_settings_pix,
+      icon_transmit_pix => \$icon_transmit_pix,
+      settings_open => \$settings_open,
+      tray_icon => \$tray_icon,
+      vfo_freq_entry => \$vfo_freq_entry,
+      vfo_sel_button => \$vfo_sel_button,
+      width_entry => \$width_entry,
+   # GUI widgets
+      box => \$box,
+      fm_box => \$fm_box,
+      lock_button => \$lock_button,
+      lock_item => \$lock_item,
+      main_menu => \$main_menu,
+      main_menu_open => \$main_menu_open,
+      mode_entry => \$mode_entry,
+      rig_vol_entry => \$rig_vol_entry,
+   # Windows
+      w_main => \$w_main,
+      w_settings => \$w_settings,
+   # Functions
+      autosize_height => \&autosize_height,
+      channel_list => \&channel_list,
+      close_main_win => \&close_main_win,
+      draw_main_win => \&draw_main_win,
+      get_state_icon => \&get_state_icon,
+      load_icon => \&load_icon,
+      load_icons => \&load_icons,
+      main_menu => \&main_menu,
+      main_menu_item_clicked => \&main_menu_item_clicked,
+      main_menu_state => \&main_menu_state,
+      refresh_available_widths => \&refresh_available_widths,
+      save_config => \&save_config,
+      set_icon => \&set_icon,
+      set_settings_icon => \&set_settings_icon,
+      set_tray_icon => \&set_tray_icon,
+      set_tray_tooltip => \&set_tray_tooltip,
+      switch_vfo => \&switch_vfo,
+      unload_icons => \&unload_icons,
+      w_main_click => \&w_main_click,
+      w_main_fm_toggle => \&w_main_fm_toggle,
+      w_main_hide => \&w_main_hide,
+      w_main_keypress => \&w_main_keypress,
+      w_main_ontop => \&w_main_ontop,
+      w_main_show => \&w_main_show,
+      w_main_state => \&w_main_state,
+      w_main_toggle => \&w_main_toggle
    };
    bless $self, $class;
 
