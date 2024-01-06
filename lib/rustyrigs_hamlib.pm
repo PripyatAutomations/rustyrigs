@@ -2,7 +2,7 @@
 #
 # Try to stay frontend-agnostic here, if possible
 #
-package grigs_hamlib;
+package rustyrigs_hamlib;
 use Carp;
 use Glib qw(TRUE FALSE);
 use strict;
@@ -267,7 +267,7 @@ sub new {
    $main::log->Log("hamlib", "info", "connecting to $host");
 
 #  XXX: hamlib seems to immediately return success, even before trying to connect...
-#   $w_main->set_title("grigs: Connecting to $host");
+#   $w_main->set_title("rustyrigs: Connecting to $host");
 #   if ($rig->open() != $Hamlib::RIG_OK) {
    my $rv = $rig->open();
 #      $log->Log("hamlib", "fatal", "failed connecting to hamlib\n");
