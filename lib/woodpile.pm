@@ -128,15 +128,11 @@ use YAML::XS;
 use Data::Dumper;
 use Data::Structure::Util qw/unbless/;
 my $cfg_readonly = 0;		# if 1, config won't be written out
+my $cfg_file;
 
 sub load {
    my ($self, $cfg_file, $def_cfg) = @_;
    my $rv;
-
-   # does $cfg_file exist? if so use it instead of default (this lets us have per-rig configurations)
-   if (defined($cfg_file) && -f $cfg_file) {
-      $cfg_file = $cfg_file;
-   }
 
    # If a config file exists, load it
    if (-f $cfg_file) {
