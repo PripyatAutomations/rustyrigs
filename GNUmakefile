@@ -30,6 +30,8 @@ $(warning sudo is not installed or not found in PATH)
 endif
 endif
 
+bin := rustyrigs
+
 ##############################################################
 
 all: world
@@ -54,7 +56,7 @@ install-dirs:
 	${SUDO} install -d -m 0755 ${RES_DIR}
 
 install-bin:
-	${SUDO} install -m 0755 rustyrigs.pl ${BIN_DIR}/rustyrigs
+	${SUDO} install -m 0755 ${bin} ${BIN_DIR}/${bin}
 
 uninstall-bin:
 	${SUDO} ${RM} ${BIN_DIR}/rustyrigs
@@ -78,11 +80,11 @@ install-lib:
 uninstall-lib:
 	${SUDO} ${RM} $(foreach x,${LIBS},${LIB_DIR}/${x})
 
-#${RES_DIR}/%: res/%
-#	@${SUDO} install -m 0644 $< $@
+${RES_DIR}/%: res/%
+	@${SUDO} install -m 0644 $< $@
 
-#${RES_DIR}/%/: res/%/
-#	@${SUDO} install -d -m 0755 $<
+${RES_DIR}/%/: res/%/
+	@${SUDO} install -d -m 0755 $<
 
 uninstall-res:
 ifneq (${RSRC},)
