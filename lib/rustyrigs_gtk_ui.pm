@@ -46,7 +46,7 @@ sub autosize_height {
    my ($window) = @_;
 
    # Get preferred height for the current width
-   my ($min_height, $nat_height) = $box->get_preferred_height_for_width($$cfg->{'win_x'});
+   my ($min_height, $nat_height) = $box->get_preferred_height_for_width($cfg->{'win_x'});
 
    # Set window height based on the preferred height of visible boxes
    $window->resize($window->get_allocated_width(), $min_height);
@@ -216,7 +216,7 @@ sub w_main_hide {
 
 sub w_main_fm_toggle {
    # hide the FM box, unless in FM mode
-   my $curr_vfo = $$cfg->{'active_vfo'};
+   my $curr_vfo = $cfg->{'active_vfo'};
    my $vfo = $vfos->{$curr_vfo};
    my $mode = uc($vfo->{'mode'});
 
@@ -230,18 +230,18 @@ sub w_main_fm_toggle {
 }
 
 sub w_main_show {
-   $$cfg->{'win_visible'} = 1;
+   $cfg->{'win_visible'} = 1;
    $w_main->deiconify();
    $w_main->set_visible(1);
    $w_main->show_all();
-   $w_main->move($$cfg->{'win_x'}, $$cfg->{'win_y'});
+   $w_main->move($cfg->{'win_x'}, $cfg->{'win_y'});
    w_main_fm_toggle();
 
    return FALSE; 
 }
 
 sub w_main_toggle {
-   if ($$cfg->{'win_visible'}) {
+   if ($cfg->{'win_visible'}) {
       $log->Log("ui", "debug", "hide w_main");
       w_main_hide();
    } else {
@@ -281,11 +281,11 @@ sub unload_icons {
 sub load_icons {
    my ($state) = @_;
 
-   my $res = $$cfg->{'res_dir'};
-   my $icon_error = $res . "/" . $$cfg->{'icon_error'};
-   my $icon_idle = $res . "/" . $$cfg->{'icon_idle'};
-   my $icon_settings = $res . "/" . $$cfg->{'icon_settings'};
-   my $icon_transmit = $res . "/" . $$cfg->{'icon_transmit'};
+   my $res = $cfg->{'res_dir'};
+   my $icon_error = $res . "/" . $cfg->{'icon_error'};
+   my $icon_idle = $res . "/" . $cfg->{'icon_idle'};
+   my $icon_settings = $res . "/" . $cfg->{'icon_settings'};
+   my $icon_transmit = $res . "/" . $cfg->{'icon_transmit'};
 
    # Load images, if not already loaded
    if (!defined($icon_error_pix)) {
@@ -315,8 +315,8 @@ sub switch_vfo {
    my $vfo = shift;
 
    $log->Log("vfo", "info", "Switching to VFO $vfo");
-   $vfo_sel_button->set_label("VFO: " . rustyrigs_hamlib::next_vfo($vfo) . " (" . $$cfg->{'key_vfo'} . ")");
-   $$cfg->{active_vfo} = $vfo;
+   $vfo_sel_button->set_label("VFO: " . rustyrigs_hamlib::next_vfo($vfo) . " (" . $cfg->{'key_vfo'} . ")");
+   $cfg->{active_vfo} = $vfo;
 
    rustyrigs_hamlib::read_rig();
 }
@@ -331,7 +331,7 @@ sub w_main_ontop {
 }
 
 sub refresh_available_widths {
-   my $curr_vfo = $$cfg->{'active_vfo'};
+   my $curr_vfo = $cfg->{'active_vfo'};
    my $vfo = $vfos->{$curr_vfo};
    my $val = $vfo->{'width'};
    my $rv = -1;
@@ -394,30 +394,30 @@ sub channel_list {
 sub draw_main_win {
    $w_main = Gtk3::Window->new('toplevel');
 
-   my $curr_vfo = $$cfg->{active_vfo};
+   my $curr_vfo = $cfg->{active_vfo};
    if ($curr_vfo eq '') {
-      $curr_vfo = $$cfg->{active_vfo} = 'A';
+      $curr_vfo = $cfg->{active_vfo} = 'A';
    }
    my $act_vfo = $vfos->{$curr_vfo};
 
    # XXX: We need to set the window icon
    $w_main->set_title("rustyrigs: Not connected");
-   $w_main->set_default_size($$cfg->{'win_width'}, $$cfg->{'win_height'});
-   $w_main->set_border_width($$cfg->{'win_border'});
+   $w_main->set_default_size($cfg->{'win_width'}, $cfg->{'win_height'});
+   $w_main->set_border_width($cfg->{'win_border'});
    my $resizable = 0;
 
-   if (defined($$cfg->{'win_resizable'})) {
-      $resizable = $$cfg->{'win_resizable'};
+   if (defined($cfg->{'win_resizable'})) {
+      $resizable = $cfg->{'win_resizable'};
    }
 
    $w_main->set_resizable($resizable);
 
-   if ($$cfg->{'always_on_top'}) {
+   if ($cfg->{'always_on_top'}) {
       w_main_ontop(1);
    }
 
-   $w_main->set_default_size($$cfg->{'win_width'}, $$cfg->{'win_height'});  # Replace $width and $height with desired values
-   $w_main->move($$cfg->{'win_x'}, $$cfg->{'win_y'});  # Replace $x and $y with desired coordinates
+   $w_main->set_default_size($cfg->{'win_width'}, $cfg->{'win_height'});  # Replace $width and $height with desired values
+   $w_main->move($cfg->{'win_x'}, $cfg->{'win_y'});  # Replace $x and $y with desired coordinates
 
    ##############################
    # Capture the window signals #
@@ -435,10 +435,10 @@ sub draw_main_win {
        my ($x, $y) = $widget->get_position();
 
        # Save the data...
-       $$cfg->{'win_x'} = $x;
-       $$cfg->{'win_y'} = $y;
-       $$cfg->{'win_height'} = $height;
-       $$cfg->{'win_width'} = $width;
+       $cfg->{'win_x'} = $x;
+       $cfg->{'win_y'} = $y;
+       $cfg->{'win_height'} = $height;
+       $cfg->{'win_width'} = $width;
 
        # Return FALSE to allow the event to propagate
        return FALSE;
@@ -452,7 +452,7 @@ sub draw_main_win {
    $box = Gtk3::Box->new('vertical', 5);
 
 
-   my $meter_box = rustyrigs_meter::render_meters($$cfg, $vfos, $w_main);
+   my $meter_box = rustyrigs_meter::render_meters($cfg, $vfos, $w_main);
    $box->pack_start($meter_box, TRUE, TRUE, 0);
 
    #################
@@ -460,7 +460,7 @@ sub draw_main_win {
    #################
    my $chan_box = Gtk3::Box->new('vertical', 5);
 
-   my $chan_label = Gtk3::Label->new("Channel (" . $$cfg->{'key_chan'} . ")");
+   my $chan_label = Gtk3::Label->new("Channel (" . $cfg->{'key_chan'} . ")");
    $chan_box->pack_start($chan_label, FALSE, FALSE, 0);
 
    # Show the channel choser combobox
@@ -479,7 +479,7 @@ sub draw_main_win {
 
    $chan_box->pack_start($chan_combo, FALSE, FALSE, 0);
 
-   $w_main_accel->connect(ord($$cfg->{'key_chan'}), $$cfg->{'shortcut_key'}, 'visible', sub {
+   $w_main_accel->connect(ord($cfg->{'key_chan'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $chan_combo->grab_focus();
       $chan_combo->popup();
    });
@@ -487,7 +487,7 @@ sub draw_main_win {
    my $mem_btn_box = Gtk3::Box->new('horizontal', 5);
 
    # Memory load button
-   my $mem_load_button = Gtk3::Button->new("Load Chan (" . $$cfg->{'key_mem_load'} . ")");
+   my $mem_load_button = Gtk3::Button->new("Load Chan (" . $cfg->{'key_mem_load'} . ")");
    $mem_load_button->set_tooltip_text("(re)load the channel memory");
 
    $mem_load_button->signal_connect(clicked => sub {
@@ -499,14 +499,14 @@ sub draw_main_win {
    $mem_btn_box->pack_start($mem_load_button, TRUE, TRUE, 0);
 
    # XXX: ACCEL-Replace these with a global function
-   $w_main_accel->connect(ord($$cfg->{'key_mem_load'}), $$cfg->{'shortcut_key'}, 'visible', sub {
+   $w_main_accel->connect(ord($cfg->{'key_mem_load'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $mem_load_button->grab_focus();
       # XXX: Apply the settings from the memory entry into active VFO
       # apply_mem_to_vfo();
    });
 
    # Memory edit button
-   my $mem_edit_button = Gtk3::Button->new("Edit Chan (" . $$cfg->{'key_mem_edit'} . ")");
+   my $mem_edit_button = Gtk3::Button->new("Edit Chan (" . $cfg->{'key_mem_edit'} . ")");
    $mem_edit_button->set_tooltip_text("Add or Edit Memory slot");
 
    $mem_edit_button->signal_connect(clicked => sub {
@@ -515,7 +515,7 @@ sub draw_main_win {
    $mem_edit_button->grab_focus();
    $mem_btn_box->pack_start($mem_edit_button, TRUE, TRUE, 0);
    # XXX: ACCEL-Replace these with a global function
-   $w_main_accel->connect(ord($$cfg->{'key_mem_edit'}), $$cfg->{'shortcut_key'}, 'visible', sub {
+   $w_main_accel->connect(ord($cfg->{'key_mem_edit'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $mem_edit_button->grab_focus();
       $main::channels->show();
    });
@@ -525,7 +525,7 @@ sub draw_main_win {
    $box->pack_start($chan_box, FALSE, FALSE, 0);
 
    # VFO choser:
-   $vfo_sel_button = Gtk3::Button->new("VFO: " . $curr_vfo . " (" . $$cfg->{'key_vfo'} . ")");
+   $vfo_sel_button = Gtk3::Button->new("VFO: " . $curr_vfo . " (" . $cfg->{'key_vfo'} . ")");
    $vfo_sel_button->set_tooltip_text("Toggle active VFO");
 
    $vfo_sel_button->signal_connect(clicked => sub {
@@ -534,27 +534,27 @@ sub draw_main_win {
    $vfo_sel_button->grab_focus();
    $box->pack_start($vfo_sel_button, FALSE, FALSE, 0);
    # XXX: ACCEL-Replace these with a global function
-   $w_main_accel->connect(ord($$cfg->{'key_vfo'}), $$cfg->{'shortcut_key'}, 'visible', sub {
+   $w_main_accel->connect(ord($cfg->{'key_vfo'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $vfo_sel_button->grab_focus();
       next_vfo();
    });
 
    # rig volume
-   my $rig_vol_label = Gtk3::Label->new("Volume % (" . $$cfg->{'key_volume'} . ")");
+   my $rig_vol_label = Gtk3::Label->new("Volume % (" . $cfg->{'key_volume'} . ")");
    my $rig_vol_entry = Gtk3::Scale->new_with_range('horizontal', 0, 100, 1);
    $rig_vol_entry->set_digits(0);           # Disable decimal places
    $rig_vol_entry->set_draw_value(TRUE);    # Display the current value on the slider
    $rig_vol_entry->set_has_origin(FALSE);   # Disable origin value
    $rig_vol_entry->set_value_pos('right');  # Set the position of the value indicator
-   $rig_vol_entry->set_value($$cfg->{'rig_volume'});
+   $rig_vol_entry->set_value($cfg->{'rig_volume'});
    $rig_vol_entry->set_tooltip_text("Please click and drag to set RX volume");
    # XXX: ACCEL-Replace these with a global function
-   $w_main_accel->connect(ord($$cfg->{'key_volume'}), $$cfg->{'shortcut_key'}, 'visible', sub {
+   $w_main_accel->connect(ord($cfg->{'key_volume'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $rig_vol_entry->grab_focus();
    });
 
    # Active VFO settings
-   my $vfo_freq_label = Gtk3::Label->new('Frequency (Hz) (' . $$cfg->{'key_freq'} . ')');
+   my $vfo_freq_label = Gtk3::Label->new('Frequency (Hz) (' . $cfg->{'key_freq'} . ')');
 #   die "curr_vfo: $curr_vfo || vfos: " . Dumper($act_vfo) . "\n";
 
    $vfo_freq_entry = Gtk3::SpinButton->new_with_range($act_vfo->{'min_freq'}, $act_vfo->{'max_freq'}, $act_vfo->{'vfo_step'});
@@ -573,7 +573,7 @@ sub draw_main_win {
    });
 
    # XXX: ACCEL-Replace these with a global function
-   $w_main_accel->connect(ord($$cfg->{'key_freq'}), $$cfg->{'shortcut_key'}, 'visible', sub {
+   $w_main_accel->connect(ord($cfg->{'key_freq'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $vfo_freq_entry->grab_focus();  
    });
 
@@ -622,7 +622,7 @@ sub draw_main_win {
    });
 
    # XXX: we need to TAB key presses in the drop downs and move to next widget...
-   my $mode_label = Gtk3::Label->new('Mode (' . $$cfg->{'key_mode'} . ')');
+   my $mode_label = Gtk3::Label->new('Mode (' . $cfg->{'key_mode'} . ')');
    $mode_entry = Gtk3::ComboBoxText->new();
    $mode_entry->set_tooltip_text("Modulation Mode. Some options my not be supported by your rig.");
    $mode_entry->append_text('D-U');
@@ -634,7 +634,7 @@ sub draw_main_win {
    $mode_entry->append_text('C4FM');
    $mode_entry->append_text('CW');
    # XXX: ACCEL-Replace these with a global function
-   $w_main_accel->connect(ord($$cfg->{'key_mode'}), $$cfg->{'shortcut_key'}, 'visible', sub {
+   $w_main_accel->connect(ord($cfg->{'key_mode'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $mode_entry->grab_focus();
       $mode_entry->popup();
    });
@@ -644,7 +644,7 @@ sub draw_main_win {
    $mode_entry->signal_connect(changed => sub {
       my $selected_item = $mode_entry->get_active_text();
       $log->Log("ui", "debug", "Mode Selected: $selected_item");
-      my $curr_vfo = $$cfg->{'active_vfo'};
+      my $curr_vfo = $cfg->{'active_vfo'};
       my $mode = uc($act_vfo->{'mode'});
       $act_vfo->{'mode'} = uc($selected_item);
       # apply it
@@ -654,11 +654,11 @@ sub draw_main_win {
       refresh_available_widths();
    });
 
-   my $width_label = Gtk3::Label->new('Width (hz) (' . $$cfg->{'key_width'} . ')');
+   my $width_label = Gtk3::Label->new('Width (hz) (' . $cfg->{'key_width'} . ')');
    $width_entry = Gtk3::ComboBoxText->new();
    $width_entry->set_tooltip_text("Modulation bandwidth");
    # XXX: ACCEL-Replace these with a global function
-   $w_main_accel->connect(ord($$cfg->{'key_width'}), $$cfg->{'shortcut_key'}, 'visible', sub {
+   $w_main_accel->connect(ord($cfg->{'key_width'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $width_entry->grab_focus();
       $width_entry->popup();
    });
@@ -669,12 +669,12 @@ sub draw_main_win {
       my $selected_item = $width_entry->get_active_text();
       if (defined($selected_item)) {
          $log->Log("ui", "debug", "Width Selected: $selected_item\n");  # Print the selected item (for demonstration)
-         my $curr_vfo = $$cfg->{'active_vfo'};
+         my $curr_vfo = $cfg->{'active_vfo'};
          $act_vfo->{'width'} = $selected_item;
       }
    });
 
-   my $rf_gain_label = Gtk3::Label->new('RF Gain / Atten. (' . $$cfg->{'key_rf_gain'} . ')');
+   my $rf_gain_label = Gtk3::Label->new('RF Gain / Atten. (' . $cfg->{'key_rf_gain'} . ')');
    my $rf_gain_entry = Gtk3::Scale->new_with_range('horizontal', -40, 40, 1);
    $rf_gain_entry->set_digits(0);           # Disable decimal places
    $rf_gain_entry->set_draw_value(TRUE);    # Display the current value on the slider
@@ -683,18 +683,18 @@ sub draw_main_win {
    $rf_gain_entry->set_value($act_vfo->{'rf_gain'});
    $rf_gain_entry->set_tooltip_text("Please Click and DRAG to change RF gain");
    # XXX: ACCEL-Replace these with a global function
-   $w_main_accel->connect(ord($$cfg->{'key_rf_gain'}), $$cfg->{'shortcut_key'}, 'visible', sub {
+   $w_main_accel->connect(ord($cfg->{'key_rf_gain'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $rf_gain_entry->grab_focus();
    });
    $rf_gain_entry->signal_connect(value_changed => sub {
-      my $curr_vfo = $$cfg->{'active_vfo'};
+      my $curr_vfo = $cfg->{'active_vfo'};
       my $value = $rf_gain_entry->get_value();
       $act_vfo->{'rf_gain'} = $value;
    });
    # Variable to track if the scale is being dragged
    my $dragging = 0;
 
-   my $vfo_power_label = Gtk3::Label->new('Power (Watts) (' . $$cfg->{'key_power'} . ')');
+   my $vfo_power_label = Gtk3::Label->new('Power (Watts) (' . $cfg->{'key_power'} . ')');
    my $vfo_power_entry = Gtk3::Scale->new_with_range('horizontal', $act_vfo->{'min_power'}, $act_vfo->{'max_power'}, $act_vfo->{'power_step'});
    $vfo_power_entry->set_digits(0);           # Disable decimal places
    $vfo_power_entry->set_draw_value(TRUE);    # Display the current value on the slider
@@ -703,7 +703,7 @@ sub draw_main_win {
    $vfo_power_entry->set_value($act_vfo->{'power'});
    $vfo_power_entry->set_tooltip_text("Please Click and DRAG to change TX power");
    # XXX: ACCEL-Replace these with a global function
-   $w_main_accel->connect(ord($$cfg->{'key_power'}), $$cfg->{'shortcut_key'}, 'visible', sub {
+   $w_main_accel->connect(ord($cfg->{'key_power'}), $cfg->{'shortcut_key'}, 'visible', sub {
       $vfo_power_entry->grab_focus();
    });
 
@@ -775,11 +775,11 @@ sub draw_main_win {
    });
 
    # XXX: This will change soon as _accel will be wrapped in window object
-   my $fm_p  = rustyrigs_fm->new($$cfg, $w_main, $w_main_accel);
+   my $fm_p  = rustyrigs_fm->new($cfg, $w_main, $w_main_accel);
    $fm_box = $fm_p->{box};
 
    # Create a toggle button to represent the lock state
-   my $key_lock = $$cfg->{'key_lock'};
+   my $key_lock = $cfg->{'key_lock'};
    $lock_button = Gtk3::ToggleButton->new_with_label("Lock ($key_lock)");
    $lock_button->signal_connect(toggled => sub {
       if ($main::locked) {
@@ -789,7 +789,7 @@ sub draw_main_win {
       }
     });
 
-   $w_main_accel->connect(ord($$cfg->{'key_lock'}), $$cfg->{'shortcut_key'}, 'visible', sub {
+   $w_main_accel->connect(ord($cfg->{'key_lock'}), $cfg->{'shortcut_key'}, 'visible', sub {
       if ($lock_button->get_active()) {
          $log->Log("ui", "info", "UNLOCKing controls");
          main::toggle_locked("hotkey");
@@ -847,8 +847,8 @@ sub draw_main_win {
    w_main_show();
 
    # set the window visibility to saved state (from config) automaticly?
-   if ($$cfg->{'stay_hidden'}) {
-      my $vis = $$cfg->{'win_visible'};
+   if ($cfg->{'stay_hidden'}) {
+      my $vis = $cfg->{'win_visible'};
       $log->Log("ui", "info", "stay hidden mode enabled: visible=$vis");
       $w_main->set_visible($vis);
    }
@@ -891,9 +891,9 @@ sub set_tray_icon {
       $connected_txt = "Connecting";
    }
    my $freq = '';
-   my $rigctl_addr = $$cfg->{'rigctl_addr'};
+   my $rigctl_addr = $cfg->{'rigctl_addr'};
    my $status_txt = '';
-   my $curr_vfo = $$cfg->{'active_vfo'}; 
+   my $curr_vfo = $cfg->{'active_vfo'}; 
    my $act_vfo = $vfos->{$curr_vfo};
 
    if (defined($main::rig)) {
@@ -933,7 +933,7 @@ sub set_icon {
    } elsif ($state eq "transmit") {
       $state_txt = "TRANSMIT -";
    }
-   $w_main->set_title($main::app_name . ": $state_txt " . $$cfg->{'rigctl_addr'});
+   $w_main->set_title($main::app_name . ": $state_txt " . $cfg->{'rigctl_addr'});
 
    my $icon = get_state_icon($state);
    $w_main->set_icon($icon);

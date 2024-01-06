@@ -135,25 +135,25 @@ sub load {
    my $rv;
 
    # If a config file exists, load it
-   if (-f $cfg_file) {
-      open my $fh, '<', $cfg_file or die "Can't open config file $cfg_file for reading: $!";
-      $main::log->Log("config", "info", "loading configuration from $cfg_file");
+   if (-f $$cfg_file) {
+      open my $fh, '<', $$cfg_file or die "Can't open config file $$cfg_file for reading: $!";
+      $main::log->Log("config", "info", "loading configuration from $$cfg_file");
       my $yaml_content = do { local $/; <$fh> };
       my $new_cfg = YAML::XS::Load($yaml_content);
 
       if (defined($def_cfg) && defined($new_cfg)) {
          $main::log->Log("config", "info", "merging config");
-         $rv = {%$def_cfg, %$new_cfg};
+         $rv = {%$$def_cfg, %$new_cfg};
       } elsif (defined($new_cfg)) {
          $main::log->Log("config", "info", "using only new config");
          $rv = $new_cfg;
       } else {
          $main::log->Log("config", "info", "using only default config");
-         $rv = $def_cfg;
+         $rv = $$def_cfg;
       }
    } else {
-      warn "[config/info] cant find config file $cfg_file, using defaults\n";
-      $rv = $def_cfg;
+      warn "[config/info] cant find config file $$cfg_file, using defaults\n";
+      $rv = $$def_cfg;
    }
    return $rv;
 }
@@ -162,12 +162,12 @@ sub save {
    my ($self, $cfg_file) = @_;
 
    if (!$cfg_readonly) {
-      print "[core/debug] saving config to $cfg_file\n";
+      print "[core/debug] saving config to $$cfg_file\n";
       my $cfg_out_txt = YAML::XS::Dump($self->{cfg});
       if (!defined($cfg_out_txt)) {
          die "Exporting YAML configuration failed\n";
       }
-      open my $fh, '>', $cfg_file or die "Can't open config file $cfg_file for writing: $! ";
+      open my $fh, '>', $$cfg_file or die "Can't open config file $cfg_file for writing: $! ";
       print $fh $cfg_out_txt . "\n";
       close $fh;
    } else {

@@ -100,7 +100,7 @@ sub close {
 
 sub new {
    ( my $class, my $cfg_ref, my $w_main_ref ) = @_;
-   $cfg = ${$cfg_ref};
+   $cfg = $cfg_ref;
    $w_main = ${$w_main_ref};
 
    # if settings window is already open raise it instead

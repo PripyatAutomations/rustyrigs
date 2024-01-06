@@ -251,7 +251,7 @@ sub exec_read_rig {
 
 sub new {
    ( my $class, my $cfg_ref ) = @_;
-   $cfg = ${$cfg_ref};
+   $cfg = $cfg_ref;
 
    Hamlib::rig_set_debug(hamlib_debug_level($$cfg->{'hamlib_loglevel'}));
    my $model = $$cfg->{'rigctl_model'};
