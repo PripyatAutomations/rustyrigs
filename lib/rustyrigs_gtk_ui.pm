@@ -154,7 +154,7 @@ sub main_menu {
 sub save_config {
    ( my $class ) = @_;
 
-   if (!$main::cfg_readonly && (!defined($$cfg->{'readonly'}) || !$$cfg->{'readonly'})) {
+   if (!$main::cfg_readonly && (!defined($cfg->{'readonly'}) || !$cfg->{'readonly'})) {
       $log->Log("core", "info", "Saved configuration to " . $cfg_file);
       $class->save($cfg_file);
    } else {
@@ -209,7 +209,7 @@ sub w_main_click {
 }
 
 sub w_main_hide {
-   $$cfg->{'win_visible'} = 0;
+   $cfg->{'win_visible'} = 0;
    $w_main->set_visible(0);
    return FALSE;
 }

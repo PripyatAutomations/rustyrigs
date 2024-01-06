@@ -108,7 +108,7 @@ $gtk_ui = rustyrigs_gtk_ui->new($cfg, $log, $vfos);
 $gtk_ui->load_icons();
 
 # load channel memory
-#$channels = rustyrigs_memory->new($cfg, \$gtk_ui->w_main);
+#$channels = rustyrigs_memory->new($cfg, $gtk_ui->w_main);
 
 #if (-f $cfg->{'mem_file'}) {
 #   $channels->load_from_yaml();

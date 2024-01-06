@@ -46,9 +46,9 @@ sub apply {
    ( my $class ) = @_;
    if (defined $cfg) {
       if ($cfg->{'always_on_top'}) {
-         main->w_main_ontop(1);
+         $main::gtk_ui->w_main_ontop(1);
       } else {
-         main->w_main_ontop(1);
+         $main::gtk_ui->w_main_ontop(1);
       }
    }
 }
