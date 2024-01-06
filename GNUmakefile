@@ -12,7 +12,7 @@ NEED_PKG += devscripts dh-make-perl
 DOCS := $(wildcard doc/*)
 
 # Libraries (perl modules)
-LIBS := $(wildcard ./*.pm)
+LIBS := $(wildcard lib/*.pm)
 
 # Resources (icons, data files, etc)
 RSRC := $(wildcard res/*)
