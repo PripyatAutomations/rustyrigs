@@ -2,13 +2,21 @@
 # which can be inserted/removed on the main window as needed
 
 package rustyrigs_fm;
-use Carp;
-use Data::Dumper;
-use Data::Structure::Util qw/unbless/;
-use woodpile;
 use strict;
 use warnings;
+use Carp;
+use Data::Dumper;
+#use Data::Structure::Util qw/unbless/;
 use Glib qw(TRUE FALSE);
+if (-f 'lib/rustyrigs_defconfig.pm') {
+   print "* It seems we're running in the source directory, so we'll use the libraries from there. *\n";
+#   use lib $FindBin::Bin . '/lib';
+   use lib "./lib";
+} else {
+   print "Using installed libraries...\n";
+   use lib '/usr/lib/rustyrigs/';
+}
+use woodpile;
 use rustyrigs_hamlib;
 
 my $cfg;
