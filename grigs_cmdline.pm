@@ -1,4 +1,4 @@
-package grigs_cmdline;
+package rustyrigs_cmdline;
 use strict;
 use warnings;
 use Carp;
@@ -6,7 +6,6 @@ use Glib qw(TRUE FALSE);
 use Data::Dumper;
 use Getopt::Long;
 
-###########################################################
 # scratch space for cmdline arguments
 my $cfg_file;
 my $mem_file;
@@ -18,8 +17,11 @@ my $cl_s_x;		# cmdline X pos of settings win
 my $cl_s_y;		# cmdline Y pos of settings win
 my $cfg;
 
-sub parse_cmdline {
-   ( $cfg, $cfg_file ) = @_;
+sub parse {
+   ( my $cfg_ref, my $cfg_file_ref ) = @_;
+
+   $cfg = ${$cfg_ref};
+   $cfg_file = ${$cfg_file_ref};
 
    # Parse command line options
    GetOptions(
@@ -48,24 +50,24 @@ sub parse_cmdline {
 
    # Show help if requested
    if ($cl_show_help) {
-      grigs_doc::show_help($main::app_name, $main::app_descr);
+      rustyrigs_doc::show_help($main::app_name, $main::app_descr);
    }
 
    # XXX: Make this work
 
-#   if (defined($cl_ontop)) {
-#      $main::log->Log("ui", "info", "Forcing always on top due to -a cmdline option");
-#      $main::cfg->{'always_on_top'} = 1;
-#   }
+   if (defined($cl_ontop)) {
+      $main::log->Log("ui", "info", "Forcing always on top due to -a cmdline option");
+      $main::cfg->{'always_on_top'} = 1;
+   }
 
-#   if (defined($cl_x) && defined($cl_y)) {
-#      $main::log->Log("ui", "info", "Placing main window at $cl_x, $cl_y at cmdline request");
-#      $main::cfg->{'win_x'} = $cl_x;
-#      $main::cfg->{'win_y'} = $cl_y;
-#   } elsif (defined($cl_x) || defined($cl_y)) {
-#      $main::log->Log("ui", "error", "You must specify both -x and -y options to place the window at startup");
-#      exit 1;
-#   }
+   if (defined($cl_x) && defined($cl_y)) {
+      $main::log->Log("ui", "info", "Placing main window at $cl_x, $cl_y at cmdline request");
+      $main::cfg->{'win_x'} = $cl_x;
+      $main::cfg->{'win_y'} = $cl_y;
+   } elsif (defined($cl_x) || defined($cl_y)) {
+      $main::log->Log("ui", "error", "You must specify both -x and -y options to place the window at startup");
+      exit 1;
+   }
 }
 
 1;

@@ -1,9 +1,9 @@
-# basic makefile for installing/uninstall grigs
+# basic makefile for installing/uninstall rustyrigs
 PREFIX ?= /usr
-RES_DIR ?= ${PREFIX}/share/grigs
+RES_DIR ?= ${PREFIX}/share/rustyrigs
 DOC_DIR ?= ${PREFIX}/share/doc
 BIN_DIR ?= ${PREFIX}/bin
-LIB_DIR ?= ${PREFIX}/lib/grigs
+LIB_DIR ?= ${PREFIX}/lib/rustyrigs
 
 NEED_PKG := libgtk3-perl libglib-perl libyaml-perl libhamlib-perl
 NEED_PKG += devscripts dh-make-perl
@@ -54,10 +54,10 @@ install-dirs:
 	${SUDO} install -d -m 0755 ${RES_DIR}
 
 install-bin:
-	${SUDO} install -m 0755 grigs.pl ${BIN_DIR}/grigs
+	${SUDO} install -m 0755 rustyrigs.pl ${BIN_DIR}/rustyrigs
 
 uninstall-bin:
-	${SUDO} ${RM} ${BIN_DIR}/grigs
+	${SUDO} ${RM} ${BIN_DIR}/rustyrigs
 
 install-docs:
 ifneq (${DOCS},)

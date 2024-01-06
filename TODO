@@ -1,5 +1,6 @@
 * Move all the polling and setting into read_rig and write_rig
   - Call these periodically, if needed, but throttled best we can
+* Add a widget (scale/slider?) under the freq selector to allow chosing the step
 * Fix the bugs
 * Crap ton of code cleanup is needed...
 * PTT button & Light

@@ -1,5 +1,5 @@
 # Here we deal with our memory add/edit window
-package grigs_memory;
+package rustyrigs_memory;
 use strict;
 use warnings;
 use Carp;

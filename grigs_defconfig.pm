@@ -1,6 +1,6 @@
 # Default configuration is here.
 # These settings are loaded at startup. Eventually config file is loaded, parsed, and merged with this
-package grigs_defconfig;
+package rustyrigs_defconfig;
 
 # - Default configuration
 our $def_cfg = {
@@ -36,7 +36,7 @@ our $def_cfg = {
    poll_interval => 1000,		# every 1 sec
    poll_tray_every => 10,		# at 1/10th the rate of normal
    rig_volume => 0,
-   res_dir => "/usr/share/grigs/",
+   res_dir => "/usr/share/rustyrigs/",
    rigctl_addr => 'localhost:4532',
    rigctl_model => $Hamlib::RIG_MODEL_NETRIGCTL,
 #   shortcut_key => 'control-mask',	# ctrl

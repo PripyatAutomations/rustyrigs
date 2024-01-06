@@ -55,7 +55,7 @@ use Sys::Hostname;
 use Data::Dumper;
 use POSIX qw(strftime);
 use Time::HiRes qw(gettimeofday tv_interval usleep);
-my $app_name = 'grigs';
+my $app_name = 'rustyrigs';
 
 # Log levels for messages
 our %log_levels = (

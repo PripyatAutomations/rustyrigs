@@ -1,5 +1,5 @@
 # documentation
-package grigs_doc;
+package rustyrigs_doc;
 use Carp;
 use warnings;
 use strict;

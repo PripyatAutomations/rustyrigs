@@ -1,5 +1,5 @@
 # Here we handle the settings window
-package grigs_settings;
+package rustyrigs_settings;
 use Carp;
 use Data::Dumper;
 use strict;
@@ -19,38 +19,9 @@ my $cfg;
 my $settings_open = 0;
 my $w_settings;
 
-sub print_signal_info {
-   my ($widget, $signal_name) = @_;
-   $main::log->Log("ui", "debug", "Signal emitted by $widget: $signal_name");
-}
-
-sub apply_settings {
-   $cfg = $main::cfg;
-
-   if (defined $cfg) {
-      if ($cfg->{'always_on_top'}) {
-         main->w_main_ontop(1);
-      } else {
-         main->w_main_ontop(1);
-      }
-   }
-}
-
-sub save_settings {
-   if ($changes && defined $tmp_cfg) {
-      $main::log->Log("config", "info", "Merging settings into in-memory config");
-      my $tmp = {%$cfg, %$tmp_cfg};
-      $main::cfg = $cfg = $tmp;
-      $main::log->Log("ui", "core", "cfg: " . Dumper($main::cfg));
-   } else {
-      $main::log->Log("config", "info", "no changes to save");
-   }
-   apply_settings();
-   main::save_config();
-   $settings_open = 0;
-   $w_settings->destroy();
-}
-
+##############################
+# Internal use, not exported #
+##############################
 sub combobox_keys {
    my ($widget, $event) = @_;
    if ($event->keyval == 65289) {
@@ -63,8 +34,74 @@ sub combobox_keys {
    }
 }
 
-sub show_settings {
-   ( $cfg, my $mainwin, $w_main ) = @_;
+sub print_signal_info {
+   my ($widget, $signal_name) = @_;
+   $main::log->Log("ui", "debug", "Signal emitted by $widget: $signal_name");
+}
+
+######################
+# Exported Functions #
+######################
+sub apply {
+   ( my $class ) = @_;
+   if (defined $cfg) {
+      if ($cfg->{'always_on_top'}) {
+         main->w_main_ontop(1);
+      } else {
+         main->w_main_ontop(1);
+      }
+   }
+}
+
+sub save {
+   ( my $class ) = @_;
+   if ($changes && defined $tmp_cfg) {
+      $main::log->Log("config", "info", "Merging settings into in-memory config");
+      my $tmp = {%$cfg, %$tmp_cfg};
+      $main::cfg = $cfg = $tmp;
+      $main::log->Log("ui", "core", "cfg: " . Dumper($main::cfg));
+   } else {
+      $main::log->Log("config", "info", "no changes to save");
+   }
+   apply();
+   main::save_config();
+   $settings_open = 0;
+   $w_settings->destroy();
+}
+
+sub close {
+   ( my $class ) = @_;
+   my $dialog = Gtk3::MessageDialog->new(
+       $w_settings,
+       'destroy-with-parent',
+       'warning',
+       'yes_no',
+       "Close settings window? Unsaved changes may be lost."
+   );
+   $dialog->set_title('Confirm Close');
+   $dialog->set_default_response('no');
+   $dialog->set_transient_for($w_settings);
+   $dialog->set_modal(1);
+   $dialog->set_keep_above(1);
+   $dialog->present();
+   $dialog->grab_focus();
+
+   my $response = $dialog->run();
+   if ($response eq 'yes') {
+      $dialog->destroy();
+      $w_settings->destroy();
+      $settings_open = 0;
+   } else {
+      $dialog->destroy();
+      $w_settings->present();
+      $w_settings->grab_focus();
+   }
+}
+
+sub new {
+   ( my $class, my $cfg_ref, my $w_main_ref ) = @_;
+   $cfg = ${$cfg_ref};
+   $w_main = ${$w_main_ref};
 
    # if settings window is already open raise it instead
    if ($settings_open) {
@@ -88,7 +125,7 @@ sub show_settings {
    $w_settings->set_keep_above(1);
    $w_settings->set_modal(1);
    $w_settings->set_resizable(0);
-   main::set_settings_icon($w_settings);
+   rustyrigs_gtk_ui::set_settings_icon($w_settings);
 
    # Bind 'Escape' key press to close the settings window with confirmation
    # XXX: Figure out why fallthrough events do not work regardless of returning TRUE or FALSE :\
@@ -96,7 +133,7 @@ sub show_settings {
 #       my ($widget, $event) = @_;
 #
 #       if ($event->keyval == 65307) {  # ASCII value for 'Escape' key
-#           close_settings($w_settings);
+#           $class->close($w_settings);
 #           return TRUE; # Suppress further handling
 #       }
 #       return FALSE;
@@ -113,25 +150,26 @@ sub show_settings {
    $w_settings->move($cfg->{'win_settings_x'}, $cfg->{'win_settings_y'});
 
    $w_settings->signal_connect('configure-event' => sub {
-       my ($widget, $event) = @_;
+      my ($widget, $event) = @_;
        
-       # Retrieve the size and position information
-       my ($width, $height) = $widget->get_size();
-       my ($x, $y) = $widget->get_position();
+      # Retrieve the size and position information
+      my ($width, $height) = $widget->get_size();
+      my ($x, $y) = $widget->get_position();
 
-       # Save the data...
-       $cfg->{'win_settings_x'} = $x;
-       $cfg->{'win_settings_y'} = $y;
-       $cfg->{'win_settings_height'} = $height;
-       $cfg->{'win_settings_width'} = $width;
+      # Save the data...
+      $cfg->{'win_settings_x'} = $x;
+      $cfg->{'win_settings_y'} = $y;
+      $cfg->{'win_settings_height'} = $height;
+      $cfg->{'win_settings_width'} = $width;
 
-       # Return FALSE to allow the event to propagate
-       return FALSE;
+      # Return FALSE to allow the event to propagate
+      return FALSE;
    });
 
    $w_settings->signal_connect(delete_event => sub {
-       close_settings();
-       return TRUE;      # Suppress default window destruction
+      ( my $class ) = @_;
+      $class->close();
+      return TRUE;      # Suppress default window destruction
    });
 
    # Rigctl address
@@ -141,7 +179,7 @@ sub show_settings {
    $address_entry->set_tooltip_text("Address of rigctld server (default localhost:4532)");
    $address_entry->set_can_focus(1);
    $address_entry->signal_connect(changed => sub {
-       my $val = $address_entry->get_text();
+      my $val = $address_entry->get_text();
    });
 
    # poll interval: window visible
@@ -155,9 +193,9 @@ sub show_settings {
    $poll_interval_entry->set_tooltip_text("Hamlib polling interval when window is active (in millisconds)");
    $poll_interval_entry->set_can_focus(1);
    $poll_interval_entry->signal_connect(value_changed => sub {
-       my $val = $poll_interval_entry->get_value();
-       $tmp_cfg->{'poll_interval'} = $val;
-       $changes++;
+      my $val = $poll_interval_entry->get_value();
+      $tmp_cfg->{'poll_interval'} = $val;
+      $changes++;
    });
 
    # poll interval: in tray
@@ -171,9 +209,9 @@ sub show_settings {
    $poll_tray_entry->set_tooltip_text("When inactive (in the tray), we poll at 1/x the normal rate above");
    $poll_tray_entry->set_can_focus(1);
    $poll_tray_entry->signal_connect(value_changed => sub {
-       my $val = $poll_tray_entry->get_value();
-       $tmp_cfg->{'poll_tray_every'} = $val;
-       $changes++;
+      my $val = $poll_tray_entry->get_value();
+      $tmp_cfg->{'poll_tray_every'} = $val;
+      $changes++;
    });
 
    # system log level
@@ -205,7 +243,7 @@ sub show_settings {
    $hamlib_debug->set_tooltip_text("Select the logging level of hamlib");
    $i = 0;
    my $cur_hl_dbg = -1;
-   for our $hl_dbg_opt (keys %grigs_hamlib::hamlib_debug_levels) {
+   for our $hl_dbg_opt (keys %rustyrigs_hamlib::hamlib_debug_levels) {
       if ($hl_dbg_opt eq $cfg->{'hamlib_loglevel'}) {
          $cur_hl_dbg = $i;
       }
@@ -376,17 +414,17 @@ sub show_settings {
    my $save_button = Gtk3::Button->new('_Save');
    $save_button->set_tooltip_text("Save and apply changes");
    $save_button->set_can_focus(1);
-   $w_settings_accel->connect(ord('S'), $cfg->{'shortcut_key'}, 'visible', sub { save_settings($tmp_cfg); });
+   $w_settings_accel->connect(ord('S'), $cfg->{'shortcut_key'}, 'visible', sub { save($tmp_cfg); });
 
    # Create a Cancel button to discard changes
    my $cancel_button = Gtk3::Button->new('_Cancel');
    $cancel_button->set_tooltip_text("Discard changes");
-   $save_button->signal_connect('activate' => sub { save_settings($tmp_cfg); });
-   $save_button->signal_connect('clicked' => sub { save_settings($tmp_cfg); });
-   $cancel_button->signal_connect('activate' => \&close_settings); 
-   $cancel_button->signal_connect('clicked' => \&close_settings );
+   $save_button->signal_connect('activate' => sub { save($tmp_cfg); });
+   $save_button->signal_connect('clicked' => sub { save($tmp_cfg); });
+   $cancel_button->signal_connect('activate' => \&close); 
+   $cancel_button->signal_connect('clicked' => \&close );
    $cancel_button->set_can_focus(1);
-   $w_settings_accel->connect(ord('C'), 'mod1-mask', 'visible', \&close_settings);
+   $w_settings_accel->connect(ord('C'), 'mod1-mask', 'visible', \&close);
    $button_box->pack_start($save_button, TRUE, TRUE, 0);
    $button_box->pack_start($cancel_button, TRUE, TRUE, 0);
 
@@ -410,36 +448,13 @@ sub show_settings {
    $w_settings->add($config_box);
    $w_settings->show_all();
    $address_entry->grab_focus();
-}
 
-# Function to close the settings window
-sub close_settings {
-    my $dialog = Gtk3::MessageDialog->new(
-        $w_settings,
-        'destroy-with-parent',
-        'warning',
-	'yes_no',
-        "Close settings window? Unsaved changes may be lost."
-    );
-    $dialog->set_title('Confirm Close');
-    $dialog->set_default_response('no');
-    $dialog->set_transient_for($w_settings);
-    $dialog->set_modal(1);
-    $dialog->set_keep_above(1);
-    $dialog->present();
-    $dialog->grab_focus();
-
-    my $response = $dialog->run();
-
-    if ($response eq 'yes') {
-       $dialog->destroy();
-       $w_settings->destroy();
-       $settings_open = 0;
-    } else {
-       $dialog->destroy();
-       $w_settings->present();
-       $w_settings->grab_focus();
-    }
+   my $self = {
+      settings => \&settings,
+      close => \&close,
+      save => \&save,
+      w_settings => \$w_settings
+   };
 }
 
 1;

@@ -119,7 +119,7 @@ sub hamlib_debug_level {
 
 sub ptt_off {
    ( my $class, my $vfo ) = @_;
-   my $curr_vfo = $cfg->{active_vfo};
+   my $curr_vfo = $$cfg->{active_vfo};
 
    $main::log->Log("ptt", "info", "Clearing PTT...");
    $rig->set_ptt($vfo, $Hamlib::RIG_PTT_OFF);
@@ -127,7 +127,7 @@ sub ptt_off {
 
 sub ptt_on {
    ( my $class, my $vfo ) = @_;
-   my $curr_vfo = $cfg->{active_vfo};
+   my $curr_vfo = $$cfg->{active_vfo};
 
    $main::log->Log("ptt", "info", "Setting PTT...");
    $rig->set_ptt($vfo, $Hamlib::RIG_PTT_ON);
@@ -135,14 +135,14 @@ sub ptt_on {
 
 sub set_freq {
    ( my $class, my $freq ) = @_;
-   my $curr_vfo = $cfg->{'active_vfo'};
+   my $curr_vfo = $$cfg->{'active_vfo'};
    $vfos->{$curr_vfo}{'freq'} = $freq;
    $rig->set_freq($curr_vfo, $freq);
 }
 
 sub update_display {
    ( my $class ) = @_;
-   my $curr_vfo = $cfg->{'active_vfo'};
+   my $curr_vfo = $$cfg->{'active_vfo'};
 
    $main::vfo_freq_entry->set_value($vfos->{$curr_vfo}{'freq'});
 }
@@ -188,12 +188,12 @@ sub read_rig {
    ( my $class ) = @_;
 
    my $curr_hlvfo = $rig->get_vfo();
-   my $curr_vfo = $cfg->{active_vfo} = vfo_name($curr_hlvfo);
+   my $curr_vfo = $$cfg->{active_vfo} = vfo_name($curr_hlvfo);
 
    # XXX: Update the VFO select button if needed
    # Get the RX volume
-   $cfg->{'rx_volume'} = $rig->get_level($Hamlib::RIG_LEVEL_AF, $curr_hlvfo);
-#   $rig_vol_entry->set_value($cfg->{'rx_volume'});
+   $$cfg->{'rx_volume'} = $rig->get_level($Hamlib::RIG_LEVEL_AF, $curr_hlvfo);
+#   $rig_vol_entry->set_value($$cfg->{'rx_volume'});
 
    # Get the frequency for current VFO
    $vfos->{$curr_vfo}{'freq'} = $rig->get_freq($curr_hlvfo);
@@ -220,14 +220,14 @@ my $update_needed = 0;
 sub exec_read_rig {
    ( my $class ) = @_;
 
-   my $tray_every = $cfg->{'poll_tray_every'};
+   my $tray_every = $$cfg->{'poll_tray_every'};
 
    if (!$main::connected) {
       $main::log->Log("hamlib", "debug", "skipping rig read (not connected)");
    }
 
    # Slow down status updates when not actively displayed
-   if ($cfg->{'win_visible'}) {
+   if ($$cfg->{'win_visible'}) {
       $update_needed = 1;
    } else {
       $tray_iterations++;
@@ -250,11 +250,12 @@ sub exec_read_rig {
 }
 
 sub new {
-   ( my $class, $cfg ) = @_;
+   ( my $class, my $cfg_ref ) = @_;
+   $cfg = ${$cfg_ref};
 
-   Hamlib::rig_set_debug(hamlib_debug_level($cfg->{'hamlib_loglevel'}));
-   my $model = $cfg->{'rigctl_model'};
-   my $host = $cfg->{'rigctl_addr'};
+   Hamlib::rig_set_debug(hamlib_debug_level($$cfg->{'hamlib_loglevel'}));
+   my $model = $$cfg->{'rigctl_model'};
+   my $host = $$cfg->{'rigctl_addr'};
    if (!defined($model) || $model eq "") {
       $model = 'RIG_MODEL_RIGCTLD';
    }
@@ -286,7 +287,7 @@ sub new {
       $main::log->Log("hamlib", "info", "Connected Rig:\t$riginfo");
    }
 
-   my $poll_interval = $cfg->{'poll_interval'};
+   my $poll_interval = $$cfg->{'poll_interval'};
 
    # Start a timer for it
    my $rig_timer = Glib::Timeout->add_seconds($poll_interval, \&exec_read_rig);
