@@ -165,7 +165,7 @@ sub save_config {
 sub close_main_win {
    my ($widget, $event) = @_;
 
-   main::save_config();
+#   main::save_config();
    Gtk3->main_quit();
    return TRUE;
 }
