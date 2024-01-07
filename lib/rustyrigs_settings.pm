@@ -64,7 +64,7 @@ sub save {
    }
    apply();
    main::save_config();
-   $w_settings->destroy();
+   $w_settings->DESTROY();
 }
 
 sub DESTROY {
@@ -443,6 +443,8 @@ sub new {
       save => \&save,
       w_settings => \$w_settings
    };
+   bless $self, $class;
+   return $self;
 }
 
 1;
