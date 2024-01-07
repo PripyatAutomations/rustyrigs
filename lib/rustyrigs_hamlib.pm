@@ -7,9 +7,10 @@ use Carp;
 use Glib qw(TRUE FALSE);
 use strict;
 use warnings;
-
+use Data::Dumper;
 my $cfg;
 my $rig;
+my $gtk_ui;
 
 our @vfo_widths_fm  = ( 25000, 12500 );
 our @vfo_widths_am  = ( 6000,  5000, 3800, 3200, 3000, 2800 );
@@ -147,7 +148,8 @@ sub update_display {
     ( my $class ) = @_;
     my $curr_vfo = $$cfg->{'active_vfo'};
 
-    $main::gtk_ui->vfo_freq_entry->set_value( $vfos->{$curr_vfo}{'freq'} );
+    my $vfe = $$gtk_ui->{'vfo_freq_entry'};
+    $$vfe->set_value( $vfos->{$curr_vfo}{'freq'} );
 }
 
 sub vfo_name {
@@ -189,8 +191,7 @@ sub next_vfo {
        return;
     }
 
-    # XXX: fix this!
-#    $main::gtk_ui->switch_vfo($vfo);
+    $gtk_ui->switch_vfo($vfo);
     $main::log->Log( "ui", "debug", "val: $vfo, curr: " . $$cfg->{'active_vfo'} );
 
     # XXX: this only supports 2 vfo
@@ -208,7 +209,6 @@ sub next_vfo {
 sub read_rig {
     ( my $class ) = @_;
 
-    my $gtk_ui = $main::gtk_ui;
     my $curr_hlvfo = $rig->get_vfo();
     my $curr_vfo   = $$cfg->{active_vfo} = vfo_name($curr_hlvfo);
 
@@ -221,8 +221,9 @@ sub read_rig {
 
     # Get the frequency for current VFO
     $vfos->{$curr_vfo}{'freq'} = $rig->get_freq($curr_hlvfo);
-    $gtk_ui->vfo_freq_entry->set_value( $vfos->{$curr_vfo}{'freq'} );
-    $main::log->Log( "hamlib", "debug", "freq: " . $vfos->{$curr_vfo}{'freq'} );
+    my $vfe = $$gtk_ui->{'vfo_freq_entry'};
+    $$vfe->set_value( $vfos->{$curr_vfo}{'freq'} );
+#    $main::log->Log( "hamlib", "debug", "freq: " . $vfos->{$curr_vfo}{'freq'} );
 
     #   my $mode;
     #   $vfos->{$curr_vfo}{'mode'] = $mode;
@@ -244,7 +245,6 @@ my $update_needed   = 0;
 
 sub exec_read_rig {
     ( my $class ) = @_;
-    print ".\n";
 
     my $tray_every = $$cfg->{'poll_tray_every'};
 
@@ -279,6 +279,7 @@ sub exec_read_rig {
 sub new {
     ( my $class, my $cfg_ref ) = @_;
     $cfg = $cfg_ref;
+    $gtk_ui = \$main::gtk_ui;
 
     Hamlib::rig_set_debug( hamlib_debug_level( $$cfg->{'hamlib_loglevel'} ) );
     my $model = $$cfg->{'rigctl_model'};
@@ -324,15 +325,29 @@ sub new {
     our $rig_timer =
       Glib::Timeout->add( $poll_interval, \&exec_read_rig );
     my $self = {
-
         # variables
         rig           => $rig,
         timer         => $rig_timer,
         update_needed => \$update_needed,
+        vfos => \$vfos,
+        %hamlib_debug_levels => \%hamlib_debug_levels,
+        @pl_tones => \@pl_tones,
+        %vfo_mapping => \%vfo_mapping,
+        @vfo_widths_am => \@vfo_widths_am,
+        @vfo_widths_fm => \@vfo_widths_fm,
+        @vfo_widths_ssb => \@vfo_widths_ssb,
 
         # functions
         exec_read_rig => \&exec_read_rig,
-        set_freq      => \&set_freq,
+        hamlib_debug_level => \&hamlib_debug_level,
+        next_vfo => \&next_vfo,
+        ptt_off => \&ptt_off,
+        ptt_on => \&ptt_on,
+        read_rig => \&read_rig,
+        set_freq => \&set_freq,
+        update_display => \&update_display,
+        vfo_from_name => \&vfo_from_name,
+        vfo_name => \&vfo_name
     };
     bless $self, $class;
 

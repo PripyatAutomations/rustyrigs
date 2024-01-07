@@ -649,7 +649,7 @@ sub draw_main_win {
             my $freq = $vfo_freq_entry->get_text();
             $log->Log( "vfo", "debug",
                 "Changing freq on VFO $curr_vfo to $freq" );
-            rustyrigs_hamlib->rig_set_freq($freq);
+            rustyrigs_hamlib->set_freq($freq);
             return FALSE;
         }
     );
