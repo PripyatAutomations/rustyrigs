@@ -64,10 +64,10 @@ sub save {
    }
    apply();
    main::save_config();
-   $w_settings->DESTROY();
+   $w_settings->close();
 }
 
-sub DESTROY {
+sub close {
    ( my $self ) = @_;
    my $dialog = Gtk3::MessageDialog->new(
       $w_settings,
@@ -93,6 +93,10 @@ sub DESTROY {
       $w_settings->present();
       $w_settings->grab_focus();
    }
+}
+
+sub DESTROY {
+   ( my $self ) = @_;
 }
 
 sub new {
@@ -156,7 +160,7 @@ sub new {
 
    $w_settings->signal_connect(delete_event => sub {
       ( my $class ) = @_;
-      $class->DESTROY();
+      $class->close();
       return TRUE;      # Suppress default window destruction
    });
 
@@ -297,7 +301,7 @@ sub new {
    });
    $window_options_box->pack_start($meter_ontop_button, FALSE, FALSE, 0);
 
-###########
+   ###########
    my $meter_choices_box = Gtk3::Box->new('vertical', 5);
    my $meters_label = Gtk3::Label->new('Displayed Meters');
    # XXX: Make this 2 checkboxes per row: main dialog & meter popup
@@ -439,7 +443,7 @@ sub new {
 
    my $self = {
       settings => \&settings,
-      close => \&DESTROY,
+      close => \&close,
       save => \&save,
       w_settings => \$w_settings
    };
