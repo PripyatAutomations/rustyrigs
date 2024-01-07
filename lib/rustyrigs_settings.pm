@@ -23,6 +23,7 @@ my $w_settings;
 ##############################
 sub combobox_keys {
    my ($widget, $event) = @_;
+
    if ($event->keyval == 65289) {
       $main::log->Log("ui", "debug", "settings next!");
       $w_settings->child_focus('down');
@@ -43,6 +44,7 @@ sub print_signal_info {
 ######################
 sub apply {
    ( my $class ) = @_;
+
    if (defined $cfg) {
       if ($cfg->{'always_on_top'}) {
          $main::gtk_ui->w_main_ontop(1);
@@ -54,6 +56,7 @@ sub apply {
 
 sub save {
    ( my $class ) = @_;
+
    if ($changes && defined $tmp_cfg) {
       $main::log->Log("config", "info", "Merging settings into in-memory config");
       my $tmp = {%$cfg, %$tmp_cfg};
@@ -62,6 +65,7 @@ sub save {
    } else {
       $main::log->Log("config", "info", "no changes to save");
    }
+
    apply();
    main::save_config();
    $w_settings->close();
@@ -85,6 +89,7 @@ sub close {
    $dialog->grab_focus();
 
    my $response = $dialog->run();
+
    if ($response eq 'yes') {
       $dialog->destroy();
       bless $self, 'undef';
@@ -261,6 +266,7 @@ sub new {
    $autohide_toggle->set_active($cfg->{'stay_hidden'});
    $autohide_toggle->signal_connect('toggled' => sub {
       my $button = shift;
+
       if ($button->get_active()) {
          $tmp_cfg->{'stay_hidden'} = 1;
       } else {
@@ -276,6 +282,7 @@ sub new {
    $ontop_button->set_can_focus(1);
    $ontop_button->signal_connect('toggled' => sub {
       my $button = shift;
+
       if ($button->get_active()) {
          $tmp_cfg->{'always_on_top'} = 1;
       } else {
@@ -292,6 +299,7 @@ sub new {
    $meter_ontop_button->set_can_focus(1);
    $meter_ontop_button->signal_connect('toggled' => sub {
       my $button = shift;
+
       if ($button->get_active()) {
          $tmp_cfg->{'always_on_top_meters'} = 1;
       } else {
@@ -313,6 +321,7 @@ sub new {
    $alc_toggle->set_active($cfg->{'show_alc'});
    $alc_toggle->signal_connect('toggled' => sub {
       my $button = shift;
+
       if ($button->get_active()) {
          $tmp_cfg->{'show_alc'} = 1;
       } else {
@@ -328,6 +337,7 @@ sub new {
    $comp_toggle->set_active($cfg->{'show_comp'});
    $comp_toggle->signal_connect('toggled' => sub {
       my $button = shift;
+
       if ($button->get_active()) {
          $tmp_cfg->{'show_comp'} = 1;
       } else {
@@ -343,6 +353,7 @@ sub new {
    $pow_toggle->set_active($cfg->{'show_pow'});
    $pow_toggle->signal_connect('toggled' => sub {
       my $button = shift;
+
       if ($button->get_active()) {
          $tmp_cfg->{'show_pow'} = 1;
       } else {
@@ -358,6 +369,7 @@ sub new {
    $swr_toggle->set_active($cfg->{'show_swr'});
    $swr_toggle->signal_connect('toggled' => sub {
       my $button = shift;
+
       if ($button->get_active()) {
          $tmp_cfg->{'show_swr'} = 1;
       } else {
@@ -373,6 +385,7 @@ sub new {
    $temp_toggle->set_active($cfg->{'show_temp'});
    $temp_toggle->signal_connect('toggled' => sub {
       my $button = shift;
+
       if ($button->get_active()) {
          $tmp_cfg->{'show_temp'} = 1;
       } else {
@@ -388,6 +401,7 @@ sub new {
    $vdd_toggle->set_active($cfg->{'show_vdd'});
    $vdd_toggle->signal_connect('toggled' => sub {
       my $button = shift;
+
       if ($button->get_active()) {
          $tmp_cfg->{'show_vdd'} = 1;
       } else {
