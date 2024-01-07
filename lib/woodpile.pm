@@ -163,12 +163,12 @@ sub save {
    my ($self, $cfg_file) = @_;
 
    if (!$cfg_readonly) {
-      print "[core/debug] saving config to $$cfg_file\n";
+      print "[core/debug] saving config to $cfg_file\n";
       my $cfg_out_txt = YAML::XS::Dump($self->{cfg});
       if (!defined($cfg_out_txt)) {
          die "Exporting YAML configuration failed\n";
       }
-      open my $fh, '>', $$cfg_file or die "Can't open config file $cfg_file for writing: $! ";
+      open my $fh, '>', $cfg_file or die "Can't open config file $cfg_file for writing: $! ";
       print $fh $cfg_out_txt . "\n";
       close $fh;
    } else {

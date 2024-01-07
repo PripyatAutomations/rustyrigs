@@ -16,7 +16,6 @@ my $tmp_cfg;
 my $w_main;
 my $changes = 0;
 my $cfg;
-my $settings_open = 0;
 my $w_settings;
 
 ##############################
@@ -48,7 +47,7 @@ sub apply {
       if ($cfg->{'always_on_top'}) {
          $main::gtk_ui->w_main_ontop(1);
       } else {
-         $main::gtk_ui->w_main_ontop(1);
+         $main::gtk_ui->w_main_ontop(0);
       }
    }
 }
@@ -59,24 +58,23 @@ sub save {
       $main::log->Log("config", "info", "Merging settings into in-memory config");
       my $tmp = {%$cfg, %$tmp_cfg};
       $main::cfg = $cfg = $tmp;
-      $main::log->Log("ui", "core", "cfg: " . Dumper($main::cfg));
+#      $main::log->Log("ui", "core", "cfg: " . Dumper($main::cfg));
    } else {
       $main::log->Log("config", "info", "no changes to save");
    }
    apply();
    main::save_config();
-   $settings_open = 0;
    $w_settings->destroy();
 }
 
-sub close {
-   ( my $class ) = @_;
+sub DESTROY {
+   ( my $self ) = @_;
    my $dialog = Gtk3::MessageDialog->new(
-       $w_settings,
-       'destroy-with-parent',
-       'warning',
-       'yes_no',
-       "Close settings window? Unsaved changes may be lost."
+      $w_settings,
+      'destroy-with-parent',
+      'warning',
+      'yes_no',
+      "Close settings window? Unsaved changes may be lost."
    );
    $dialog->set_title('Confirm Close');
    $dialog->set_default_response('no');
@@ -89,8 +87,7 @@ sub close {
    my $response = $dialog->run();
    if ($response eq 'yes') {
       $dialog->destroy();
-      $w_settings->destroy();
-      $settings_open = 0;
+      bless $self, 'undef';
    } else {
       $dialog->destroy();
       $w_settings->present();
@@ -103,15 +100,6 @@ sub new {
    $cfg = $cfg_ref;
    $w_main = ${$w_main_ref};
 
-   # if settings window is already open raise it instead
-   if ($settings_open) {
-      $w_settings->present();
-      $w_settings->grab_focus();
-      return TRUE;
-   }
-
-   # Nope, we'll create the window...
-   $settings_open = 1;
    $w_settings = Gtk3::Window->new('toplevel',
       decorated => TRUE,
       destroy_with_parent => TRUE,
@@ -168,7 +156,7 @@ sub new {
 
    $w_settings->signal_connect(delete_event => sub {
       ( my $class ) = @_;
-      $class->close();
+      $class->DESTROY();
       return TRUE;      # Suppress default window destruction
    });
 
@@ -406,7 +394,7 @@ sub new {
    $vdd_toggle->set_can_focus(1);
    $meter_choices_box->pack_start($vdd_toggle, FALSE, FALSE, 0);
 
-###########
+   ###########
    # We want Save and Cancel next to each other, so use a box to wrap
    my $button_box = Gtk3::Box->new('horizontal', 5);
 
@@ -451,7 +439,7 @@ sub new {
 
    my $self = {
       settings => \&settings,
-      close => \&close,
+      close => \&DESTROY,
       save => \&save,
       w_settings => \$w_settings
    };

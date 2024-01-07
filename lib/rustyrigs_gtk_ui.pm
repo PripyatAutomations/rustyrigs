@@ -38,7 +38,6 @@ my $lock_item;
 
 # status flags
 my $main_menu_open = 0;
-my $settings_open = 0;
 
 # Function to resize window height based on visible boxes
 # Call this when widgets in a window are hidden or shown, to calculate needed dimensions
@@ -149,17 +148,6 @@ sub main_menu {
 
    # XXX: We need to add an event to destroy the menu if it loses focus
    $main_menu->signal_connect(window_state_event => \&main_menu_state);
-}
-
-sub save_config {
-   ( my $class ) = @_;
-
-   if (!$main::cfg_readonly && (!defined($cfg->{'readonly'}) || !$cfg->{'readonly'})) {
-      $log->Log("core", "info", "Saved configuration to " . $cfg_file);
-      $class->save($cfg_file);
-   } else {
-      $log->Log("core", "info", "Not saving configuration as it's read-only");
-   }
 }
 
 sub close_main_win {
@@ -830,9 +818,7 @@ sub draw_main_win {
    my $settings_button = Gtk3::Button->new_with_mnemonic('_Settings');
    $settings_button->signal_connect(clicked => sub { 
       if (!defined($settings)) {
-         $settings = rustyrigs_settings->new($cfg, \$w_main)
-      } else {
-         $settings->show();
+         $settings = rustyrigs_settings->new($cfg, \$w_main);
       }
    });
    $settings_button->set_tooltip_text("Settings editor");
@@ -958,7 +944,6 @@ sub new {
       icon_main_pix => \$icon_main_pix,
       icon_settings_pix => \$icon_settings_pix,
       icon_transmit_pix => \$icon_transmit_pix,
-      settings_open => \$settings_open,
       tray_icon => \$tray_icon,
       vfo_freq_entry => \$vfo_freq_entry,
       vfo_sel_button => \$vfo_sel_button,

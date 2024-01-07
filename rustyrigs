@@ -49,21 +49,21 @@ our $log = woodpile::Log->new($log_file, "debug");
 ##################
 # Run time state #
 ##################
-my $cfg_readonly = FALSE;
-my $connected = FALSE;
-my $locked = FALSE;
-my $vfos = $rustyrigs_hamlib::vfos;
-my $hamlib_riginfo;
-my $rig;
-my $channels;
-my $gtk_ui;
-my $rig_p;
+our $cfg_readonly = FALSE;
+our $connected = FALSE;
+our $locked = FALSE;
+our $vfos = $rustyrigs_hamlib::vfos;
+our $hamlib_riginfo;
+our $rig;
+our $channels;
+our $gtk_ui;
+our $rig_p;
 
 #####################################################
 # Set config to defconfig, until we load config...
-my $def_cfg = $rustyrigs_defconfig::def_cfg;
+our $def_cfg = $rustyrigs_defconfig::def_cfg;
 our $cfg = $def_cfg;
-my $cfg_p;
+our $cfg_p;
 
 # Set up logging...
 $log->Log("core", "info", $app_name . " is starting");
@@ -90,6 +90,10 @@ sub next_vfo {
     switch_vfo($nval);
     $log->Log("ui", "debug", "nval: $nval, curr: " . $cfg->{'active_vfo'});
     return FALSE;
+}
+
+sub save_config {
+   $cfg_p->save($cfg_file);
 }
 
 # Parse the command line
