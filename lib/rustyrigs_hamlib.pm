@@ -147,7 +147,7 @@ sub update_display {
     ( my $class ) = @_;
     my $curr_vfo = $$cfg->{'active_vfo'};
 
-    $main::vfo_freq_entry->set_value( $vfos->{$curr_vfo}{'freq'} );
+    $main::gtk_ui->vfo_freq_entry->set_value( $vfos->{$curr_vfo}{'freq'} );
 }
 
 sub vfo_name {
@@ -208,6 +208,7 @@ sub next_vfo {
 sub read_rig {
     ( my $class ) = @_;
 
+    my $gtk_ui = $main::gtk_ui;
     my $curr_hlvfo = $rig->get_vfo();
     my $curr_vfo   = $$cfg->{active_vfo} = vfo_name($curr_hlvfo);
 
@@ -220,7 +221,7 @@ sub read_rig {
 
     # Get the frequency for current VFO
     $vfos->{$curr_vfo}{'freq'} = $rig->get_freq($curr_hlvfo);
-    $main::vfo_freq_entry->set_value( $vfos->{$curr_vfo}{'freq'} );
+    $gtk_ui->vfo_freq_entry->set_value( $vfos->{$curr_vfo}{'freq'} );
     $main::log->Log( "hamlib", "debug", "freq: " . $vfos->{$curr_vfo}{'freq'} );
 
     #   my $mode;
@@ -243,6 +244,7 @@ my $update_needed   = 0;
 
 sub exec_read_rig {
     ( my $class ) = @_;
+    print ".\n";
 
     my $tray_every = $$cfg->{'poll_tray_every'};
 
@@ -271,7 +273,6 @@ sub exec_read_rig {
         $update_needed = 0;
     }
 
-    print ".\n";
     return TRUE;    # ensure we're called again
 }
 
@@ -320,8 +321,8 @@ sub new {
     my $poll_interval = $$cfg->{'poll_interval'};
 
     # Start a timer for it
-    my $rig_timer =
-      Glib::Timeout->add_seconds( $poll_interval, \&exec_read_rig );
+    our $rig_timer =
+      Glib::Timeout->add( $poll_interval, \&exec_read_rig );
     my $self = {
 
         # variables

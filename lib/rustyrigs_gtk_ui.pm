@@ -1116,7 +1116,6 @@ sub new {
     $vfos     = ${vfos_ref};
 
     my $self = {
-
         # Variables
         icon_error_pix    => \$icon_error_pix,
         icon_idle_pix     => \$icon_idle_pix,
