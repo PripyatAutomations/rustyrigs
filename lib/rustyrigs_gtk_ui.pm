@@ -177,7 +177,7 @@ sub w_main_state {
     if ( $event->new_window_state =~ m/\biconified\b/ ) {
 
         # Prevent the window from being iconified
-        $w_main->deiconify();
+        $widget->deiconify();
 
         # and minimize it to the system tray icon
         w_main_hide();
@@ -194,12 +194,14 @@ sub w_main_state {
 
     # the window shouldn't ever be maximized...
     if ( $event->new_window_state =~ m/\bmaximized\b/ ) {
-        $w_main->unmaximize();
+        $widget->unmaximize();
     }
 
     if ( defined( $event->new_window_state ) ) {
         $log->Log( "ui", "debug",
-                "window state event: "
+                "WSE: "
+              . $widget->get_title()
+              . " // "
               . $event->new_window_state
               . " (ontop: $on_top, focused: $focused)" );
     }
