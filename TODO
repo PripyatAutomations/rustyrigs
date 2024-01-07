@@ -1,15 +1,16 @@
 * Move all the polling and setting into read_rig and write_rig
   - Call these periodically, if needed, but throttled best we can
-* Add a widget (scale/slider?) under the freq selector to allow chosing the step
+* Add a widget (scale/slider?) under the freq selector to allow chosing the step size
 * Fix the bugs
 * Crap ton of code cleanup is needed...
 * PTT button & Light
-* Add some holdoff before actually sending commands to the rig
-* Replace freq entry with a normal text box, tune up/down buttons, and a step combo
-* When user starts typing in the frequency field, suspend actions on the field and allow typing normally
-* More keyboard controls! make it so you can type to search the boxes
-* Add speech for blind users
 * Finish GTK3 GUI
+* Add settings dialog for using color picker to set the various colors.
+* More keyboard controls! make it so you can type to search the boxes
+* When user starts typing in the frequency field, suspend actions on the field and allow typing normally
+* Replace freq entry with a normal text box, tune up/down buttons, and a step combo
+* Add some holdoff before actually sending commands to the rig
+* Add speech for blind users
 * Tune button (ON/OFF/AUTO)
 * Support for multiple VFOs is not yet usable
 * Combined meter view for RX/TX in one line

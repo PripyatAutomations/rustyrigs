@@ -1,5 +1,6 @@
 # Default configuration is here.
-# These settings are loaded at startup. Eventually config file is loaded, parsed, and merged with this
+# These settings are loaded at startup.
+# Eventually config file is loaded, parsed, and merged with this...
 package rustyrigs_defconfig;
 
 # - Default configuration

@@ -91,13 +91,6 @@ sub toggle_locked {
     $log->Log( "ui", "debug", "Toggling \$locked to $locked by $origin" );
 }
 
-sub next_vfo {
-    my $nval = rustyrigs_hamlib::next_vfo( $cfg->{'active_vfo'} );
-    switch_vfo($nval);
-    $log->Log( "ui", "debug", "nval: $nval, curr: " . $cfg->{'active_vfo'} );
-    return FALSE;
-}
-
 sub save_config {
     $cfg_p->save($cfg_file);
 }

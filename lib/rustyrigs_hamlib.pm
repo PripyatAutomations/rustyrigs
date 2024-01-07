@@ -179,7 +179,19 @@ sub vfo_from_name {
 }
 
 sub next_vfo {
-    my $vfo = shift;
+    my $vfo;
+    
+    if (!defined $vfo) {
+       $vfo = shift;
+    }
+    else {
+       print "not enough arguments to next_vfo\n";
+       return;
+    }
+
+    # XXX: fix this!
+#    $main::gtk_ui->switch_vfo($vfo);
+    $main::log->Log( "ui", "debug", "val: $vfo, curr: " . $$cfg->{'active_vfo'} );
 
     # XXX: this only supports 2 vfo
     if ( $vfo eq 'A' ) {

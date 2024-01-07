@@ -583,7 +583,7 @@ sub draw_main_win {
 
     $vfo_sel_button->signal_connect(
         clicked => sub {
-            next_vfo();
+            rustyrigs_hamlib::next_vfo();
         }
     );
     $vfo_sel_button->grab_focus();
