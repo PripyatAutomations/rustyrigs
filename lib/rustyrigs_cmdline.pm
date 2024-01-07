@@ -25,24 +25,22 @@ sub parse {
 
    # Parse command line options
    GetOptions(
-#      "a" => \$cl_ontop,		# -a for always on top
+      "a" => \$cl_ontop,		# -a for always on top
       "f=s" => \$cfg_file,	    	# -f to specify the config file
       "m=s" => \$mem_file,		# -m for memory file
       "r" => \$main::cfg_readonly, 	# -r for read-only config
       "h|help" => \$cl_show_help,     # -h or --help for help
-#      "x=i" => \$cl_x,		# X pos of main win
-#      "y=i" => \$cl_y,		# Y pos of main win
+      "x=i" => \$cl_x,		# X pos of main win
+      "y=i" => \$cl_y,		# Y pos of main win
    ) or die "Invalid options - see --help\n";
 
    $main::cfg_file = $cfg_file;
-   if (defined $mem_file) {
-      # use cmdline memory file
+   if (defined $mem_file) {      # use cmdline memory file
       $main::mem_file = $mem_file;
    } elsif (defined $main::cfg->{'mem_file'}) {
       # use file specified in config file
       $mem_file = $main::mem_file = $main::cfg->{'mem_file'};
-   } else {
-      # derive it from config file name
+   } else {		         # derive it from config file name
       $mem_file = $main::cfg_file;
       $mem_file =~ s/\.yaml$/.mem.yaml/;
    }

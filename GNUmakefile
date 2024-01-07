@@ -78,7 +78,7 @@ install-lib:
 	${SUDO} install -m 0644 ${LIBS} ${LIB_DIR}
 
 uninstall-lib:
-	${SUDO} ${RM} $(foreach x,${LIBS},${LIB_DIR}/${x})
+	${SUDO} ${RM} $(foreach x,$(notdir ${LIBS}),${LIB_DIR}/${x})
 
 ${RES_DIR}/%: res/%
 	@${SUDO} install -m 0644 $< $@

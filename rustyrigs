@@ -25,6 +25,7 @@ our $log_file = $ENV{"HOME"} . "/${app_name}.log";
 # override with local bits and pieces if in source directory...
 if (-f 'lib/rustyrigs_defconfig.pm') {
 #   use lib $FindBin::Bin . '/lib';
+   print "* It appears we're in our source directory, using local libraries in ./lib *\n";
    use lib "./lib";
 } else {
    use lib '/usr/lib/rustyrigs/';

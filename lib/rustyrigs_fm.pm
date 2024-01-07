@@ -1,18 +1,18 @@
 # Here we generate a box packed with the FM mode settings
 # which can be inserted/removed on the main window as needed
-
 package rustyrigs_fm;
 use strict;
 use warnings;
 use Carp;
 use Data::Dumper;
-#use Data::Structure::Util qw/unbless/;
 use Glib qw(TRUE FALSE);
+
 if (-f 'lib/rustyrigs_defconfig.pm') {
    use lib "./lib";
 } else {
    use lib '/usr/lib/rustyrigs/';
 }
+
 use woodpile;
 use rustyrigs_hamlib;
 
@@ -186,8 +186,10 @@ sub new {
    $fm_box->pack_start($tone_freq_tx_label, FALSE, FALSE, 0);
    $fm_box->pack_start($tone_freq_tx_entry, FALSE, FALSE, 0);
    my $self = {
-      box => $fm_box
+      box => $fm_box,
+      refresh_tone_freqs => \&refresh_tone_freqs
    };
+
    bless $self, $class;
    return $self;
 }

@@ -1,6 +1,5 @@
 # documentation
 package rustyrigs_doc;
-use Carp;
 use warnings;
 use strict;
 
@@ -15,10 +14,10 @@ sub show_help {
    print "\t\t--help\n";
    print "\t-r\t\t\tTreat the configuration file as read-only\n";
    print "\n";
-#   print "==== Window Placement ====\n";
-#   print "\t-a\t\t\tAlways on top\n";
-#   print "\t-x\t\t\tX position of main window\n";
-#   print "\t-y\t\t\tY position of main window\n";
+   print "==== Window Placement ====\n";
+   print "\t-a\t\t\tAlways on top\n";
+   print "\t-x\t\t\tX position of main window\n";
+   print "\t-y\t\t\tY position of main window\n";
    exit 0;
 }
 

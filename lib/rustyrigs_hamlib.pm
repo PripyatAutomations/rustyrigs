@@ -292,10 +292,13 @@ sub new {
    # Start a timer for it
    my $rig_timer = Glib::Timeout->add_seconds($poll_interval, \&exec_read_rig);
    my $self = {
+      # variables
       rig => $rig,
+      timer => $rig_timer,
+      update_needed => \$update_needed,
+      # functions
       exec_read_rig => \&exec_read_rig,
       set_freq => \&set_freq,
-      timer => $rig_timer
    };
    bless $self, $class;
 

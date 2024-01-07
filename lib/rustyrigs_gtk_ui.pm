@@ -163,7 +163,7 @@ sub save_config {
 }
 
 sub close_main_win {
-   my ($widget, $event) = @_;
+   my ( $widget, $event ) = @_;
 
 #   main::save_config();
    Gtk3->main_quit();
@@ -171,7 +171,7 @@ sub close_main_win {
 }
 
 sub w_main_state {
-   my ($widget, $event) = @_;
+   my ( $widget, $event ) = @_;
    my $on_top = 0;
    my $focused = 0;
 
@@ -183,9 +183,11 @@ sub w_main_state {
       w_main_hide();
       return TRUE;
    }
+
    if ($event->new_window_state =~ m/\babove\b/) {
       $on_top = 1;
    }
+
    if ($event->new_window_state =~ m/\bfocused\b/) {
       $focused = 1;
    }
@@ -194,6 +196,7 @@ sub w_main_state {
    if ($event->new_window_state =~ m/\bmaximized\b/) {
       $w_main->unmaximize();
    }
+
    if (defined($event->new_window_state)) {
       $log->Log("ui", "debug", "window state event: " . $event->new_window_state . " (ontop: $on_top, focused: $focused)");
    }
@@ -202,6 +205,7 @@ sub w_main_state {
 
 sub w_main_click {
     my ($widget, $event) = @_;
+
     # Right mouse click (display menu)
     if ($event->type eq 'button-press' && $event->button == 3) {
         main_menu($tray_icon, 3, $event->time);
@@ -452,7 +456,7 @@ sub draw_main_win {
    $box = Gtk3::Box->new('vertical', 5);
 
 
-   my $meter_box = rustyrigs_meter::render_meters($cfg, $vfos, $w_main);
+   my $meter_box = rustyrigs_meterbar::render_meterbars($cfg, $vfos, $w_main);
    $box->pack_start($meter_box, TRUE, TRUE, 0);
 
    #################
@@ -861,7 +865,7 @@ sub set_settings_icon {
 }
 
 sub get_state_icon {
-   my $state = shift;
+   ( my $state ) = @_;
 
    if ($state eq "idle") {
       return $icon_idle_pix;
@@ -873,7 +877,7 @@ sub get_state_icon {
 }
 
 sub set_tray_tooltip {
-   my $icon = shift;
+   ( my $icon ) = @_;
    my $tooltip_text = shift;
    $icon->set_tooltip_text($tooltip_text);
 }
@@ -881,7 +885,7 @@ sub set_tray_tooltip {
 # Set up the tray icon and set a label on it...
 #############
 sub set_tray_icon {
-   my $status = shift;
+   ( my $status ) = @_;
 
    my $connected_txt = '';
 
@@ -923,7 +927,7 @@ sub set_tray_icon {
 }
 
 sub set_icon {
-   my $state = shift;
+   ( my $class, my $state ) = @_;
    my $state_txt = "unknown";
 
    if ($state eq "idle") {
@@ -934,7 +938,6 @@ sub set_icon {
       $state_txt = "TRANSMIT -";
    }
    $w_main->set_title($main::app_name . ": $state_txt " . $cfg->{'rigctl_addr'});
-
    my $icon = get_state_icon($state);
    $w_main->set_icon($icon);
    set_tray_icon($state);
