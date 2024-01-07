@@ -24,7 +24,6 @@ my $icon_transmit_pix;
 # gui widgets
 my $tray_icon;    # systray icon
 my $w_main;       # main window
-my $w_settings;
 my $main_menu;
 my $mode_entry;
 my $rig_vol_entry;
@@ -35,6 +34,9 @@ my $box;
 my $fm_box;
 my $lock_button;
 my $lock_item;
+
+# objects
+my $settings;
 
 # status flags
 my $main_menu_open = 0;
@@ -52,8 +54,6 @@ sub autosize_height {
     $window->resize( $window->get_allocated_width(), $min_height );
 }
 
-my $settings;
-
 # main menu
 sub main_menu_item_clicked {
     my ( $item, $window, $menu ) = @_;
@@ -65,12 +65,7 @@ sub main_menu_item_clicked {
         close_main_win();
     }
     elsif ( $item->get_label() eq 'Settings' ) {
-        if ( !defined($settings) ) {
-            $settings = rustyrigs_settings->new( $cfg, \$w_main );
-        }
-        else {
-            $settings->show();
-        }
+        $settings = rustyrigs_settings->new( $cfg, \$w_main );
     }
 
     $main_menu_open = 0;
@@ -991,9 +986,7 @@ sub draw_main_win {
     my $settings_button = Gtk3::Button->new_with_mnemonic('_Settings');
     $settings_button->signal_connect(
         clicked => sub {
-            if ( !defined($settings) ) {
-                $settings = rustyrigs_settings->new( $cfg, \$w_main );
-            }
+            $settings = rustyrigs_settings->new( $cfg, \$w_main );
         }
     );
     $settings_button->set_tooltip_text("Settings editor");
@@ -1145,7 +1138,6 @@ sub new {
 
         # Windows
         w_main     => \$w_main,
-        w_settings => \$w_settings,
 
         # Functions
         autosize_height          => \&autosize_height,

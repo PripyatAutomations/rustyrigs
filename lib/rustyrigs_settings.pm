@@ -57,15 +57,13 @@ sub apply {
 }
 
 sub save {
-    ( my $class ) = @_;
+    ( my $self, my $tc ) = @_;
 
-    if ( $changes && defined $tmp_cfg ) {
+    if ( $changes && defined $tc ) {
         $main::log->Log( "config", "info",
             "Merging settings into in-memory config" );
-        my $tmp = { %$cfg, %$tmp_cfg };
+        my $tmp = { %$cfg, %$tc };
         $main::cfg = $cfg = $tmp;
-
-        #      $main::log->Log("ui", "core", "cfg: " . Dumper($main::cfg));
     }
     else {
         $main::log->Log( "config", "info", "no changes to save" );
@@ -74,6 +72,7 @@ sub save {
     apply();
     main::save_config();
     $w_settings->close();
+    $w_settings->destroy();
 }
 
 sub close {
@@ -93,6 +92,7 @@ sub close {
 
     if ( $response eq 'yes' ) {
         $dialog->destroy();
+        $w_settings->destroy();
         bless $self, 'undef';
     }
     else {
@@ -104,6 +104,7 @@ sub close {
 
 sub DESTROY {
     ( my $self ) = @_;
+    print "destroying settings obj\n";
 }
 
 sub new {
@@ -509,7 +510,6 @@ sub new {
     $address_entry->grab_focus();
 
     my $self = {
-        settings   => \&settings,
         close      => \&close,
         save       => \&save,
         w_settings => \$w_settings
