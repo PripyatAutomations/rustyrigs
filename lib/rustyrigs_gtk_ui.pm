@@ -701,14 +701,10 @@ sub draw_main_win {
     $mode_entry = Gtk3::ComboBoxText->new();
     $mode_entry->set_tooltip_text(
         "Modulation Mode. Some options my not be supported by your rig.");
-    $mode_entry->append_text('D-U');
-    $mode_entry->append_text('D-L');
-    $mode_entry->append_text('USB');
-    $mode_entry->append_text('LSB');
-    $mode_entry->append_text('FM');
-    $mode_entry->append_text('AM');
-    $mode_entry->append_text('C4FM');
-    $mode_entry->append_text('CW');
+    foreach my $mode (@rustyrigs_hamlib::hamlib_modes) {
+        $mode_entry->append_text($mode);
+    }
+    $mode_entry->set_active(0);
 
     # XXX: ACCEL-Replace these with a global function
     $w_main_accel->connect(
@@ -720,7 +716,7 @@ sub draw_main_win {
             $mode_entry->popup();
         }
     );
-    $mode_entry->set_active(0);
+#    $mode_entry->set_active(0);
 
     # Callback function to handle selection change
     $mode_entry->signal_connect(
@@ -729,11 +725,8 @@ sub draw_main_win {
             $log->Log( "ui", "debug", "Mode Selected: $selected_item" );
             my $curr_vfo = $cfg->{'active_vfo'};
             my $mode     = uc( $act_vfo->{'mode'} );
-            $act_vfo->{'mode'} = uc($selected_item);
-
-            # apply it
-            #      rustyrigs_hamlib::set_mode($curr_vfo, $mode);
-            # update the GUI
+            $vfos->{$curr_vfo}{'mode'} = uc($selected_item);
+#            rustyrigs_hamlib::set_mode($curr_vfo, $mode);
             w_main_fm_toggle();
             refresh_available_widths();
         }

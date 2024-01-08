@@ -1,7 +1,6 @@
 # Here we handle interaction with hamlib to talk to rigctld
 #
 # Try to stay frontend-agnostic here, if possible
-#
 package rustyrigs_hamlib;
 use Carp;
 use Glib qw(TRUE FALSE);
@@ -10,6 +9,8 @@ use warnings;
 use Data::Dumper;
 my $cfg;
 my $rig;
+
+# Someday we'll need to make use of if defined on this...
 my $gtk_ui;
 
 our @vfo_widths_fm  = ( 25000, 12500 );
@@ -32,6 +33,8 @@ our %hamlib_debug_levels = (
     'cache'   => $Hamlib::RIG_DEBUG_CACHE
 );
 
+our @hamlib_modes = ( 'D-U', 'D-L', 'USB', 'LSB', 'FM', 'AM', 'C4FM', 'CW' );
+
 our %vfo_mapping = (
     'A' => $Hamlib::RIG_VFO_A,
     'B' => $Hamlib::RIG_VFO_B,
@@ -41,7 +44,7 @@ our %vfo_mapping = (
 our $vfos = {
     'A' => {
         freq       => 14074000,
-        mode       => "D-U",
+        mode       => "LSB",
         power      => 40,
         width      => 3000,
         min_power  => 5,
@@ -65,7 +68,7 @@ our $vfos = {
     },
     'B' => {
         freq       => 7074000,
-        mode       => "D-U",
+        mode       => "LSB",
         power      => 40,
         width      => 3000,
         min_power  => 5,
@@ -102,7 +105,6 @@ my $pending_changes = {
     }
 };
 
-my $last_ptt_status;
 ########################################################################
 ########################################################################
 
@@ -145,13 +147,6 @@ sub set_freq {
 #    $rig->set_freq( $curr_vfo, $freq );
 }
 
-sub update_display {
-    ( my $class ) = @_;
-    my $curr_vfo = $$cfg->{'active_vfo'};
-
-    my $vfe = $$gtk_ui->{'vfo_freq_entry'};
-    $$vfe->set_value( $vfos->{$curr_vfo}{'freq'} );
-}
 
 sub vfo_name {
     my $vfo = shift;
@@ -207,6 +202,11 @@ sub next_vfo {
     }
 }
 
+# These let us only show messages when a state has changed, regardless
+# of how many times we poll the rig... Don't export these...
+my $last_ptt_status;
+my $last_mode;
+
 sub read_rig {
     ( my $class ) = @_;
 
@@ -236,8 +236,22 @@ sub read_rig {
     my $textmode = Hamlib::rig_strrmode($mode);
     $textmode =~ s/PKTUSB/D-U/g;
     $textmode =~ s/PKTLSB/D-L/g;
-#    print "Mode of VFO A: $mode ($textmode) at width $width\n";
-    $vfos->{$curr_vfo}{'mode'} = $mode;
+    if (!defined $last_mode || !($last_mode eq $textmode)) {
+       $main::log->Log("hamlib", "info", "Mode of VFO $curr_hlvfo: $mode ($textmode) at width $width");
+    }
+    $last_mode = $textmode;
+
+    my $vme = $$gtk_ui->{'mode_entry'};
+    my $active_index = 0;
+    for my $i (0 .. $#rustyrigs_hamlib::hamlib_modes) {
+        if ($rustyrigs_hamlib::hamlib_modes[$i] eq $textmode) {
+            $active_index = $i;
+            last;
+        }
+    }
+    $vfos->{$curr_vfo}{'mode'} = $textmode;
+    $$vme->set_active( $active_index );
+
     # XXX: Switch the mode input
 
 #    my $power = $rig->get_level($curr_hlvfo, 'POWER');
@@ -267,7 +281,7 @@ sub read_rig {
     $last_ptt_status = $ptt_status;
 }
 
-# state for our tray mode polling slowdown
+# state for our tray mode polling slowdown, not exported
 my $tray_iterations = 0;
 my $update_needed   = 0;
 
@@ -297,11 +311,14 @@ sub exec_read_rig {
     if ($update_needed) {
         $tray_iterations = 0;
         read_rig();
-        update_display();
         $update_needed = 0;
     }
 
     return TRUE;    # ensure we're called again
+}
+
+sub write_rig {
+    my ( $self ) = @_;
 }
 
 sub new {
@@ -374,9 +391,9 @@ sub new {
         ptt_on => \&ptt_on,
         read_rig => \&read_rig,
         set_freq => \&set_freq,
-        update_display => \&update_display,
         vfo_from_name => \&vfo_from_name,
-        vfo_name => \&vfo_name
+        vfo_name => \&vfo_name,
+        write_rig => \&write_rig
     };
     bless $self, $class;
 
