@@ -9,13 +9,11 @@ my $window;
 
 sub cancel {
    my ( $self ) = @_;
-   print "destroy\n";
    $window->destroy();
 }
 
 sub save {
    my ( $self ) = @_;
-   print "save\n";
    $window->destroy();
 }
 
