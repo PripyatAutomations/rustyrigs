@@ -1,4 +1,9 @@
 # Here we provide a window to display log messages
+# This needs some improvements --
+# * Fix autoscrolling bug
+# * Add save to file (is there a point? we have logfile already...)
+# * Add upload to termbin button
+
 package rustyrigs_logview;
 use Carp;
 use Data::Dumper;
@@ -17,7 +22,6 @@ my @log_buffer;
 sub write {
     ( my $self, my $message ) = @_;
     my $buffer = $text_view->get_buffer();
-#    die "tv: " . Dumper($self) . "\n";
     push @log_buffer, "$message";
 
     # Get rid of a line, if too long

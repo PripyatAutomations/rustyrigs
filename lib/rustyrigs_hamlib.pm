@@ -260,8 +260,16 @@ sub read_rig {
 
     # XXX: Figure out which width table applies and find the appropriate width index then select it...
 
-    # XXX: Power/signal readings
-#    my $power = $rig->get_level($curr_hlvfo, 'POWER');
+    # XXX: This needs to use MaxWatts instead of 100...
+    my ( $alc, $comp, $power, $sig, $swr, $temp, $vdd );
+#    $alc = $rig->get_level($Hamlib::RIG_LEVEL_ALC);
+#    $comp = $rig->get_level($Hamlib::RIG_LEVEL_COMP);
+    $power = int($rig->get_level_f($Hamlib::RIG_LEVEL_RFPOWER) * 100 + 0.5);
+    $sig = $rig->get_level_i($Hamlib::RIG_LEVEL_STRENGTH);
+    $swr = $rig->get_level_f($Hamlib::RIG_LEVEL_SWR);
+#    $temp = $rig->get_level($Hamlib::RIG_LEVEL_TEMP);
+#    $vdd = $rig->get_level($Hamlib::RIG_LEVEL_VDD);
+    print "power: $power sig: $sig swr: $swr\n";
 #    $vfos->{$curr_vfo}{'power'} = $power;
 #    my $stats = $vfos->{$curr_vfo}{'stats'};
 #    $stats->{'signal'} = $rig->get_level_i( $curr_hlvfo, $Hamlib::RIG_LEVEL_STRENGTH );
