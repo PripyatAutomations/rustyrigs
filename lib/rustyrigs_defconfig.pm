@@ -1,6 +1,8 @@
 # Default configuration is here.
 # These settings are loaded at startup.
-# Eventually config file is loaded, parsed, and merged with this...
+# Eventually config file is loaded, parsed, and merged with this.
+# Any values set in the configuration will override the defaults.
+# New settings will get combined
 package rustyrigs_defconfig;
 
 # - Default configuration
@@ -17,6 +19,8 @@ our $def_cfg = {
     hide_log_at_start => 0,	     # 1 will hide the logview by default
     icon_error       => "error.png",
     icon_idle        => "idle.png",
+    icon_logview     => "logview.png",
+    icon_meters      => "meters.png",
     icon_settings    => "settings.png",
     icon_transmit    => "transmit.png",
     key_chan         => 'C',                      # open channel dropbown
@@ -102,6 +106,7 @@ our $def_cfg = {
     win_visible         => 0,
     win_x               => 2252,
     win_y               => 49,
+    # center, mouse, center_always, center_on_parent, none (place at x,y below)
     win_logview_placement => 'none',
     win_logview_height  => 480,
     win_logview_width   => 1024,
@@ -111,7 +116,7 @@ our $def_cfg = {
     win_mem_edit_y      => 1,
     win_mem_edit_height => 278,
     win_mem_edit_width  => 479,
-    win_settings_placement => 'center_on_parent',	# center, mouse, center_always, center_on_parent, none (place at x,y below)
+    win_settings_placement => 'none',
     win_settings_x      => 183,
     win_settings_y      => 318,
     win_settings_height => 278,

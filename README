@@ -6,4 +6,11 @@ Install needed perl packages--
 
 sudo apt install -y libgtk3-perl libglib-perl libyaml-perl libhamlib-perl libdata-structure-util-perl
 
-This evolved in a kind of ugly direciton, but hopefully the code can get cleaned up a bit...
+---
+
+You'll probably want to quiet down the debug level in the settings.
+
+
+Things that are broken but should be fixed soon:
+	Various settings aren't saved/applied properly, I'm aware.
+	

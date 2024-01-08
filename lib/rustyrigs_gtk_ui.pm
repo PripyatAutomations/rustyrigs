@@ -17,7 +17,9 @@ our $cfg_file;
 # shared resources
 our $icon_error_pix;
 our $icon_idle_pix;
+our $icon_logview_pix;
 our $icon_main_pix;
+our $icon_meters_pix;
 our $icon_settings_pix;
 our $icon_transmit_pix;
 
@@ -279,6 +281,8 @@ sub load_icons {
     my $res           = $cfg->{'res_dir'};
     my $icon_error    = $res . "/" . $cfg->{'icon_error'};
     my $icon_idle     = $res . "/" . $cfg->{'icon_idle'};
+    my $icon_logview  = $res . "/" . $cfg->{'icon_logview'};
+    my $icon_meters   = $res . "/" . $cfg->{'icon_meters'};
     my $icon_settings = $res . "/" . $cfg->{'icon_settings'};
     my $icon_transmit = $res . "/" . $cfg->{'icon_transmit'};
 
@@ -288,6 +292,12 @@ sub load_icons {
     }
     if ( !defined($icon_idle_pix) ) {
         $icon_idle_pix = load_icon($icon_idle);
+    }
+    if ( !defined($icon_logview_pix) ) {
+        $icon_logview_pix = load_icon($icon_logview);
+    }
+    if ( !defined($icon_meters_pix) ) {
+        $icon_meters_pix = load_icon($icon_meters);
     }
     if ( !defined($icon_settings_pix) ) {
         $icon_settings_pix = load_icon($icon_settings);

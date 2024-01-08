@@ -64,14 +64,15 @@ my $app_name = 'rustyrigs';
 
 # Log levels for messages
 our %log_levels = (
-    'none'  => 0,
-    'fatal' => 1,
-    'bug'   => 2,
-    'audit' => 3,
-    'warn'  => 4,
-    'info'  => 5,
-    'debug' => 6,
-    'noise' => 7,
+    'none'  => 0,		# show no errors
+    'fatal' => 1,		# show only fatal errors
+    'bug'   => 2,		# show only bugs + fatal errors
+    'audit' => 3,		# show important events for auditing
+    'warn'  => 4,		# show warnings and more urgent only
+    'notice' => 5,		# show notices and more urgent only
+    'info'  => 6,		# show informational messages too
+    'noise' => 7,		# show even more noise
+    'debug' => 8,		# show debugging spew
 );
 
 sub Log {
@@ -99,12 +100,15 @@ sub Log {
        $buf .= " " . $a;
     }
     $buf .= "\n";
-    print { $self->{log_fh} } $buf;
-    print $buf;
+    # If we've established a log output handler, send it there
     if (defined $self->{'handler'}) {
        my $i = $self->{'handler'};
        $i->write($buf);
+    } else { # else, to the tty
+       print $buf;
     }
+    # send to the log file, always
+    print { $self->{log_fh} } $buf;
 }
 
 sub set_log_level {
@@ -114,6 +118,7 @@ sub set_log_level {
 sub add_handler {
    ( my $self, my $handler ) = @_;
 
+    $self->Log("core", "notice", "Switching logging to external handler, tty will go silent except runtime errors... Logfile is at " . $self->{'log_file'});
     $self->{'handler'} = $handler;
 }
 

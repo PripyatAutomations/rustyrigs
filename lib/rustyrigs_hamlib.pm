@@ -252,8 +252,9 @@ sub read_rig {
     $vfos->{$curr_vfo}{'mode'} = $textmode;
     $$vme->set_active( $active_index );
 
-    # XXX: Switch the mode input
+    # XXX: Figure out which width table applies and find the appropriate width index then select it...
 
+    # XXX: Power/signal readings
 #    my $power = $rig->get_level($curr_hlvfo, 'POWER');
 #    $vfos->{$curr_vfo}{'power'} = $power;
 #    my $stats = $vfos->{$curr_vfo}{'stats'};

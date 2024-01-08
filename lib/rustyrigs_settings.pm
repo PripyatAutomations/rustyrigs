@@ -516,8 +516,8 @@ sub new {
     my $colours_button = Gtk3::Button->new('Colo_urs');
     $colours_button->set_tooltip_text("Change GUI colours");
     $colours_button->set_can_focus(1);
-    $colours_button->signal_connect( 'activate' => sub { (my $self) = @_; $self->colour_dialog(); } );
-    $colours_button->signal_connect( 'clicked'  => sub { (my $self) = @_; $self->colour_dialog(); } );
+    $colours_button->signal_connect( 'activate' => sub { (my $self) = @_; $class->colour_dialog(); } );
+    $colours_button->signal_connect( 'clicked'  => sub { (my $self) = @_; $class->colour_dialog(); } );
     $w_settings_accel->connect(
         ord('U'),  $cfg->{'shortcut_key'},
         'visible', sub { $colours_button->grab_focus(); }

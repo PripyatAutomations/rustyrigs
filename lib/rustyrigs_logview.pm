@@ -60,8 +60,11 @@ sub window_state {
         return TRUE;
     }
 
-#    if ( $event->new_window_state =~ m/\bwithdrawn\b/ ) {
-#    }
+    # we need to unhide, as we don't have a way to recall the window yet...
+    # XXX: Add a button/menu toggle for this...
+    if ( $event->new_window_state =~ m/\bwithdrawn\b/ ) {
+       $widget->unhide();
+    }
 
     if ( $event->new_window_state =~ m/\babove\b/ ) {
         $on_top = 1;
@@ -72,17 +75,9 @@ sub window_state {
     }
 
     # the window shouldn't ever be maximized...
-    if ( $event->new_window_state =~ m/\bmaximized\b/ ) {
-        $widget->unmaximize();
-    }
-
-    if ( defined( $event->new_window_state ) ) {
-#        print "ui debug - WSE: "
-#              . $widget->get_title()
-#              . " // "
-#              . $event->new_window_state
-#              . " (ontop: $on_top, focused: $focused)\n";
-    }
+#    if ( $event->new_window_state =~ m/\bmaximized\b/ ) {
+#        $widget->unmaximize();
+#    }
     return FALSE;
 }
 
