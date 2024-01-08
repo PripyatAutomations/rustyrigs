@@ -45,6 +45,8 @@ sub print_signal_info {
 # Exported Functions #
 ######################
 sub colour_dialog() {
+   my ( $class ) = @_;
+   my $dialog = rustyrigs_set_colors->new(\$w_settings);
 }
 
 sub apply {
@@ -132,7 +134,7 @@ sub new {
     $w_settings->set_transient_for($w_main);
     $w_settings->set_title("Settings");
     $w_settings->set_border_width(5);
-    $w_settings->set_default_size( 300, 200 );
+#    $w_settings->set_default_size( 300, 200 );
     $w_settings->set_keep_above(1);
     $w_settings->set_modal(1);
     $w_settings->set_resizable(0);
