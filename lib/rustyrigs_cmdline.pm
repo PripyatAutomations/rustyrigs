@@ -16,7 +16,6 @@ my $cl_s_y;      # cmdline Y pos of settings win
 
 sub parse {
     ( my $cfg_ref, my $cfg_file_ref ) = @_;
-
     my $cfg      = ${$cfg_ref};
     my $cfg_file = ${$cfg_file_ref};
     my $mem_file;
@@ -39,7 +38,8 @@ sub parse {
     elsif ( defined $main::cfg->{'mem_file'} ) {
         $main::mem_file = $main::cfg->{'mem_file'};
     }
-    else {                                   # derive it from config file name
+    else {
+        # derive it from config file name
         my $mem_file = $main::cfg_file;
         $mem_file =~ s/\.yaml$/.mem.yaml/;
         $main::cfg->{'mem_file'} = $mem_file;

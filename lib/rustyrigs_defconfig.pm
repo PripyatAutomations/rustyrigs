@@ -11,9 +11,7 @@ our $def_cfg = {
     always_on_top        => 0,     # 1 will keep window always on top by default
     always_on_top_log    => 0,	   # 1 will keep log viewer window on top by default
     always_on_top_meters => 1,     # 1 will keep meters window on top by default
-    autoload_memories    =>
-      0,    # 1 will automatically load memory channels when selected in list
-    default_icon     => 'actions-gtk-save',
+    autoload_memories    => 0,     # 1 will avoid needing to click Load Chan button
     floating_meters  => 0,           # 1 will put the meters in their own window
     hamlib_loglevel  => "bug",       # bug err warn verbose trace cache
     hide_logview_at_start => 0,	     # 1 will hide the logview by default

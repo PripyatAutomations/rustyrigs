@@ -211,6 +211,7 @@ sub next_vfo {
 # of how many times we poll the rig... Don't export these...
 my $last_ptt_status;
 my $last_mode;
+my $last_freq;
 
 sub read_rig {
     ( my $class ) = @_;
@@ -230,13 +231,14 @@ sub read_rig {
     else {
        $volume = 0;
     }
-    my $rve = $$gtk_ui->{'rig_vol_entry'};
-    $$rve->set_value($volume);
 
     # Get the frequency for current VFO
-    $vfos->{$curr_vfo}{'freq'} = $rig->get_freq($curr_hlvfo);
-    my $vfe = $$gtk_ui->{'vfo_freq_entry'};
-    $$vfe->set_value( $vfos->{$curr_vfo}{'freq'} );
+    my $freq = $rig->get_freq($curr_hlvfo);
+    $vfos->{$curr_vfo}{'freq'} = $freq;
+    if (!defined $last_freq || !($last_freq == $freq)) {
+       $main::log->Log("hamlib", "info", "Freq change on VFO $curr_hlvfo to $freq");
+    }
+    $last_freq = $freq;
 
     my ($mode, $width) = $rig->get_mode();
     my $textmode = Hamlib::rig_strrmode($mode);
@@ -255,8 +257,6 @@ sub read_rig {
             last;
         }
     }
-    $vfos->{$curr_vfo}{'mode'} = $textmode;
-    $$vme->set_active( $active_index );
 
     # XXX: Figure out which width table applies and find the appropriate width index then select it...
 
@@ -279,6 +279,16 @@ sub read_rig {
     #    $stats->{'atten'} = $atten;
     #    $main::log->Log("hamlib", "debug", "Attenuators:\t\t@$atten");
     my $ptt_status = $rig->get_ptt($curr_hlvfo);
+
+    ####################
+    # Apply the values #
+    ####################
+    my $rve = $$gtk_ui->{'rig_vol_entry'};
+    $$rve->set_value($volume);
+    my $vfe = $$gtk_ui->{'vfo_freq_entry'};
+    $$vfe->set_value( $vfos->{$curr_vfo}{'freq'} );
+    $vfos->{$curr_vfo}{'mode'} = $textmode;
+    $$vme->set_active( $active_index );
 
     if (!$ptt_status) {
        if (!defined $last_ptt_status || $last_ptt_status != $ptt_status) {

@@ -33,19 +33,18 @@ else {
     use lib '/usr/lib/rustyrigs/';
 }
 
-use woodpile;
-use rustyrigs_defconfig;
-
-#use rustyrigs_ui;			# someday we'll have a cli interface here
-use rustyrigs_gtk_ui;
-use rustyrigs_cmdline;
-use rustyrigs_doc;
-use rustyrigs_hamlib;
-use rustyrigs_settings;
-use rustyrigs_fm;
-use rustyrigs_memory;
-use rustyrigs_meter;
-use rustyrigs_logview;
+use woodpile;			# misc. scraps we dug out of the woodpile
+use rustyrigs_defconfig;	# default configuration settings
+#use rustyrigs_ui;		# someday we'll have a cli interface here
+use rustyrigs_gtk_ui;		# GTK3 user interface
+use rustyrigs_cmdline;		# command line parsing
+use rustyrigs_doc;		# help messages
+use rustyrigs_hamlib;		# hamlib interface
+use rustyrigs_settings;		# settings editor window (includes color choser)
+use rustyrigs_fm;		# FM settings sub-box for main window
+use rustyrigs_memory;		# channel memory management
+use rustyrigs_meter;		# meter bars and window
+use rustyrigs_logview;		# log viewer window
 
 # Start logging in debug mode until config is loaded and we quiet down...
 our $log = woodpile::Log->new( $log_file, "debug" );
@@ -114,10 +113,11 @@ $gtk_ui = rustyrigs_gtk_ui->new( $cfg, $log, $vfos );
 # Open the log window
 $logview = rustyrigs_logview->new($cfg);
 $log->add_handler($logview);
+
+# Finish GUI setup
 $gtk_ui->load_icons();
-
-
 $gtk_ui->draw_main_win();
+# set status to Connecting...
 $gtk_ui->set_icon("connecting");
 
 # XXX: Sort this mess out soon
@@ -144,10 +144,11 @@ sub hamlib_init {
     $rig = $rig_p->{rig};
 
     if ( defined($rig) ) {
+        # change the status from Connecting to Idle.
         $gtk_ui->set_icon("idle");
     }
     else {
-        die "Wtf? setup_hamlib returned undefined\n";
+        die "setup_hamlib returned undefined?!\n";
     }
     $hamlib_initialized = 1;
 }

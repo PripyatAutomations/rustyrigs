@@ -1,0 +1,5 @@
+2024-01-08
+	* Implemented a lock around controls, to prevent write_rig() from being
+          called when read_rig() is applied. Should probably implement a similar
+          lock around write_rig() at a later time
+        * Started work on a color selection dialog
