@@ -64,6 +64,7 @@ our $channels;
 our $gtk_ui;
 our $rig_p;
 our $logview;
+our $mem_file;
 
 #####################################################
 # Set config to defconfig, until we load config...
@@ -116,10 +117,14 @@ $gtk_ui->load_icons();
 # Open the log window
 $logview = rustyrigs_logview->new($cfg);
 
-# load channel memory
-#$channels = rustyrigs_memory->new($cfg, $gtk_ui->w_main);
+$gtk_ui->draw_main_win();
+$gtk_ui->set_icon("connecting");
 
-#if (-f $cfg->{'mem_file'}) {
+# XXX: Sort this mess out soon
+#$channels = rustyrigs_memory->new($cfg, \$gtk_ui->w_main, $mem_file);
+#
+#if (defined $mem_file && -f $mem_file) {
+#   $mem_file = $cfg->{'mem_file'};
 #   $channels->load_from_yaml();
 #} else {
 #   # Load default memories
@@ -127,11 +132,8 @@ $logview = rustyrigs_logview->new($cfg);
 #
 #   # Save default memories to memory file
 #   # XXX: Save memories
-##   $channels->save($cfg->{'mem_file'});
+#   $channels->save($cfg->{'mem_file'});
 #}
-
-$gtk_ui->draw_main_win();
-$gtk_ui->set_icon("connecting");
 
 # Delay the hamlib init at least a second, for reliability
 my $hamlib_initialized = 0;
@@ -151,7 +153,7 @@ sub hamlib_init {
     $hamlib_initialized = 1;
 }
 Glib::Timeout->add( 1000, \&hamlib_init );
-
+$logview->write("Testicles 1 2 3");
 # Andd.... go!
 Gtk3->main();
 $log->Log( "core", "info", "$app_name is shutting down!" );

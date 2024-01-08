@@ -231,16 +231,14 @@ sub read_rig {
     my $vfe = $$gtk_ui->{'vfo_freq_entry'};
     $$vfe->set_value( $vfos->{$curr_vfo}{'freq'} );
 
-    my $mode_width = $rig->get_mode($curr_hlvfo);
-
-    # Split the returned value into mode and width
-    my ($mode, $width) = split /\s+/, $mode_width;
-
-    print "Mode of VFO A: $mode\n";
-    print "Width of VFO A: $width\n";
-
-    $vfos->{$curr_vfo}{'mode'} = $mode;
-    die "Mode: $mode\n";
+    my $mode;
+#    $mode_width = $rig->get_mode($curr_hlvfo);
+#    # Split the returned value into mode and width
+#    my ($mode, $width) = split /\s+/, $mode_width;
+#    print "Mode of VFO A: $mode\n";
+#    print "Width of VFO A: $width\n";
+#    $vfos->{$curr_vfo}{'mode'} = $mode;
+#    die "Mode: $mode\n";
     my $power = $rig->get_level($curr_hlvfo, 'POWER');
     $vfos->{$curr_vfo}{'power'} = $power;
     my $stats = $vfos->{$curr_vfo}{'stats'};

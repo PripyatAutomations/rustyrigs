@@ -7,54 +7,48 @@ use Data::Dumper;
 use Getopt::Long;
 
 # scratch space for cmdline arguments
-my $cfg_file;
-my $mem_file;
 my $cl_show_help = 0;
 my $cl_ontop;    # always on top?
 my $cl_x;        # cmdline X pos of main win
 my $cl_y;        # cmdline Y pos of main win
 my $cl_s_x;      # cmdline X pos of settings win
 my $cl_s_y;      # cmdline Y pos of settings win
-my $cfg;
 
 sub parse {
     ( my $cfg_ref, my $cfg_file_ref ) = @_;
 
-    $cfg      = ${$cfg_ref};
-    $cfg_file = ${$cfg_file_ref};
+    my $cfg      = ${$cfg_ref};
+    my $cfg_file = ${$cfg_file_ref};
+    my $mem_file;
 
     # Parse command line options
     GetOptions(
         "a"      => \$cl_ontop,              # -a for always on top
-        "f=s"    => \$cfg_file,              # -f to specify the config file
-        "m=s"    => \$mem_file,              # -m for memory file
+        "f=s"    => \$main::cfg_file,        # -f to specify the config file
+        "m=s"    => \$mem_file,        # -m for memory file
         "r"      => \$main::cfg_readonly,    # -r for read-only config
         "h|help" => \$cl_show_help,          # -h or --help for help
         "x=i"    => \$cl_x,                  # X pos of main win
         "y=i"    => \$cl_y,                  # Y pos of main win
     ) or die "Invalid options - see --help (or -h)\n";
 
-    $main::cfg_file = $cfg_file;
-    if ( defined $mem_file ) {               # use cmdline memory file
+    # use file specified in config file
+    if ( defined $mem_file) {
         $main::mem_file = $mem_file;
     }
     elsif ( defined $main::cfg->{'mem_file'} ) {
-
-        # use file specified in config file
-        $mem_file = $main::mem_file = $main::cfg->{'mem_file'};
+        $main::mem_file = $main::cfg->{'mem_file'};
     }
     else {                                   # derive it from config file name
-        $mem_file = $main::cfg_file;
+        my $mem_file = $main::cfg_file;
         $mem_file =~ s/\.yaml$/.mem.yaml/;
+        $main::cfg->{'mem_file'} = $mem_file;
     }
-    $cfg->{'mem_file'} = $mem_file;
 
     # Show help if requested
     if ($cl_show_help) {
         rustyrigs_doc::show_help( $main::app_name, $main::app_descr );
     }
-
-    # XXX: Make this work
 
     if ( defined($cl_ontop) ) {
         $main::log->Log( "ui", "info",

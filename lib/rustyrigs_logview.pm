@@ -8,15 +8,27 @@ use warnings;
 
 our $cfg;
 our $window;		# our viewer window
+our $box;
+our $hidden;		# is the window hidden?
+our $text_view;
+
+my @log_buffer;
 
 sub write {
-   my ($text_view, $message) = @_;
-   my $buffer = $text_view->get_buffer();
-   $buffer->insert_at_cursor("$message\n");
+    ( my $text_view_ref, my $message ) = @_;
+    print "xx: |" . Dumper($text_view) . "| |$message|\n";
+    my $buffer = $text_view->get_buffer();
+    push @log_buffer, "$message\n";  # Add the message to the log buffer
+    if (@log_buffer > 100) {
+        shift @log_buffer;  # Remove the oldest message if buffer exceeds 100 lines
+    }
+    
+    # Update the text area with the log buffer content
+    $buffer->set_text(join("", @log_buffer));
 }
 
-
-sub autosize_height {
+# This needs adapted to our use
+#sub autosize_height {
 #    my ($window) = @_;
 
 #    # Get preferred height for the current width
@@ -25,7 +37,7 @@ sub autosize_height {
 
     # Set window height based on the preferred height of visible boxes
 #    $window->resize( $window->get_allocated_width(), $min_height );
-}
+#}
 
 sub window_state {
     my ( $widget, $event ) = @_;
@@ -74,7 +86,6 @@ sub new {
    $cfg = ${$cfg_ref};
 
    my $lvp = $cfg->{'win_logview_placement'};
-   my $box;
 
    if (!defined $lvp) {
       $lvp = 'none';
@@ -163,7 +174,7 @@ sub new {
    $scrolled_window->set_policy('automatic', 'automatic');
    $box->add($scrolled_window);
 
-   my $text_view = Gtk3::TextView->new();
+   $text_view = Gtk3::TextView->new();
    $text_view->set_editable(0);
    $text_view->set_hexpand(1);
    $text_view->set_vexpand(1);
@@ -172,17 +183,22 @@ sub new {
    $window->add($box);
    $window->show_all();
 
+   if ($cfg->{'always_on_logview'}) {
+      $window->iconify();
+   }
+
    my $self = {
       # functions
       write => \&write,
       # variables
       accel => \$accel,
       box => \$box,
+      hidden => \$hidden,
       window => \$window
    };
    bless $self, $class;
 
-   $main::log->add_handler(\&write);
+   $main::log->add_handler($self);
    return $self;
 }
 1;

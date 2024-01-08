@@ -310,26 +310,26 @@ sub new {
         }
     );
     $autohide_toggle->set_can_focus(1);
+    $window_options_box->pack_start( $autohide_toggle, FALSE, FALSE, 0 );
 
-    my $ontop_button = Gtk3::CheckButton->new();
-    $ontop_button->set_label('Keep window above others?');
-    $ontop_button->set_active( $cfg->{'always_on_top'} );
-    $ontop_button->set_can_focus(1);
-    $ontop_button->signal_connect(
+    my $hide_logview_button = Gtk3::CheckButton->new();
+    $hide_logview_button->set_label('Hide log viewer by default?');
+    $hide_logview_button->set_active( $cfg->{'hide_log_at_start'} );
+    $hide_logview_button->set_can_focus(1);
+    $hide_logview_button->signal_connect(
         'toggled' => sub {
             my $button = shift;
 
             if ( $button->get_active() ) {
-                $tmp_cfg->{'always_on_top'} = 1;
+                $tmp_cfg->{'hide_log_at_start'} = 1;
             }
             else {
-                $tmp_cfg->{'always_on_top'} = 0;
+                $tmp_cfg->{'hide_log_at_start'} = 0;
             }
             $changes++;
         }
     );
-    $window_options_box->pack_start( $autohide_toggle, FALSE, FALSE, 0 );
-    $window_options_box->pack_start( $ontop_button,    FALSE, FALSE, 0 );
+    $window_options_box->pack_start( $hide_logview_button,    FALSE, FALSE, 0 );
 
     my $logview_ontop_button = Gtk3::CheckButton->new();
     $logview_ontop_button->set_label('Keep log window above others?');
@@ -349,6 +349,25 @@ sub new {
         }
     );
     $window_options_box->pack_start( $logview_ontop_button, FALSE, FALSE, 0 );
+
+    my $ontop_button = Gtk3::CheckButton->new();
+    $ontop_button->set_label('Keep window above others?');
+    $ontop_button->set_active( $cfg->{'always_on_top'} );
+    $ontop_button->set_can_focus(1);
+    $ontop_button->signal_connect(
+        'toggled' => sub {
+            my $button = shift;
+
+            if ( $button->get_active() ) {
+                $tmp_cfg->{'always_on_top'} = 1;
+            }
+            else {
+                $tmp_cfg->{'always_on_top'} = 0;
+            }
+            $changes++;
+        }
+    );
+    $window_options_box->pack_start( $ontop_button,    FALSE, FALSE, 0 );
 
     my $meter_ontop_button = Gtk3::CheckButton->new();
     $meter_ontop_button->set_label('Keep meters window above others?');
