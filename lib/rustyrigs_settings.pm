@@ -5,6 +5,7 @@ use Data::Dumper;
 use strict;
 use Glib qw(TRUE FALSE);
 use warnings;
+use rustyrigs_set_colors;
 
 my $config_box;
 my $address_entry;
@@ -316,17 +317,17 @@ sub new {
 
     my $hide_logview_button = Gtk3::CheckButton->new();
     $hide_logview_button->set_label('Hide log viewer by default?');
-    $hide_logview_button->set_active( $cfg->{'hide_log_at_start'} );
+    $hide_logview_button->set_active( $cfg->{'hide_logview_at_start'} );
     $hide_logview_button->set_can_focus(1);
     $hide_logview_button->signal_connect(
         'toggled' => sub {
             my $button = shift;
 
             if ( $button->get_active() ) {
-                $tmp_cfg->{'hide_log_at_start'} = 1;
+                $tmp_cfg->{'hide_logview_at_start'} = 1;
             }
             else {
-                $tmp_cfg->{'hide_log_at_start'} = 0;
+                $tmp_cfg->{'hide_logview_at_start'} = 0;
             }
             $changes++;
         }

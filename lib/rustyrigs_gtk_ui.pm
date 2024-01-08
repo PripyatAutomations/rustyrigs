@@ -433,10 +433,8 @@ sub draw_main_win {
         w_main_ontop(1);
     }
 
-    $w_main->set_default_size( $cfg->{'win_width'}, $cfg->{'win_height'} )
-      ;    # Replace $width and $height with desired values
-    $w_main->move( $cfg->{'win_x'}, $cfg->{'win_y'} )
-      ;    # Replace $x and $y with desired coordinates
+    $w_main->set_default_size( $cfg->{'win_width'}, $cfg->{'win_height'} );
+    $w_main->move( $cfg->{'win_x'}, $cfg->{'win_y'} );
 
     ##############################
     # Capture the window signals #
@@ -619,16 +617,14 @@ sub draw_main_win {
     # Active VFO settings
     my $vfo_freq_label =
       Gtk3::Label->new( 'Frequency (Hz) (' . $cfg->{'key_freq'} . ')' );
-    #   die "curr_vfo: $curr_vfo || vfos: " . Dumper($act_vfo) . "\n";
 
     $vfo_freq_entry = Gtk3::SpinButton->new_with_range(
         $act_vfo->{'min_freq'},
         $act_vfo->{'max_freq'},
         $act_vfo->{'vfo_step'}
     );
-    $vfo_freq_entry->set_numeric(TRUE);    # Display only numeric input
-    $vfo_freq_entry->set_wrap(FALSE)
-      ;    # Do not wrap around on reaching min/max values
+    $vfo_freq_entry->set_numeric(TRUE);
+    $vfo_freq_entry->set_wrap(FALSE);
     $vfo_freq_entry->set_value( $act_vfo->{'freq'} );
     $vfo_freq_entry->set_tooltip_text("VFO frequency input");
 
@@ -636,10 +632,12 @@ sub draw_main_win {
         changed => sub {
             my ( $widget, $event ) = @_;
 
-            my $freq = $vfo_freq_entry->get_text();
-            $log->Log( "vfo", "debug",
-                "Changing freq on VFO $curr_vfo to $freq" );
-            rustyrigs_hamlib->set_freq($freq);
+            if (!$main::rig_p->is_busy()) {
+               my $freq = $vfo_freq_entry->get_text();
+               $log->Log( "vfo", "debug",
+                   "Changing freq on VFO $curr_vfo to $freq" );
+               rustyrigs_hamlib->set_freq($freq);
+            }
             return FALSE;
         }
     );
@@ -731,12 +729,16 @@ sub draw_main_win {
     # Callback function to handle selection change
     $mode_entry->signal_connect(
         changed => sub {
-            my $selected_item = $mode_entry->get_active_text();
-            $log->Log( "ui", "debug", "Mode Selected: $selected_item" );
-            my $curr_vfo = $cfg->{'active_vfo'};
-            my $mode     = uc( $act_vfo->{'mode'} );
-            $vfos->{$curr_vfo}{'mode'} = uc($selected_item);
-#            rustyrigs_hamlib::set_mode($curr_vfo, $mode);
+            my ( $class ) = @_;
+
+            if (!$main::rig_p->is_busy()) {
+               my $selected_item = $mode_entry->get_active_text();
+               $log->Log( "ui", "debug", "Mode Selected: $selected_item" );
+               my $curr_vfo = $cfg->{'active_vfo'};
+               my $mode     = uc( $act_vfo->{'mode'} );
+               $vfos->{$curr_vfo}{'mode'} = uc($selected_item);
+   #            rustyrigs_hamlib::set_mode($curr_vfo, $mode);
+            }
             w_main_fm_toggle();
             refresh_available_widths();
         }
@@ -762,12 +764,15 @@ sub draw_main_win {
     # Callback function to handle selection change
     $width_entry->signal_connect(
         changed => sub {
-            my $selected_item = $width_entry->get_active_text();
-            if ( defined($selected_item) ) {
-                $log->Log( "ui", "debug", "Width Selected: $selected_item\n" )
-                  ;    # Print the selected item (for demonstration)
-                my $curr_vfo = $cfg->{'active_vfo'};
-                $act_vfo->{'width'} = $selected_item;
+            my ( $class ) = @_;
+            if (!$main::rig_p->is_busy()) {
+               my $selected_item = $width_entry->get_active_text();
+               if ( defined($selected_item) ) {
+                   $log->Log( "ui", "debug", "Width Selected: $selected_item\n" )
+                     ;    # Print the selected item (for demonstration)
+                   my $curr_vfo = $cfg->{'active_vfo'};
+                   $act_vfo->{'width'} = $selected_item;
+               }
             }
         }
     );
@@ -795,9 +800,12 @@ sub draw_main_win {
     );
     $rf_gain_entry->signal_connect(
         value_changed => sub {
-            my $curr_vfo = $cfg->{'active_vfo'};
-            my $value    = $rf_gain_entry->get_value();
-            $act_vfo->{'rf_gain'} = $value;
+            my ( $class ) = @_;
+            if (!$main::rig_p->is_busy()) {
+               my $curr_vfo = $cfg->{'active_vfo'};
+               my $value    = $rf_gain_entry->get_value();
+               $act_vfo->{'rf_gain'} = $value;
+            }
         }
     );
 
@@ -834,79 +842,94 @@ sub draw_main_win {
     # Connect a signal to track button press
     $vfo_power_entry->signal_connect(
         'button-press-event' => sub {
-            my ( $widget, $event ) = @_;
-            $dragging = 1;    # Set dragging flag when the slider is clicked
-
-            # reset the value to our stored state to discard this change
-            return FALSE;     # Prevent the default behavior
+            if (!$main::rig_p->is_busy()) {
+                my ( $widget, $event ) = @_;
+                if (!$main::rig_p->is_busy()) {
+                   $dragging = 1;    # Set dragging flag when the slider is clicked
+                }
+                # reset the value to our stored state to discard this change
+                return FALSE;     # Prevent the default behavior
+            } else {
+               return TRUE;
+            }
         }
     );
 
     # Connect a signal to track button release
     $vfo_power_entry->signal_connect(
         'button-release-event' => sub {
-            $dragging = 0;    # Reset dragging flag on button release
-            if ( !defined( $act_vfo->{'power'} ) || $act_vfo->{'power'} eq "" )
-            {
-                $act_vfo->{'power'} = $main::rig->get_vfo();
-            }
+            if (!$main::rig_p->is_busy()) {
+               $dragging = 0;    # Reset dragging flag on button release
+               if ( !defined( $act_vfo->{'power'} ) || $act_vfo->{'power'} eq "" )
+               {
+                   $act_vfo->{'power'} = $main::rig->get_vfo();
+               }
 
-            # reset it
-            $vfo_power_entry->set_value( $act_vfo->{'power'} );
+               # reset it
+               $vfo_power_entry->set_value( $act_vfo->{'power'} );
+            } else {
+               return TRUE;
+            }
             return FALSE;
         }
     );
 
     $vfo_power_entry->signal_connect(
         value_changed => sub {
-            my $value  = $vfo_power_entry->get_value();
-            my $oldval = $act_vfo->{'power'};
-            my $change = 0;
-            my $step   = $act_vfo->{'power_step'};
+            if (!$main::rig_p->is_busy()) {
+               my $value  = $vfo_power_entry->get_value();
+               my $oldval = $act_vfo->{'power'};
+               my $change = 0;
+               my $step   = $act_vfo->{'power_step'};
 
-            if ( !defined($oldval) || !defined($step) ) {
-                $oldval = 0;
-                $step   = 2;
+               if ( !defined($oldval) || !defined($step) ) {
+                   $oldval = 0;
+                   $step   = 2;
+               }
+
+               my $max_change = $step * 5;
+
+               # round it
+               $value = int( $value + 0.5 );
+
+               # calculate how much change occurred
+               if ( $value > $oldval ) {
+                   $change = $value - $oldval;
+               }
+               elsif ( $value < $oldval ) {
+                   $change = $oldval - $value;
+               }
+
+   #      $log->Log("ui", "debug", "change power: dragging: $dragging - change: $change. val $value oldval: $oldval");
+
+               if ( $dragging < 2 ) {
+                   return FALSE;
+               }
+
+               # Ensure no abrupt changes occurred
+               if ( $change <= $max_change ) {
+                   $act_vfo->{'power'} = $value;
+
+                   # XXX: Send hamlib command for power
+                   # rustyrigs_hamlib::set_power($curr_vfo);
+               }
+               else {    # reject change otherwise
+                   return FALSE;
+               }
+               return TRUE;
             }
-
-            my $max_change = $step * 5;
-
-            # round it
-            $value = int( $value + 0.5 );
-
-            # calculate how much change occurred
-            if ( $value > $oldval ) {
-                $change = $value - $oldval;
-            }
-            elsif ( $value < $oldval ) {
-                $change = $oldval - $value;
-            }
-
-#      $log->Log("ui", "debug", "change power: dragging: $dragging - change: $change. val $value oldval: $oldval");
-
-            if ( $dragging < 2 ) {
-                return FALSE;
-            }
-
-            # Ensure no abrupt changes occurred
-            if ( $change <= $max_change ) {
-                $act_vfo->{'power'} = $value;
-
-                # XXX: Send hamlib command for power
-                # rustyrigs_hamlib::set_power($curr_vfo);
-            }
-            else {    # reject change otherwise
-                return FALSE;
-            }
-            return TRUE;
         }
     );
 
     $vfo_power_entry->signal_connect(
         'motion-notify-event' => sub {
-            my ( $widget, $event ) = @_;
-            $dragging = 2;
-            return FALSE;    # Propagate the event further
+            if (!$main::rig_p->is_busy()) {
+               my ( $widget, $event ) = @_;
+               $dragging = 2;
+               return FALSE;    # Propagate the event further
+            } else {
+               return TRUE;
+            }
         }
     );
 
@@ -1027,7 +1050,7 @@ sub set_tray_icon {
     my ( $self, $status ) = @_;
     my $connected_txt = '';
 
-    if ( $status eq "idle" ) {
+    if ( $status eq "idle" || $status eq "transmit" ) {
         $connected_txt = "Connected";
     }
     else {

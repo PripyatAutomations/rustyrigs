@@ -110,6 +110,7 @@ sub new {
    $window->set_keep_above($keep_above);
    $window->set_modal(0);
    $window->set_resizable(1);
+   $window->set_icon($rustyrigs_gtk_ui::icon_logview_pix);
 
    # Set width/height of teh window
    $window->set_default_size( $cfg->{'win_logview_width'},
@@ -153,24 +154,6 @@ sub new {
    );
 
    $window->signal_connect( window_state_event   => \&window_state );
-   $window->signal_connect(
-       'configure-event' => sub {
-           my ( $widget, $event ) = @_;
-
-           # Retrieve the size and position information
-           my ( $width, $height ) = $widget->get_size();
-           my ( $x,     $y )      = $widget->get_position();
-
-           # Save the data...
-           $cfg->{'win_logview_x'}      = $x;
-           $cfg->{'win_logview_y'}      = $y;
-           $cfg->{'win_logview_height'} = $height;
-           $cfg->{'win_logview_width'}  = $width;
-
-           # Return FALSE to allow the event to propagate
-           return FALSE;
-       }
-   );
 
    $box = Gtk3::Box->new('vertical', 5);
  
@@ -188,7 +171,8 @@ sub new {
    $window->add($box);
    $window->show_all();
 
-   if ($cfg->{'always_on_logview'}) {
+   my $auto_hide = $cfg->{'hide_logview_at_start'};
+   if (defined $auto_hide && $auto_hide) {
       $window->iconify();
    }
 

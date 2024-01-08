@@ -13,6 +13,11 @@ my $rig;
 # Someday we'll need to make use of if defined on this...
 my $gtk_ui;
 
+# This will become TRUE if read_rig() is running
+# - Callbacks for UI widgets will be suppressed if this is TRUE
+# - Use is_busy() to check
+our $rigctld_applying_changes = FALSE;
+
 our @vfo_widths_fm  = ( 25000, 12500 );
 our @vfo_widths_am  = ( 6000,  5000, 3800, 3200, 3000, 2800 );
 our @vfo_widths_ssb = ( 3800,  3000, 3200, 2800, 2700, 2500 );
@@ -210,6 +215,7 @@ my $last_mode;
 sub read_rig {
     ( my $class ) = @_;
 
+    $rigctld_applying_changes = TRUE;
     my $curr_hlvfo = $rig->get_vfo();
     my $curr_vfo   = $$cfg->{active_vfo} = vfo_name($curr_hlvfo);
 
@@ -267,19 +273,18 @@ sub read_rig {
     my $ptt_status = $rig->get_ptt($curr_hlvfo);
 
     if (!$ptt_status) {
-       # XXX: Set icon to idle
        if (!defined $last_ptt_status || $last_ptt_status != $ptt_status) {
-          $main::log->Log("hamlib", "debug", "PTT off");
+          $main::log->Log("hamlib", "info", "PTT off");
           $main::gtk_ui->set_icon("idle");
        }
     } else {
-       # XXX: Set icon to TX
        if (!defined $last_ptt_status || $last_ptt_status != $ptt_status) {
-          $main::log->Log("hamlib", "debug", "PTT on");
+          $main::log->Log("hamlib", "info", "PTT on");
           $main::gtk_ui->set_icon("transmit");
        }
     }
     $last_ptt_status = $ptt_status;
+    $rigctld_applying_changes = FALSE;
 }
 
 # state for our tray mode polling slowdown, not exported
@@ -320,6 +325,11 @@ sub exec_read_rig {
 
 sub write_rig {
     my ( $self ) = @_;
+}
+
+sub is_busy {
+   my ( $self ) = @_;
+   return $rigctld_applying_changes;
 }
 
 sub new {
@@ -374,6 +384,7 @@ sub new {
     my $self = {
         # variables
         rig           => $rig,
+        rigctld_applying_changes => $rigctld_applying_changes,
         timer         => $rig_timer,
         update_needed => \$update_needed,
         vfos => \$vfos,
@@ -387,6 +398,7 @@ sub new {
         # functions
         exec_read_rig => \&exec_read_rig,
         hamlib_debug_level => \&hamlib_debug_level,
+        is_busy => \&is_busy,
         next_vfo => \&next_vfo,
         ptt_off => \&ptt_off,
         ptt_on => \&ptt_on,

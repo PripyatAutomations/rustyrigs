@@ -25,11 +25,11 @@ our $log_file         = $ENV{"HOME"} . "/${app_name}.log";
 # override with local bits and pieces if in source directory...
 if ( -f 'lib/rustyrigs_defconfig.pm' ) {
     #   use lib $FindBin::Bin . '/lib';
-    print
-"* It appears we're in our source directory, using local libraries in ./lib *\n";
+    print "* It appears we're in our source directory, using local libraries in ./lib\n";
     use lib "./lib";
 }
 else {
+    # XXX: Change this in the installer
     use lib '/usr/lib/rustyrigs/';
 }
 
@@ -140,7 +140,7 @@ my $hamlib_initialized = 0;
 sub hamlib_init {
     return if $hamlib_initialized;
 
-    my $rig_p = rustyrigs_hamlib->new($cfg);
+    $rig_p = rustyrigs_hamlib->new($cfg);
     $rig = $rig_p->{rig};
 
     if ( defined($rig) ) {
