@@ -40,7 +40,7 @@ our $def_cfg = {
     poll_interval    => 1000,                     # every 1 sec
     poll_tray_every  => 10,                       # at 1/10th the rate of normal
     rig_volume       => 0,
-    res_dir          => "/usr/share/rustyrigs",
+    res_dir          => "./res",
     rigctl_addr      => 'localhost:4532',
     rigctl_model     => $Hamlib::RIG_MODEL_NETRIGCTL,
 
