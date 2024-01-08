@@ -15,31 +15,31 @@ our $log;
 our $cfg_file;
 
 # shared resources
-my $icon_error_pix;
-my $icon_idle_pix;
-my $icon_main_pix;
-my $icon_settings_pix;
-my $icon_transmit_pix;
+our $icon_error_pix;
+our $icon_idle_pix;
+our $icon_main_pix;
+our $icon_settings_pix;
+our $icon_transmit_pix;
 
 # gui widgets
-my $tray_icon;    # systray icon
-my $w_main;       # main window
-my $main_menu;
-my $mode_entry;
-my $rig_vol_entry;
-my $vfo_freq_entry;
-my $vfo_sel_button;
-my $width_entry;
-my $box;
-my $fm_box;
-my $lock_button;
-my $lock_item;
+our $tray_icon;    # systray icon
+our $w_main;       # main window
+our $main_menu;
+our $mode_entry;
+our $rig_vol_entry;
+our $vfo_freq_entry;
+our $vfo_sel_button;
+our $width_entry;
+our $box;
+our $fm_box;
+our $lock_button;
+our $lock_item;
 
 # objects
-my $settings;
+our $settings;
 
 # status flags
-my $main_menu_open = 0;
+our $main_menu_open = 0;
 
 # Function to resize window height based on visible boxes
 # Call this when widgets in a window are hidden or shown, to calculate needed dimensions
@@ -605,7 +605,7 @@ sub draw_main_win {
     # rig volume
     my $rig_vol_label =
       Gtk3::Label->new( "Volume % (" . $cfg->{'key_volume'} . ")" );
-    my $rig_vol_entry = Gtk3::Scale->new_with_range( 'horizontal', 0, 100, 1 );
+    $rig_vol_entry = Gtk3::Scale->new_with_range( 'horizontal', 0, 100, 1 );
     $rig_vol_entry->set_digits(0);    # Disable decimal places
     $rig_vol_entry->set_draw_value(TRUE)
       ;                               # Display the current value on the slider
@@ -628,7 +628,6 @@ sub draw_main_win {
     # Active VFO settings
     my $vfo_freq_label =
       Gtk3::Label->new( 'Frequency (Hz) (' . $cfg->{'key_freq'} . ')' );
-
     #   die "curr_vfo: $curr_vfo || vfos: " . Dumper($act_vfo) . "\n";
 
     $vfo_freq_entry = Gtk3::SpinButton->new_with_range(

@@ -141,7 +141,7 @@ sub set_freq {
     ( my $class, my $freq ) = @_;
     my $curr_vfo = $$cfg->{'active_vfo'};
     $vfos->{$curr_vfo}{'freq'} = $freq;
-    $rig->set_freq( $curr_vfo, $freq );
+#    $rig->set_freq( $curr_vfo, $freq );
 }
 
 sub update_display {
@@ -213,26 +213,39 @@ sub read_rig {
     my $curr_vfo   = $$cfg->{active_vfo} = vfo_name($curr_hlvfo);
 
     # XXX: Update the VFO select button if needed
-    # Get the RX volume
-    $$cfg->{'rx_volume'} =
-      $rig->get_level( $Hamlib::RIG_LEVEL_AF, $curr_hlvfo );
 
-    #   $rig_vol_entry->set_value($$cfg->{'rx_volume'});
+    # Get the RX volume
+    my $volume = $rig->get_level( $Hamlib::RIG_LEVEL_AF, $curr_hlvfo );
+    if (defined $volume) {
+       die "volume: $volume\n";
+       $$cfg->{'rx_volume'} = $volume;
+    }
+    else {
+       $volume = 0;
+    }
+    my $rve = $$gtk_ui->{'rig_vol_entry'};
+    $$rve->set_value($volume);
 
     # Get the frequency for current VFO
     $vfos->{$curr_vfo}{'freq'} = $rig->get_freq($curr_hlvfo);
     my $vfe = $$gtk_ui->{'vfo_freq_entry'};
     $$vfe->set_value( $vfos->{$curr_vfo}{'freq'} );
-#    $main::log->Log( "hamlib", "debug", "freq: " . $vfos->{$curr_vfo}{'freq'} );
 
-    #   my $mode;
-    #   $vfos->{$curr_vfo}{'mode'] = $mode;
-    #   my $power;
-    #   $vfos->{$curr_vfo}{'power'} = $power;
+    my $mode_width = $rig->get_mode($curr_hlvfo);
+
+    # Split the returned value into mode and width
+    my ($mode, $width) = split /\s+/, $mode_width;
+
+    print "Mode of VFO A: $mode\n";
+    print "Width of VFO A: $width\n";
+
+    $vfos->{$curr_vfo}{'mode'} = $mode;
+    die "Mode: $mode\n";
+    my $power = $rig->get_level($curr_hlvfo, 'POWER');
+    $vfos->{$curr_vfo}{'power'} = $power;
     my $stats = $vfos->{$curr_vfo}{'stats'};
-    $stats->{'signal'} =
-      $rig->get_level_i( $curr_hlvfo, $Hamlib::RIG_LEVEL_STRENGTH );
-    $main::log->Log( "hamlib", "debug", "strength:\t\t" . $stats->{'signal'} );
+    $stats->{'signal'} = $rig->get_level_i( $curr_hlvfo, $Hamlib::RIG_LEVEL_STRENGTH );
+    $main::log->Log( "hamlib", "debug", "power:\t\t $power\n mode: \t\t$mode\nstrength:\t\t" . $stats->{'signal'} );
 
     #    my $atten = $rig->{caps}->{attenuator};
     #    $stats->{'atten'} = $atten;

@@ -46,6 +46,7 @@ use rustyrigs_settings;
 use rustyrigs_fm;
 use rustyrigs_memory;
 use rustyrigs_meter;
+use rustyrigs_logview;
 
 # Start logging in debug mode until config is loaded and we quiet down...
 our $log = woodpile::Log->new( $log_file, "debug" );
@@ -62,6 +63,7 @@ our $rig;
 our $channels;
 our $gtk_ui;
 our $rig_p;
+our $logview;
 
 #####################################################
 # Set config to defconfig, until we load config...
@@ -110,6 +112,9 @@ if ($cfg_readonly) {
 # Initialize the GTK GUI
 $gtk_ui = rustyrigs_gtk_ui->new( $cfg, $log, $vfos );
 $gtk_ui->load_icons();
+
+# Open the log window
+$logview = rustyrigs_logview->new($cfg);
 
 # load channel memory
 #$channels = rustyrigs_memory->new($cfg, $gtk_ui->w_main);

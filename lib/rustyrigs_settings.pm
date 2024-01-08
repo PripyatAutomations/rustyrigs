@@ -112,11 +112,17 @@ sub new {
     $cfg    = $cfg_ref;
     $w_main = ${$w_main_ref};
 
+    # window placement style
+    my $wsp = $cfg->{'win_settings_placement'};
+    if (!defined $wsp) {
+       $wsp = 'none';
+    }
+
     $w_settings = Gtk3::Window->new(
         'toplevel',
         decorated           => TRUE,
         destroy_with_parent => TRUE,
-        position            => 'center'
+        position            => $wsp
     );
 
     # this makes the stacking order reasonable
@@ -149,8 +155,11 @@ sub new {
     $w_settings->set_default_size( $cfg->{'win_settings_width'},
         $cfg->{'win_settings_height'} );
 
-    # Place the window
-    $w_settings->move( $cfg->{'win_settings_x'}, $cfg->{'win_settings_y'} );
+    # If placement type is none, we should manually place the window at x,y
+    if ($wsp =~ m/none/) {
+       # Place the window
+       $w_settings->move( $cfg->{'win_settings_x'}, $cfg->{'win_settings_y'} );
+    }
 
     $w_settings->signal_connect(
         'configure-event' => sub {
@@ -321,6 +330,25 @@ sub new {
     );
     $window_options_box->pack_start( $autohide_toggle, FALSE, FALSE, 0 );
     $window_options_box->pack_start( $ontop_button,    FALSE, FALSE, 0 );
+
+    my $logview_ontop_button = Gtk3::CheckButton->new();
+    $logview_ontop_button->set_label('Keep log window above others?');
+    $logview_ontop_button->set_active( $cfg->{'always_on_top_logview'} );
+    $logview_ontop_button->set_can_focus(1);
+    $logview_ontop_button->signal_connect(
+        'toggled' => sub {
+            my $button = shift;
+
+            if ( $button->get_active() ) {
+                $tmp_cfg->{'always_on_logview'} = 1;
+            }
+            else {
+                $tmp_cfg->{'always_on_logview'} = 0;
+            }
+            $changes++;
+        }
+    );
+    $window_options_box->pack_start( $logview_ontop_button, FALSE, FALSE, 0 );
 
     my $meter_ontop_button = Gtk3::CheckButton->new();
     $meter_ontop_button->set_label('Keep meters window above others?');

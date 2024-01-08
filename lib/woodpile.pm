@@ -77,6 +77,7 @@ our %log_levels = (
 sub Log {
     my ( $self, $log_type, $log_level ) = @_;
     my $filter_level = $self->{log_level};
+    my $buf;
 
     if ( $log_levels{$filter_level} < $log_levels{$log_level} ) {
         return 0;
@@ -88,23 +89,37 @@ sub Log {
         $lvl = "UNKNOWN";
     }
     ####
-    print { $self->{log_fh} } $datestamp . " [$log_type/$lvl]";
-    print $datestamp . " [$log_type/$log_level]";
+    $buf = $datestamp . "[$log_type/$log_level]";
+#    print { $self->{log_fh} } $datestamp . " [$log_type/$lvl]";
+#    print $datestamp . " [$log_type/$log_level]";
 
     # skip first 3 arguments
     shift;
     shift;
     shift;
     foreach my $a (@_) {
-        print { $self->{log_fh} } " " . $a;
-        print " " . $a;
+#        print { $self->{log_fh} } " " . $a;
+#        print " " . $a;
+       $buf .= " " . $a;
     }
-    print { $self->{log_fh} } "\n";
-    print "\n";
+#    print { $self->{log_fh} } "\n";
+#    print "\n";
+    $buf .= "\n";
+    print { $self->{log_fh} } $buf;
+    print $buf;
+    if (defined $self->{'handler'}) {
+       $self->{'handler'}->write($buf);
+    }
 }
 
 sub set_log_level {
     my ( $class, $log_level );
+}
+
+sub add_handler {
+   ( my $self, my $handler ) = @_;
+
+    $self->handler = $handler;
 }
 
 sub new {
@@ -113,6 +128,7 @@ sub new {
     open my $log_fh, '>>', $log_file or die "Unable to open $log_file: $!\n";
 
     my $self = {
+        add_handler => \&add_handler,
         log_file  => $log_file,
         log_level => $log_level,
         log_fh    => $log_fh
@@ -190,11 +206,11 @@ sub save {
     }
 }
 
+
 sub new {
     my ( $class, $log, $cfg_file, $def_cfg ) = @_;
 
     my $self = {
-
         # Functions we export
         load => \&load,
         save => \&save,
