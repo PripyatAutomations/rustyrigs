@@ -108,7 +108,8 @@ sub Log {
     print { $self->{log_fh} } $buf;
     print $buf;
     if (defined $self->{'handler'}) {
-       $self->{'handler'}->write($buf);
+       my $i = $self->{'handler'};
+#       $i->write($buf);
     }
 }
 
@@ -119,7 +120,7 @@ sub set_log_level {
 sub add_handler {
    ( my $self, my $handler ) = @_;
 
-    $self->handler = $handler;
+    $self->{'handler'} = $handler;
 }
 
 sub new {

@@ -165,6 +165,8 @@ sub new {
 
    my $text_view = Gtk3::TextView->new();
    $text_view->set_editable(0);
+   $text_view->set_hexpand(1);
+   $text_view->set_vexpand(1);
    $scrolled_window->add($text_view);
  
    $window->add($box);
@@ -179,6 +181,8 @@ sub new {
       window => \$window
    };
    bless $self, $class;
+
+   $main::log->add_handler(\&write);
    return $self;
 }
 1;
