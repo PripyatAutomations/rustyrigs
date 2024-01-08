@@ -9,10 +9,14 @@ my $window;
 
 sub cancel {
    my ( $self ) = @_;
+   print "destroy\n";
+   $window->destroy();
 }
 
 sub save {
    my ( $self ) = @_;
+   print "save\n";
+   $window->destroy();
 }
 
 sub DESTROY {
@@ -57,13 +61,15 @@ sub new {
    my $save_button = Gtk3::Button->new("_Save");
    $save_button->set_tooltip_text("Save settings");
    $save_button->set_can_focus(1);
-   $accel->connect(ord('S'), $$cfg->{'shortcut_key'}, 'visible', sub { my ( $self ) = @_; $self->save(); });
+   $save_button->signal_connect( 'clicked'  => sub { (my $self) = @_; save($self); } );
+   $accel->connect(ord('S'), $$cfg->{'shortcut_key'}, 'visible', sub { my ( $self ) = @_; save($self); });
    $button_box->pack_start($save_button, TRUE, TRUE, 0);
 
    my $cancel_button = Gtk3::Button->new("_Cancel");
    $cancel_button->set_tooltip_text("Cancel");
    $cancel_button->set_can_focus(1);
-   $accel->connect(ord('C'), $$cfg->{'shortcut_key'}, 'visible', sub { my ( $self ) = @_; $self->cancel(); });
+   $cancel_button->signal_connect( 'clicked'  => sub { (my $self) = @_; cancel($self); } );
+   $accel->connect(ord('C'), $$cfg->{'shortcut_key'}, 'visible', sub { my ( $self ) = @_; cancel($self); });
    $button_box->pack_start($cancel_button, TRUE, TRUE, 0);
    $box->pack_end($button_box, FALSE, FALSE, 0);
 

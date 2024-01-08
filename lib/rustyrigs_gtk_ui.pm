@@ -923,7 +923,8 @@ sub draw_main_win {
 
     $vfo_power_entry->signal_connect(
         'motion-notify-event' => sub {
-            if (!$main::rig_p->is_busy()) {
+            my $rig_p = $main::rig_p;
+            if (defined $rig_p && !$rig_p->is_busy()) {
                my ( $widget, $event ) = @_;
                $dragging = 2;
                return FALSE;    # Propagate the event further
