@@ -15,8 +15,9 @@ our $text_view;
 my @log_buffer;
 
 sub write {
-    ( my $text_view_ref, my $message ) = @_;
+    ( my $self, my $message ) = @_;
     my $buffer = $text_view->get_buffer();
+#    die "tv: " . Dumper($self) . "\n";
     push @log_buffer, "$message";
 
     # Get rid of a line, if too long
@@ -26,6 +27,11 @@ sub write {
     
     # Update the text area with the log buffer content
     $buffer->set_text(join("", @log_buffer));
+    
+    # Scroll the TextView to the bottom after updating the content
+    my $end_iter = $buffer->get_end_iter();
+    my $mark = $buffer->create_mark("end_mark", $end_iter, FALSE);
+    $text_view->scroll_mark_onscreen($mark);
 }
 
 # This needs adapted to our use
@@ -68,11 +74,11 @@ sub window_state {
     }
 
     if ( defined( $event->new_window_state ) ) {
-        print "ui debug - WSE: "
-              . $widget->get_title()
-              . " // "
-              . $event->new_window_state
-              . " (ontop: $on_top, focused: $focused)\n";
+#        print "ui debug - WSE: "
+#              . $widget->get_title()
+#              . " // "
+#              . $event->new_window_state
+#              . " (ontop: $on_top, focused: $focused)\n";
     }
     return FALSE;
 }
@@ -195,6 +201,7 @@ sub new {
       accel => \$accel,
       box => \$box,
       hidden => \$hidden,
+      text_view => \$text_view,
       window => \$window
    };
    bless $self, $class;

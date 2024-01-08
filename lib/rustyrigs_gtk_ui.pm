@@ -198,12 +198,12 @@ sub w_main_state {
     }
 
     if ( defined( $event->new_window_state ) ) {
-        $log->Log( "ui", "debug",
-                "WSE: "
-              . $widget->get_title()
-              . " // "
-              . $event->new_window_state
-              . " (ontop: $on_top, focused: $focused)" );
+#        $log->Log( "ui", "debug",
+#                "WSE: "
+#              . $widget->get_title()
+#              . " // "
+#              . $event->new_window_state
+#              . " (ontop: $on_top, focused: $focused)" );
     }
     return FALSE;
 }
