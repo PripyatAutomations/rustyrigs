@@ -217,7 +217,16 @@ sub render_meterbars {
         $cfg->{'thresh_vdd_max'} );
     $meter_box->pack_start( $stat_vdd->{'grid'}, TRUE, TRUE, 0 );
 
-    return $meter_box;
+    my $self = {
+        box => $meter_box,
+        alc => \$stat_alc,
+        comp => \$stat_comp,
+        pow => \$stat_pow,
+        swr => \$stat_swr,
+        temp => \$stat_temp,
+        vdd => \$stat_vdd,        
+    };        
+    return $self;
 }
 
 1;

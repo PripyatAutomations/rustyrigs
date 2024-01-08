@@ -470,8 +470,8 @@ sub draw_main_win {
     $w_main->add_accel_group($w_main_accel);
     $box = Gtk3::Box->new( 'vertical', 5 );
 
-    my $meter_box =
-      rustyrigs_meterbar::render_meterbars( $cfg, $vfos, $w_main );
+    my $meters = rustyrigs_meterbar::render_meterbars( $cfg, $vfos, $w_main );
+    my $meter_box = $meters->{'box'};
     $box->pack_start( $meter_box, TRUE, TRUE, 0 );
 
     #################
