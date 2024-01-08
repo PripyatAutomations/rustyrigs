@@ -17,3 +17,4 @@
   - Toggle on click with full view
 * Implement ncurses or similar TUI
 * Better icons
+* Distance calculator & gridsquare/lat lon utilities window

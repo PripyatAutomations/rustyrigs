@@ -38,24 +38,6 @@ our %vfo_mapping = (
     'C' => $Hamlib::RIG_VFO_C
 );
 
-our %mode_mapping = (
-     RIG_MODE_AM => 'AM',
-     RIG_MODE_CW => 'CW',
-     RIG_MODE_LSB => 'LSB',
-     RIG_MODE_USB => 'USB',
-     RIG_MODE_RTTY => 'RTTY',
-     RIG_MODE_FM => 'FM',
-     RIG_MODE_WFM => 'WFM',
-     RIG_MODE_CWR => 'CWR',
-     RIG_MODE_PKTLSB => 'D-L',
-     RIG_MODE_PKTUSB => 'D-U',
-     RIG_MODE_PKTFM => 'D-FM',
-     RIG_MODE_P25 => 'P25',
-     RIG_MODE_DSTAR => 'DSTAR',
-     RIG_MODE_C4FM => 'C4FM',
-     RIG_MODE_IQ => 'IQ'
-);
-    
 our $vfos = {
     'A' => {
         freq       => 14074000,
@@ -120,26 +102,11 @@ my $pending_changes = {
     }
 };
 
+my $last_ptt_status;
 ########################################################################
 ########################################################################
 
 sub hamlib_debug_level {
-    ( my $class ) = @_;
-    my $new_lvl = $_[0];
-
-    if ( exists $hamlib_debug_levels{$new_lvl} ) {
-        my $val = $hamlib_debug_levels{$new_lvl};
-        return $val;
-    }
-    else {
-        $main::log->Log( "hamlib", "warn",
-"hamlib_debug_level: returning default Warnings: $new_lvl unrecognized!"
-        );
-        return $Hamlib::RIG_DEBUG_WARN;
-    }
-}
-
-sub mode_to_str {
     ( my $class ) = @_;
     my $new_lvl = $_[0];
 
@@ -266,19 +233,38 @@ sub read_rig {
     $$vfe->set_value( $vfos->{$curr_vfo}{'freq'} );
 
     my ($mode, $width) = $rig->get_mode();
-    print "Mode of VFO A: $mode\n";
-    print "Width of VFO A: $width\n";
+    my $textmode = Hamlib::rig_strrmode($mode);
+    $textmode =~ s/PKTUSB/D-U/g;
+    $textmode =~ s/PKTLSB/D-L/g;
+#    print "Mode of VFO A: $mode ($textmode) at width $width\n";
     $vfos->{$curr_vfo}{'mode'} = $mode;
+    # XXX: Switch the mode input
 
-    my $power = $rig->get_level($curr_hlvfo, 'POWER');
-    $vfos->{$curr_vfo}{'power'} = $power;
-    my $stats = $vfos->{$curr_vfo}{'stats'};
-    $stats->{'signal'} = $rig->get_level_i( $curr_hlvfo, $Hamlib::RIG_LEVEL_STRENGTH );
-    $main::log->Log( "hamlib", "debug", "power:\t\t $power\n mode: \t\t$mode\nstrength:\t\t" . $stats->{'signal'} );
+#    my $power = $rig->get_level($curr_hlvfo, 'POWER');
+#    $vfos->{$curr_vfo}{'power'} = $power;
+#    my $stats = $vfos->{$curr_vfo}{'stats'};
+#    $stats->{'signal'} = $rig->get_level_i( $curr_hlvfo, $Hamlib::RIG_LEVEL_STRENGTH );
+#    $main::log->Log( "hamlib", "debug", "power:\t\t $power\n mode: \t\t$mode\nstrength:\t\t" . $stats->{'signal'} );
 
     #    my $atten = $rig->{caps}->{attenuator};
     #    $stats->{'atten'} = $atten;
     #    $main::log->Log("hamlib", "debug", "Attenuators:\t\t@$atten");
+    my $ptt_status = $rig->get_ptt($curr_hlvfo);
+
+    if (!$ptt_status) {
+       # XXX: Set icon to idle
+       if (!defined $last_ptt_status || $last_ptt_status != $ptt_status) {
+          $main::log->Log("hamlib", "debug", "PTT off");
+          $main::gtk_ui->set_icon("idle");
+       }
+    } else {
+       # XXX: Set icon to TX
+       if (!defined $last_ptt_status || $last_ptt_status != $ptt_status) {
+          $main::log->Log("hamlib", "debug", "PTT on");
+          $main::gtk_ui->set_icon("transmit");
+       }
+    }
+    $last_ptt_status = $ptt_status;
 }
 
 # state for our tray mode polling slowdown
@@ -303,7 +289,7 @@ sub exec_read_rig {
         $tray_iterations++;
 
         # are we due for an update?
-        if ( !$tray_iterations >= $tray_every ) {
+        if ( $tray_iterations >= $tray_every ) {
             $update_needed = 1;
         }
     }
@@ -366,6 +352,7 @@ sub new {
     # Start a timer for it
     our $rig_timer =
       Glib::Timeout->add( $poll_interval, \&exec_read_rig );
+
     my $self = {
         # variables
         rig           => $rig,
@@ -382,7 +369,6 @@ sub new {
         # functions
         exec_read_rig => \&exec_read_rig,
         hamlib_debug_level => \&hamlib_debug_level,
-        mode_to_str => \&mode_to_str,
         next_vfo => \&next_vfo,
         ptt_off => \&ptt_off,
         ptt_on => \&ptt_on,
