@@ -89,21 +89,15 @@ sub Log {
         $lvl = "UNKNOWN";
     }
     ####
-    $buf = $datestamp . "[$log_type/$log_level]";
-#    print { $self->{log_fh} } $datestamp . " [$log_type/$lvl]";
-#    print $datestamp . " [$log_type/$log_level]";
+    $buf = $datestamp . " [$log_type/$log_level]";
 
     # skip first 3 arguments
     shift;
     shift;
     shift;
     foreach my $a (@_) {
-#        print { $self->{log_fh} } " " . $a;
-#        print " " . $a;
        $buf .= " " . $a;
     }
-#    print { $self->{log_fh} } "\n";
-#    print "\n";
     $buf .= "\n";
     print { $self->{log_fh} } $buf;
     print $buf;

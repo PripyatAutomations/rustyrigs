@@ -112,11 +112,11 @@ if ($cfg_readonly) {
 
 # Initialize the GTK GUI
 $gtk_ui = rustyrigs_gtk_ui->new( $cfg, $log, $vfos );
-$gtk_ui->load_icons();
-
 # Open the log window
 $logview = rustyrigs_logview->new($cfg);
 $log->add_handler($logview);
+$gtk_ui->load_icons();
+
 
 $gtk_ui->draw_main_win();
 $gtk_ui->set_icon("connecting");
@@ -138,7 +138,6 @@ $gtk_ui->set_icon("connecting");
 
 # Delay the hamlib init at least a second, for reliability
 my $hamlib_initialized = 0;
-
 sub hamlib_init {
     return if $hamlib_initialized;
 
@@ -154,6 +153,7 @@ sub hamlib_init {
     $hamlib_initialized = 1;
 }
 Glib::Timeout->add( 1000, \&hamlib_init );
+
 # Andd.... go!
 Gtk3->main();
 $log->Log( "core", "info", "$app_name is shutting down!" );

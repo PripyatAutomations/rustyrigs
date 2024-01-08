@@ -97,13 +97,6 @@ sub main_menu_state {
     if ( !$focused ) {
         $widget->destroy();
     }
-
-    if ( defined( $event->new_window_state ) ) {
-        $log->Log( "ui", "debug",
-                "main_menu window state event: "
-              . $event->new_window_state
-              . " (ontop: $on_top, focused: $focused)" );
-    }
     return FALSE;
 }
 
@@ -140,11 +133,9 @@ sub main_menu {
             toggle_locked("menu");
             $main_menu_open = 0;
             $main_menu->destroy();    # Hide the menu after the choice is made
-            $log->Log( "ui", "debug", "Closing the main menu" );
             return FALSE;
         }
     );
-    $log->Log( "core", "debug", "*** locked: $main::locked" );
     $lock_item->set_active($main::locked);
     $main_menu->append($lock_item);
 
@@ -197,14 +188,6 @@ sub w_main_state {
         $widget->unmaximize();
     }
 
-    if ( defined( $event->new_window_state ) ) {
-#        $log->Log( "ui", "debug",
-#                "WSE: "
-#              . $widget->get_title()
-#              . " // "
-#              . $event->new_window_state
-#              . " (ontop: $on_top, focused: $focused)" );
-    }
     return FALSE;
 }
 
@@ -253,11 +236,9 @@ sub w_main_show {
 
 sub w_main_toggle {
     if ( $cfg->{'win_visible'} ) {
-        $log->Log( "ui", "debug", "hide w_main" );
         w_main_hide();
     }
     else {
-        $log->Log( "ui", "debug", "show w_main" );
         w_main_show();
     }
     return FALSE;
@@ -387,7 +368,7 @@ sub refresh_available_widths {
         $rv = 0;
     }
     $log->Log( "ui", "debug",
-            "refresh avail widths: VFO $curr_vfo, mode "
+          "refresh avail widths: VFO $curr_vfo, mode "
           . $vfo->{'mode'}
           . " val: $val (rv: $rv)" );
     $width_entry->set_active($rv);
@@ -1033,16 +1014,14 @@ sub get_state_icon {
 }
 
 sub set_tray_tooltip {
-    ( my $icon ) = @_;
-    my $tooltip_text = shift;
+    my ( $self, $icon, $tooltip_text ) = @_;
     $icon->set_tooltip_text($tooltip_text);
 }
 
 # Set up the tray icon and set a label on it...
 #############
 sub set_tray_icon {
-    ( my $status ) = @_;
-
+    my ( $self, $status ) = @_;
     my $connected_txt = '';
 
     if ( $status eq "idle" ) {
@@ -1081,7 +1060,8 @@ sub set_tray_icon {
     $tray_tooltip .= "\t$status_txt $freq_txt $mode_txt ${width_text} hz\n\n";
     $tray_tooltip .= "Meters:\n";
     $tray_tooltip .= "\t\tPower: ${power_text}W\n\t\tSWR: ${swr_txt}:1\n";
-    set_tray_tooltip( $tray_icon, $tray_tooltip );
+    $self->set_tray_tooltip( $tray_icon, $tray_tooltip );
+#    print "tooltip: " . Dumper($tray_tooltip) . "\n";
 
     $tray_icon->set_from_pixbuf( get_state_icon($status) );
 }
@@ -1103,7 +1083,7 @@ sub set_icon {
         $main::app_name . ": $state_txt " . $cfg->{'rigctl_addr'} );
     my $icon = get_state_icon($state);
     $w_main->set_icon($icon);
-    set_tray_icon($state);
+    $class->set_tray_icon($state);
 }
 
 sub new {

@@ -43,6 +43,9 @@ sub print_signal_info {
 ######################
 # Exported Functions #
 ######################
+sub colour_dialog() {
+}
+
 sub apply {
     ( my $class ) = @_;
 
@@ -509,6 +512,17 @@ sub new {
     $vdd_toggle->set_can_focus(1);
     $meter_choices_box->pack_start( $vdd_toggle, FALSE, FALSE, 0 );
 
+    # Create an OK button to apply settings
+    my $colours_button = Gtk3::Button->new('Colo_urs');
+    $colours_button->set_tooltip_text("Change GUI colours");
+    $colours_button->set_can_focus(1);
+    $colours_button->signal_connect( 'activate' => sub { (my $self) = @_; $self->colour_dialog(); } );
+    $colours_button->signal_connect( 'clicked'  => sub { (my $self) = @_; $self->colour_dialog(); } );
+    $w_settings_accel->connect(
+        ord('U'),  $cfg->{'shortcut_key'},
+        'visible', sub { $colours_button->grab_focus(); }
+    );
+
     ###########
     # We want Save and Cancel next to each other, so use a box to wrap
     my $button_box = Gtk3::Box->new( 'horizontal', 5 );
@@ -547,6 +561,7 @@ sub new {
     $config_box->pack_start( $hamlib_debug,        FALSE, FALSE, 0 );
     $config_box->pack_start( $window_options_box,  FALSE, FALSE, 0 );
     $config_box->pack_start( $meter_choices_box,   FALSE, FALSE, 0 );
+    $config_box->pack_start( $colours_button,   FALSE, FALSE, 0 );
     $config_box->pack_end( $button_box, FALSE, FALSE, 0 );
 
     # Add the config box, show the window, and focus first input
@@ -556,6 +571,7 @@ sub new {
     $address_entry->grab_focus();
 
     my $self = {
+        colour_dialog => \&colour_dialog,
         close      => \&close,
         save       => \&save,
         w_settings => \$w_settings

@@ -53,12 +53,15 @@ sub window_state {
 
     if ( $event->new_window_state =~ m/\biconified\b/ ) {
         # Prevent the window from being iconified
-        $widget->deiconify();
+#        $widget->deiconify();
 
 #        # and minimize it to the system tray icon
 #        $widget->hide();
         return TRUE;
     }
+
+#    if ( $event->new_window_state =~ m/\bwithdrawn\b/ ) {
+#    }
 
     if ( $event->new_window_state =~ m/\babove\b/ ) {
         $on_top = 1;
