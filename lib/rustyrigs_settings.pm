@@ -104,7 +104,6 @@ sub close {
 
 sub DESTROY {
     ( my $self ) = @_;
-    print "destroying settings obj\n";
 }
 
 sub new {
@@ -351,7 +350,7 @@ sub new {
     $window_options_box->pack_start( $logview_ontop_button, FALSE, FALSE, 0 );
 
     my $ontop_button = Gtk3::CheckButton->new();
-    $ontop_button->set_label('Keep window above others?');
+    $ontop_button->set_label('Keep main window above others?');
     $ontop_button->set_active( $cfg->{'always_on_top'} );
     $ontop_button->set_can_focus(1);
     $ontop_button->signal_connect(

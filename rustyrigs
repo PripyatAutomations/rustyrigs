@@ -116,6 +116,7 @@ $gtk_ui->load_icons();
 
 # Open the log window
 $logview = rustyrigs_logview->new($cfg);
+$log->add_handler($logview);
 
 $gtk_ui->draw_main_win();
 $gtk_ui->set_icon("connecting");
@@ -153,7 +154,6 @@ sub hamlib_init {
     $hamlib_initialized = 1;
 }
 Glib::Timeout->add( 1000, \&hamlib_init );
-$logview->write("Testicles 1 2 3");
 # Andd.... go!
 Gtk3->main();
 $log->Log( "core", "info", "$app_name is shutting down!" );

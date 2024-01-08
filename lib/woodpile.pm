@@ -109,7 +109,7 @@ sub Log {
     print $buf;
     if (defined $self->{'handler'}) {
        my $i = $self->{'handler'};
-#       $i->write($buf);
+       $i->write($buf);
     }
 }
 

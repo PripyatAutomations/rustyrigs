@@ -38,6 +38,24 @@ our %vfo_mapping = (
     'C' => $Hamlib::RIG_VFO_C
 );
 
+our %mode_mapping = (
+     RIG_MODE_AM => 'AM',
+     RIG_MODE_CW => 'CW',
+     RIG_MODE_LSB => 'LSB',
+     RIG_MODE_USB => 'USB',
+     RIG_MODE_RTTY => 'RTTY',
+     RIG_MODE_FM => 'FM',
+     RIG_MODE_WFM => 'WFM',
+     RIG_MODE_CWR => 'CWR',
+     RIG_MODE_PKTLSB => 'D-L',
+     RIG_MODE_PKTUSB => 'D-U',
+     RIG_MODE_PKTFM => 'D-FM',
+     RIG_MODE_P25 => 'P25',
+     RIG_MODE_DSTAR => 'DSTAR',
+     RIG_MODE_C4FM => 'C4FM',
+     RIG_MODE_IQ => 'IQ'
+);
+    
 our $vfos = {
     'A' => {
         freq       => 14074000,
@@ -106,6 +124,22 @@ my $pending_changes = {
 ########################################################################
 
 sub hamlib_debug_level {
+    ( my $class ) = @_;
+    my $new_lvl = $_[0];
+
+    if ( exists $hamlib_debug_levels{$new_lvl} ) {
+        my $val = $hamlib_debug_levels{$new_lvl};
+        return $val;
+    }
+    else {
+        $main::log->Log( "hamlib", "warn",
+"hamlib_debug_level: returning default Warnings: $new_lvl unrecognized!"
+        );
+        return $Hamlib::RIG_DEBUG_WARN;
+    }
+}
+
+sub mode_to_str {
     ( my $class ) = @_;
     my $new_lvl = $_[0];
 
@@ -231,14 +265,11 @@ sub read_rig {
     my $vfe = $$gtk_ui->{'vfo_freq_entry'};
     $$vfe->set_value( $vfos->{$curr_vfo}{'freq'} );
 
-    my $mode;
-#    $mode_width = $rig->get_mode($curr_hlvfo);
-#    # Split the returned value into mode and width
-#    my ($mode, $width) = split /\s+/, $mode_width;
-#    print "Mode of VFO A: $mode\n";
-#    print "Width of VFO A: $width\n";
-#    $vfos->{$curr_vfo}{'mode'} = $mode;
-#    die "Mode: $mode\n";
+    my ($mode, $width) = $rig->get_mode();
+    print "Mode of VFO A: $mode\n";
+    print "Width of VFO A: $width\n";
+    $vfos->{$curr_vfo}{'mode'} = $mode;
+
     my $power = $rig->get_level($curr_hlvfo, 'POWER');
     $vfos->{$curr_vfo}{'power'} = $power;
     my $stats = $vfos->{$curr_vfo}{'stats'};
@@ -351,6 +382,7 @@ sub new {
         # functions
         exec_read_rig => \&exec_read_rig,
         hamlib_debug_level => \&hamlib_debug_level,
+        mode_to_str => \&mode_to_str,
         next_vfo => \&next_vfo,
         ptt_off => \&ptt_off,
         ptt_on => \&ptt_on,

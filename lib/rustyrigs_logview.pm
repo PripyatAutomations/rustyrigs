@@ -16,11 +16,12 @@ my @log_buffer;
 
 sub write {
     ( my $text_view_ref, my $message ) = @_;
-    print "xx: |" . Dumper($text_view) . "| |$message|\n";
     my $buffer = $text_view->get_buffer();
-    push @log_buffer, "$message\n";  # Add the message to the log buffer
+    push @log_buffer, "$message";
+
+    # Get rid of a line, if too long
     if (@log_buffer > 100) {
-        shift @log_buffer;  # Remove the oldest message if buffer exceeds 100 lines
+        shift @log_buffer; 
     }
     
     # Update the text area with the log buffer content
@@ -78,7 +79,6 @@ sub window_state {
 
 sub DESTROY {
    ( my $self ) = @_;
-   print "destroying logview obj\n";
 }
 
 sub new {
@@ -178,6 +178,7 @@ sub new {
    $text_view->set_editable(0);
    $text_view->set_hexpand(1);
    $text_view->set_vexpand(1);
+   $text_view->set_wrap_mode('word');
    $scrolled_window->add($text_view);
  
    $window->add($box);
@@ -197,8 +198,6 @@ sub new {
       window => \$window
    };
    bless $self, $class;
-
-   $main::log->add_handler($self);
    return $self;
 }
 1;
