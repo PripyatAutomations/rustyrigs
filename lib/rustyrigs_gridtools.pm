@@ -54,7 +54,7 @@ sub update {
 #       print "$out\n";
        my $log_msg = sprintf( "Dist: %.3f km, bearing %.2f, long path: %.3f km from $mygrid to $dxgrid\n",
            $dist, $az, $longpath);
-       $log->Log("user", "info", "Calculated [$mygrid] => [$dxgrid]: ${s_dist} km ($s_longpath km long path) at ${s_az})°");
+       $log->Log("user", "info", "Calculated [$mygrid] => [$dxgrid]: ${s_dist} km ($longpath km long path) at ${s_az})°");
     } else {	# clear results until valid values present
        $$b_l->set_text('----');	# clear bearing label
        $$d_l->set_text('----');	# clear distance label
