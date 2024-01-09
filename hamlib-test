@@ -5,7 +5,7 @@ my $grid1 = "FN20mm";
 my $grid2 = shift;
 
 if (!defined $grid2) {
-   $grid2 = "FN21pr";
+   $grid2 = "FN31pr";
 }
 ($err, $lon1, $lat1, $sw1) = Hamlib::locator2longlat("$grid1");
 ($err, $lon2, $lat2, $sw1) = Hamlib::locator2longlat("$grid2");
