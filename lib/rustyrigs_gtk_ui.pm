@@ -1015,6 +1015,22 @@ sub draw_main_win {
         }
     );
     $settings_button->set_tooltip_text("Settings editor");
+
+    my $gridtools_button = Gtk3::Button->new_with_mnemonic('_Gridsquare Tools');
+    $gridtools_button->signal_connect(
+        clicked => sub {
+            if (defined $main::gridtools) {
+               my $gt_win = $main::gridtools->{'window'};
+               $$gt_win->deiconify();
+               $$gt_win->present();
+            }
+            else {
+               $main::gridtools = rustyrigs_gridtools->new();
+            }
+        }
+    );
+    $gridtools_button->set_tooltip_text("Show gridsquare tools");
+
     my $quit_button = Gtk3::Button->new_with_mnemonic('_Quit');
     $quit_button->signal_connect( clicked => \&close_main_win );
     $quit_button->set_tooltip_text("Exit the program");
@@ -1022,6 +1038,7 @@ sub draw_main_win {
     # Add widgets and insert the box in the window
     $box->pack_start( $hide_button,     FALSE, FALSE, 0 );
     $box->pack_start( $settings_button, FALSE, FALSE, 0 );
+    $box->pack_start( $gridtools_button, FALSE, FALSE, 0 );
     $box->pack_start( $quit_button,     FALSE, FALSE, 0 );
     $w_main->add($box);
 

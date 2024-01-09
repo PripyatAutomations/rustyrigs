@@ -31,6 +31,7 @@ sub update {
     # update lat/lon for the gridsquare if it appears valid length
     if ($dx_len >= 4 && ($dx_len % 2 == 0)) {
        (my $err, $dx_lon, $dx_lat, my $sw) = Hamlib::locator2longlat($dxgrid);
+       print "err: $err\n";
        my $dx_lat_s = int($dx_lat * 100000) / 100000.0;
        my $dx_lon_s = int($dx_lon * 100000) / 100000.0;
        my $latlon = "$dx_lat_s, $dx_lon_s";
@@ -40,6 +41,7 @@ sub update {
     # calculate distance/bearing, only when both are correct
     if (($my_len == 4 || $my_len == 6) && ($dx_len == 4 || $dx_len == 6)) {
        (my $ll_err, $my_lon, $my_lat, my $sw) = Hamlib::locator2longlat($dxgrid);
+       print "ll_err: $ll_err\n";
        my $my_lat_s = int($my_lat * 100000) / 100000.0;
        my $my_lon_s = int($my_lon * 100000) / 100000.0;
 
@@ -54,7 +56,7 @@ sub update {
 #       print "$out\n";
        my $log_msg = sprintf( "Dist: %.3f km, bearing %.2f, long path: %.3f km from $mygrid to $dxgrid\n",
            $dist, $az, $longpath);
-       $log->Log("user", "info", "Calculated [$mygrid] => [$dxgrid]: ${s_dist} km ($longpath km long path) at ${s_az})°");
+       $log->Log("user", "info", "Calculated [$mygrid] => [$dxgrid]: ${s_dist} km ($longpath km long path) at ${s_az}) °");
     } else {	# clear results until valid values present
        $$b_l->set_text('----');	# clear bearing label
        $$d_l->set_text('----');	# clear distance label
@@ -74,12 +76,10 @@ sub new {
 
     my $cfg = $main::cfg;
     $log = $main::log;
-
     
     my $wp = $$cfg->{'win_gridtools_placement'};
     my $on_top = $$cfg->{'always_on_top_gridtools'};
     $wp = 'none' if (!defined $wp);
-
     my $box;
 
     # get the main window
@@ -98,7 +98,6 @@ sub new {
     $window->set_default_size(320, 320);
     $window->set_keep_above($on_top);
     $window->set_resizable(0);
-
 
     my $icon = ${$gtk_ui->{'icon_settings_pix'}};
     $window->set_icon($icon);
@@ -173,7 +172,7 @@ sub new {
     $reset_button->signal_connect( 'clicked'  => sub { 
        (my $self) = @_;
        $mygrid_input->set_text($$cfg->{'my_qth'});
-       $mygrid_input->set_text('');
+       $dxgrid_input->set_text('');
     });
     $accel->connect(ord('R'), $$cfg->{'shortcut_key'}, 'visible', sub { my ( $self ) = @_; });
     $button_box->pack_start($reset_button, TRUE, TRUE, 0);
@@ -188,12 +187,50 @@ sub new {
 
     $window->add($box);
     $window->show_all();
-    $dxgrid_input->grab_focus();    
+
+    # Focus the DX QTH input
+    $dxgrid_input->grab_focus();
 
     # if configured as such, hide the window automatically
     if ($$cfg->{'hide_gridtools_at_start'}) {
        $window->iconify();
     }
+
+    # Handle window placement
+    my $wgp = $$cfg->{'win_gridtools_placement'};
+    if (!defined $wgp) {
+       $wgp = 'none';
+    }
+
+
+    # If placement type is none, we should manually place the window at x,y
+    if ($wgp =~ m/none/) {
+       # Place the window
+       $window->move( $$cfg->{'win_gridtools_x'}, $$cfg->{'win_gridtools_y'} );
+#       # Set width/height of teh window
+#       $window->set_default_size( $$cfg->{'win_gridtools_width'},
+#           $$cfg->{'win_gridtools_height'} );
+    }
+
+    $window->signal_connect(
+        'configure-event' => sub {
+            my ( $widget, $event ) = @_;
+
+            # Retrieve the size and position information
+            my ( $width, $height ) = $widget->get_size();
+            my ( $x,     $y )      = $widget->get_position();
+
+            # Save the data...
+            $$cfg->{'win_gridtools_x'}      = $x;
+            $$cfg->{'win_gridtools_y'}      = $y;
+            $$cfg->{'win_gridtools_height'} = $height;
+            $$cfg->{'win_gridtools_width'}  = $width;
+
+            print "saving new position $x, $y ($width x $height)\n";
+            # Return FALSE to allow the event to propagate
+            return FALSE;
+        }
+    );
 
     my $self = {
        # functions
