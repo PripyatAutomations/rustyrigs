@@ -104,6 +104,7 @@ our $def_cfg = {
     win_visible         => 0,
     win_x               => 2252,
     win_y               => 49,
+
     # center, mouse, center_always, center_on_parent, none (place at x,y below)
     win_logview_placement => 'none',
     win_logview_height  => 480,

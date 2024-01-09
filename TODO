@@ -1,3 +1,6 @@
+* Move GTK GUI update code from lib/*_hamlib.pm to update() in lib/*_gtk_ui.pm
+* Clean up read_rig to update $vfos->{$curr_vfo} and call gtk_ui->update()
+
 * Move all the polling and setting into read_rig and write_rig
   - Call these periodically, if needed, but throttled best we can
 * Add a widget (scale/slider?) under the freq selector to allow chosing the step size

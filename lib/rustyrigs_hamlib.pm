@@ -18,6 +18,9 @@ my $gtk_ui;
 # - Use is_busy() to check
 our $rigctld_applying_changes = FALSE;
 
+# This will be come TRUE if user is changing the GUI
+our $gui_applying_changes = FALSE;
+
 our @vfo_widths_fm  = ( 25000, 12500 );
 our @vfo_widths_am  = ( 6000,  5000, 3800, 3200, 3000, 2800 );
 our @vfo_widths_ssb = ( 3800,  3000, 3200, 2800, 2700, 2500 );
@@ -213,6 +216,8 @@ my $last_ptt_status;
 my $last_mode;
 my $last_freq;
 
+# Read the state of the rig and apply it to the appropriate $vfos entry
+# XXX: This needs to read into $vfos then call $gtk_ui->update()
 sub read_rig {
     ( my $class ) = @_;
 
@@ -309,6 +314,7 @@ sub read_rig {
 my $tray_iterations = 0;
 my $update_needed   = 0;
 
+# Determine if we need to read the rig this iteration...
 sub exec_read_rig {
     ( my $class ) = @_;
 
@@ -341,6 +347,7 @@ sub exec_read_rig {
     return TRUE;    # ensure we're called again
 }
 
+# Write vfo{}s
 sub write_rig {
     my ( $self ) = @_;
 }

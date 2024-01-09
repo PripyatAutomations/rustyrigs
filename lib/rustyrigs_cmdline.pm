@@ -47,7 +47,7 @@ sub parse {
 
     # Show help if requested
     if ($cl_show_help) {
-        rustyrigs_doc::show_help( $main::app_name, $main::app_descr );
+        rustyrigs_doc::show_help_tty( $main::app_name, $main::app_descr );
     }
 
     if ( defined($cl_ontop) ) {
