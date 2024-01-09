@@ -9,6 +9,7 @@ use rustyrigs_set_colors;
 
 my $config_box;
 my $address_entry;
+my $qth_entry;
 my $poll_interval_entry;
 my $poll_tray_entry;
 my $core_debug;
@@ -203,6 +204,20 @@ sub new {
     $address_entry->signal_connect(
         changed => sub {
             my $val = $address_entry->get_text();
+            $cfg->{'rigctl_addr'} = $val;
+        }
+    );
+
+    # My gridsquare
+    my $qth_label = Gtk3::Label->new('My gridsquare');
+    $qth_entry = Gtk3::Entry->new();
+    $qth_entry->set_text( $cfg->{'my_qth'} );    # Default value
+    $qth_entry->set_tooltip_text("Maidenhead gridsquare of the rig");
+    $qth_entry->set_can_focus(1);
+    $qth_entry->signal_connect(
+        changed => sub {
+            my $val = $qth_entry->get_text();
+            $cfg->{'my_qth'} = $val;
         }
     );
 
@@ -554,6 +569,8 @@ sub new {
     # place the widgets
     $config_box->pack_start( $address_label,       FALSE, FALSE, 0 );
     $config_box->pack_start( $address_entry,       FALSE, FALSE, 0 );
+    $config_box->pack_start( $qth_label,           FALSE, FALSE, 0 );
+    $config_box->pack_start( $qth_entry,           FALSE, FALSE, 0 );
     $config_box->pack_start( $poll_interval_label, FALSE, FALSE, 0 );
     $config_box->pack_start( $poll_interval_entry, FALSE, FALSE, 0 );
     $config_box->pack_start( $poll_tray_label,     FALSE, FALSE, 0 );

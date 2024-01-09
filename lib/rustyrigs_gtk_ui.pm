@@ -202,12 +202,6 @@ sub w_main_click {
     }
 }
 
-sub w_main_hide {
-    $cfg->{'win_visible'} = 0;
-    $w_main->set_visible(0);
-    return FALSE;
-}
-
 sub w_main_fm_toggle {
 
     # hide the FM box, unless in FM mode
@@ -225,10 +219,31 @@ sub w_main_fm_toggle {
     }
 }
 
+
+sub w_main_hide {
+    my ( $self ) = @_;
+
+    $cfg->{'win_visible'} = 0;
+    $w_main->set_visible(0);
+    my $lv = $main::logview;
+    my $w = ${$lv->{'window'}};
+    if (defined $w) {
+       $w->set_visible(0);
+    }
+    return FALSE;
+}
+
 sub w_main_show {
+    my ( $self ) = @_;
+
     $cfg->{'win_visible'} = 1;
     $w_main->deiconify();
     $w_main->set_visible(1);
+    my $lv = $main::logview;
+    my $w = ${$lv->{'window'}};
+    if (defined $w) {
+       $w->set_visible(1);
+    }
     $w_main->show_all();
     $w_main->move( $cfg->{'win_x'}, $cfg->{'win_y'} );
     w_main_fm_toggle();
@@ -237,11 +252,12 @@ sub w_main_show {
 }
 
 sub w_main_toggle {
+    my ( $self ) = @_;
     if ( $cfg->{'win_visible'} ) {
-        w_main_hide();
+        $self->w_main_hide();
     }
     else {
-        w_main_show();
+        $self->w_main_show();
     }
     return FALSE;
 }
@@ -276,7 +292,7 @@ sub unload_icons {
 }
 
 sub load_icons {
-    my ($state) = @_;
+    my ($self) = @_;
 
     my $res           = $cfg->{'res_dir'};
     my $icon_error    = $res . "/" . $cfg->{'icon_error'};
@@ -312,7 +328,7 @@ sub load_icons {
         $tray_icon = Gtk3::StatusIcon->new();
 
         # Create a system tray icon with the loaded icon
-        $tray_icon->signal_connect( 'activate'   => \&w_main_toggle );
+        $tray_icon->signal_connect( 'activate'   => sub { $self->w_main_toggle(); });
         $tray_icon->signal_connect( 'popup-menu' => \&main_menu );
     }
 }

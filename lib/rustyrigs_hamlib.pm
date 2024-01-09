@@ -230,7 +230,7 @@ sub read_rig {
     # Get the RX volume
     my $volume = $rig->get_level( $Hamlib::RIG_LEVEL_AF, $curr_hlvfo );
     if (defined $volume) {
-       die "volume: $volume\n";
+       print "volume: $volume\n";
        $$cfg->{'rx_volume'} = $volume;
     }
     else {
@@ -295,6 +295,7 @@ sub read_rig {
     $vfos->{$curr_vfo}{'mode'} = $textmode;
     $$vme->set_active( $active_index );
 
+    # XXX: need to move gui stuff out of here later..
     if (!$ptt_status) {
        if (!defined $last_ptt_status || $last_ptt_status != $ptt_status) {
           $main::log->Log("hamlib", "info", "PTT off");

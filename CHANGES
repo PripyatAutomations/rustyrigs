@@ -1,3 +1,11 @@
+2024-01-09
+	* Logview window shows and hides with the main window
+	  - Close button minimizes logviewer
+	* Added a gridsquare tools dialog
+	  - Gridsquare to lat/lon
+	  - Lat/lon to gridsquare
+	  - Distance/bearing calculator
+
 2024-01-08
 	* Implemented a lock around controls, to prevent write_rig() from being
           called when read_rig() is applied. Should probably implement a similar

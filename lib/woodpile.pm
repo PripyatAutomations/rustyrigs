@@ -22,7 +22,6 @@ sub hex_to_gdk_rgba {
 }
 
 sub find_offset {
-
     # Wut?
     my $array_ref = shift;
     my @a         = @$array_ref;
@@ -62,6 +61,8 @@ use POSIX       qw(strftime);
 use Time::HiRes qw(gettimeofday tv_interval usleep);
 my $app_name = 'rustyrigs';
 
+our $cfg;
+
 # Log levels for messages
 our %log_levels = (
     'none'  => 0,		# show no errors
@@ -78,6 +79,9 @@ our %log_levels = (
 sub Log {
     my ( $self, $log_type, $log_level ) = @_;
     my $filter_level = $self->{log_level};
+
+#    print "of: $filter_level log_level: $log_level\n";
+
     my $buf;
 
     if ( $log_levels{$filter_level} < $log_levels{$log_level} ) {
@@ -100,6 +104,7 @@ sub Log {
        $buf .= " " . $a;
     }
     $buf .= "\n";
+
     # If we've established a log output handler, send it there
     if (defined $self->{'handler'}) {
        my $i = $self->{'handler'};
@@ -112,7 +117,13 @@ sub Log {
 }
 
 sub set_log_level {
-    my ( $class, $log_level );
+    my ( $class, $log_level ) = @_;
+    my $ll = $class->{'log_level'};
+    if (!defined $ll) {
+       $ll = 'debug';
+    }
+    print "[core/notice] Changing log level from $ll to $log_level\n";
+    $class->{'log_level'} = $log_level;
 }
 
 sub add_handler {
@@ -128,7 +139,10 @@ sub new {
     open my $log_fh, '>>', $log_file or die "Unable to open $log_file: $!\n";
 
     my $self = {
+        # functions
         add_handler => \&add_handler,
+        set_log_level => \&set_level,
+        # variables
         log_file  => $log_file,
         log_level => $log_level,
         log_fh    => $log_fh

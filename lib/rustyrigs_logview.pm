@@ -64,10 +64,14 @@ sub window_state {
         return TRUE;
     }
 
-    # we need to unhide, as we don't have a way to recall the window yet...
-    # XXX: Add a button/menu toggle for this...
+    # Only allow the window to be hidden with the main window
     if ( $event->new_window_state =~ m/\bwithdrawn\b/ ) {
-       $widget->unhide();
+       my $visible = $cfg->{'win_visible'};
+       if ($visible) {
+          # Instead, iconify it
+          $widget->unhide();
+          $widget->iconify();
+       }
     }
 
     if ( $event->new_window_state =~ m/\babove\b/ ) {
@@ -95,6 +99,8 @@ sub new {
 
    my $lvp = $cfg->{'win_logview_placement'};
 
+   my $gtk_ui = $main::gtk_ui;
+
    if (!defined $lvp) {
       $lvp = 'none';
    }
@@ -114,7 +120,8 @@ sub new {
    $window->set_keep_above($keep_above);
    $window->set_modal(0);
    $window->set_resizable(1);
-   $window->set_icon($rustyrigs_gtk_ui::icon_logview_pix);
+   my $icon = $gtk_ui->{'icon_logview_pix'};
+   $window->set_icon($icon);
 
    # Set width/height of teh window
    $window->set_default_size( $cfg->{'win_logview_width'},

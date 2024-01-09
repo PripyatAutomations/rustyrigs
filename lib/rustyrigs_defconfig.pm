@@ -9,12 +9,14 @@ package rustyrigs_defconfig;
 our $def_cfg = {
     active_vfo           => 'A',
     always_on_top        => 0,     # 1 will keep window always on top by default
+    always_on_top_gridtools => 1,  # 1 will keep grid tools window on top by default
     always_on_top_log    => 0,	   # 1 will keep log viewer window on top by default
     always_on_top_meters => 1,     # 1 will keep meters window on top by default
     autoload_memories    => 0,     # 1 will avoid needing to click Load Chan button
     floating_meters  => 0,           # 1 will put the meters in their own window
     hamlib_loglevel  => "bug",       # bug err warn verbose trace cache
     hide_logview_at_start => 0,	     # 1 will hide the logview by default
+    hide_gridtools_at_start => 1,    # 1 will hide the gridtools by default
     icon_error       => "error.png",
     icon_idle        => "idle.png",
     icon_logview     => "logview.png",
@@ -39,6 +41,7 @@ our $def_cfg = {
     key_volume       => 'K',
     key_width        => 'W',
     log_level        => "debug",
+    my_qth           => "AA00aa",		  # my 6 digit gridsquare
     poll_interval    => 250,                      # every 1/4 sec
     poll_tray_every  => 20,                       # at 1/20th the rate of normal (every 5 sec)
     rig_volume       => 0,
@@ -106,6 +109,11 @@ our $def_cfg = {
     win_y               => 49,
 
     # center, mouse, center_always, center_on_parent, none (place at x,y below)
+    win_gridtools_placement => 'none',
+    win_gridtools_height  => 480,
+    win_gridtools_width   => 1024,
+    win_gridtools_x       => 0,
+    win_gridtools_y       => 0,
     win_logview_placement => 'none',
     win_logview_height  => 480,
     win_logview_width   => 1024,
