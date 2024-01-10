@@ -245,7 +245,7 @@ sub new {
             $$cfg->{'win_gridtools_height'} = $height;
             $$cfg->{'win_gridtools_width'}  = $width;
 
-            print "saving new position $x, $y ($width x $height)\n";
+#            print "saving new position $x, $y ($width x $height)\n";
             # Return FALSE to allow the event to propagate
             return FALSE;
         }
