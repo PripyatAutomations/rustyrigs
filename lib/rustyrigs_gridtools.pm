@@ -27,6 +27,7 @@ sub update {
     my $b_l = $self->{'bear_label'};
     my $d_l = $self->{'dist_label'};
     my $l_l = $self->{'latlon_entry'};
+    my $lp_l = $self->{'longpath_label'};
 
     # update lat/lon for the gridsquare if it appears valid length
     if ($dx_len >= 4 && ($dx_len % 2 == 0)) {
@@ -46,16 +47,19 @@ sub update {
 
        ( my $err, $dist, $az ) = Hamlib::qrb($my_lon, $my_lat, $dx_lon, $dx_lat);
        my $longpath = Hamlib::distance_long_path($dist);
+       my $s_longpath = sprintf("%.2f", $longpath);
 
        my $s_dist = sprintf("%.2f", $dist);
        my $s_az = sprintf("%.2f", $az);
        $log->Log("user", "info", "Calculated [$mygrid] => [$dxgrid]: ${s_dist} km ($longpath km long path) at ${s_az}) °");
        $$b_l->set_text($s_az);
-       $$d_l->set_text($s_dist);
+       $$d_l->set_text($s_dist . " km");
+       $$lp_l->set_text($s_longpath . " km");
     } else {	# clear results until valid values present
        $$b_l->set_text('----');	# clear bearing label
        $$d_l->set_text('----');	# clear distance label
        $$l_l->set_text('');	# clear lat lon label
+       $$lp_l->set_text('----');
     }
  }
 
@@ -141,6 +145,13 @@ sub new {
     $db_box->pack_start($dist_box, TRUE, TRUE, 0);
     $db_box->pack_start($bear_box, TRUE, TRUE, 0);
     $out_box->pack_start($db_box, FALSE, FALSE, 0);
+
+    my $lp_box = Gtk3::Box->new('vertical', 5);
+    my $longpath_label = Gtk3::Label->new('Long path');
+    my $o_longpath_label = Gtk3::Label->new('----');
+    $lp_box->pack_start($longpath_label, FALSE, FALSE, 0);
+    $lp_box->pack_start($o_longpath_label, FALSE, FALSE, 0);
+    $out_box->pack_start($lp_box, FALSE, FALSE, 0);
 
     # lat/lon conversion
     my $latlon_box = Gtk3::Box->new('vertical', 5);
@@ -243,6 +254,7 @@ sub new {
        box => \$box,
        bear_label => \$o_bear_label,
        dist_label => \$o_dist_label,
+       longpath_label => \$o_longpath_label,
        latlon_entry => \$o_latlon_entry,
        dxgrid => $dxgrid_input,
        mygrid => $mygrid_input,
