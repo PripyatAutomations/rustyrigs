@@ -23,6 +23,9 @@ sub update {
     my $my_len = length($mygrid);
     my $dx_len = length($dxgrid);
     my ( $dx_lat, $dx_lon, $my_lat, $my_lon, $dist, $az );
+    my ( $s_az, $s_dx_lat, $s_dx_lon, $s_my_lat, $s_my_lon );
+    my ( $longpath, $s_longpath, $s_dist, $s_ax, $use_metric );
+    $use_metric = $$cfg->{'use_metric'};
 
     # labels to update
     my $b_l = $self->{'bear_label'};
@@ -33,26 +36,20 @@ sub update {
     # update lat/lon for the gridsquare if it appears valid length
     if ($dx_len >= 4 && ($dx_len % 2 == 0)) {
        (my $err, $dx_lon, $dx_lat, my $sw) = Hamlib::locator2longlat($dxgrid);
-       my $dx_lat_s = int($dx_lat * 100000) / 100000.0;
-       my $dx_lon_s = int($dx_lon * 100000) / 100000.0;
-       my $latlon = "$dx_lat_s, $dx_lon_s";
+       $s_dx_lat = int($dx_lat * 100000) / 100000.0;
+       $s_dx_lon = int($dx_lon * 100000) / 100000.0;
+       my $latlon = "$s_dx_lat, $s_dx_lon";
        $$l_l->set_text($latlon);
     }
 
     # calculate distance/bearing, only when both are correct
     if (($my_len == 4 || $my_len == 6) && ($dx_len == 4 || $dx_len == 6)) {
        (my $ll_err, $my_lon, $my_lat, my $sw) = Hamlib::locator2longlat($mygrid);
-       my $my_lat_s = int($my_lat * 100000) / 100000.0;
-       my $my_lon_s = int($my_lon * 100000) / 100000.0;
+       $s_my_lat = int($my_lat * 100000) / 100000.0;
+       $s_my_lon = int($my_lon * 100000) / 100000.0;
 
        ( my $err, $dist, $az ) = Hamlib::qrb($my_lon, $my_lat, $dx_lon, $dx_lat);
-       my $longpath = Hamlib::distance_long_path($dist);
-       my $s_longpath;
-       
-
-       my $s_dist;
-       my $s_az;
-       my $use_metric = $$cfg->{'use_metric'};
+       $longpath = Hamlib::distance_long_path($dist);
 
        if ($use_metric) {
           $s_az = sprintf("%.2f deg", $az);
@@ -63,7 +60,7 @@ sub update {
           $s_dist = sprintf("%.2f mi", $dist / 1.60934);
           $s_longpath = sprintf("%.2f mi", $longpath / 1.60934);
        }
-       $log->Log("user", "info", "Calculated [$mygrid] => [$dxgrid]: ${s_dist} ($s_longpath long path) at ${s_az}) °");
+       $log->Log("user", "info", "Calculated [$mygrid] $s_my_lat, $s_my_lon => [$dxgrid] $s_dx_lat, $s_dx_lon - ${s_dist} ($s_longpath long path) at ${s_az}");
        $$b_l->set_text($s_az);
        $$d_l->set_text($s_dist);
        $$lp_l->set_text($s_longpath);
