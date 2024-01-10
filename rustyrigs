@@ -40,6 +40,7 @@ use rustyrigs_gtk_ui;		# GTK3 user interface
 use rustyrigs_cmdline;		# command line parsing
 use rustyrigs_doc;		# help messages
 use rustyrigs_hamlib;		# hamlib interface
+#use rustyrigs_rotator;
 use rustyrigs_settings;		# settings editor window (includes color choser)
 use rustyrigs_fm;		# FM settings sub-box for main window
 use rustyrigs_memory;		# channel memory management

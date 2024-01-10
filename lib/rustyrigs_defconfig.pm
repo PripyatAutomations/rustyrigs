@@ -49,6 +49,8 @@ our $def_cfg = {
     res_dir          => "./res",
     rigctl_addr      => 'localhost:4532',
     rigctl_model     => $Hamlib::RIG_MODEL_NETRIGCTL,
+    rotctl_addr      => 'localhost:4533',
+    rotctl_model     => $Hamlib::ROT_MODEL_DUMMY,
 
     #   shortcut_key => 'control-mask',	# ctrl
     shortcut_key        => 'mod1-mask',    # alt
