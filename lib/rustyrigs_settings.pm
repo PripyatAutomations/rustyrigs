@@ -1,4 +1,8 @@
 # Here we handle the settings window
+# XXX: De-duplicate widget creation by moving them out to functions
+#      which will return exactly 1 object, with the desired properties applied
+# XXX: Make this possible using a list with title, properties, etc for each
+
 package rustyrigs_settings;
 use Carp;
 use Data::Dumper;
@@ -16,7 +20,7 @@ my $core_debug;
 my $hamlib_debug;
 my $tmp_cfg;
 my $w_main;
-my $changes = 0;
+my $changes = 1;	# XXX: fix this
 my $cfg;
 my $w_settings;
 
@@ -50,6 +54,7 @@ sub colour_dialog() {
    my $dialog = rustyrigs_set_colors->new(\$w_settings);
 }
 
+# XXX: We need to make a list of cfg val => function
 sub apply {
     ( my $class ) = @_;
 
@@ -64,15 +69,24 @@ sub apply {
 }
 
 sub save {
-    ( my $self, my $tc ) = @_;
-
-    if ( $changes && defined $tc ) {
+# XXX: Check if we have 1 or 2 arguments (called via class or directly)
+#    ( my $self, my $tc ) = @_;
+#     print "self: " . Dumper($self) . "\n";
+     my ( $tc ) = @_;
+# XXX: enable this once we've added $changes++ everywhere needed
+#    if ( $changes && defined $tc ) {
+   if (defined $tc) {
         $main::log->Log( "config", "info",
             "Merging settings into in-memory config" );
+        my $tc_dump = Dumper($tc);
+        print "Changes to be applied:\n$tc_dump\n";
+        $main::log->Log( "config", "debug", "Applying config changes:\n\t$tc_dump");
         my $tmp = { %$cfg, %$tc };
-        $main::cfg = $cfg = $tmp;
+        $cfg = $tmp;
+        $main::cfg = $cfg;
     }
     else {
+        print "No changes to apply.\n";
         $main::log->Log( "config", "info", "no changes to save" );
     }
 
