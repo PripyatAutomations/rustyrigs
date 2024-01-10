@@ -20,6 +20,12 @@ sub update {
     my ( $self ) = @_;
     my $mygrid = uc($self->{'mygrid'}->get_text);
     my $dxgrid = uc($self->{'dxgrid'}->get_text);
+
+    # re-apply it the text field, so it's captialized
+    $self->{'mygrid'}->set_text($mygrid);
+    $self->{'mygrid'}->set_position(-1);
+    $self->{'dxgrid'}->set_text($dxgrid);
+    $self->{'dxgrid'}->set_position(-1);
     my $my_len = length($mygrid);
     my $dx_len = length($dxgrid);
     my ( $dx_lat, $dx_lon, $my_lat, $my_lon, $dist, $az );
@@ -122,7 +128,9 @@ sub new {
     my $mygrid_box = Gtk3::Box->new('vertical', 5);
     my $mygrid_label = Gtk3::Label->new('My QTH');
     my $mygrid_input = Gtk3::Entry->new();
+    # fill the input box
     $mygrid_input->set_text(uc($$cfg->{'my_qth'}));
+
     $mygrid_box->pack_start($mygrid_label, FALSE, FALSE, 0);
     $mygrid_box->pack_start($mygrid_input, FALSE, FALSE, 0);
     $mygrid_input->signal_connect('changed' => sub { my ( $self ) = $main::gridtools; $self->update(); });
@@ -133,6 +141,7 @@ sub new {
     $dxgrid_box->pack_start($dxgrid_label, FALSE, FALSE, 0);
     $dxgrid_box->pack_start($dxgrid_input, FALSE, FALSE, 0);
 
+    # Add the grid square input boxes to the inbox box
     $in_box->pack_start($mygrid_box, FALSE, TRUE, 0);
     $in_box->pack_start($dxgrid_box, FALSE, TRUE, 0); 
 
@@ -211,10 +220,13 @@ sub new {
     $box->pack_start($rot_box, TRUE, TRUE, 0);
     $box->pack_end($button_box, FALSE, FALSE, 0);
 
+
     $window->add($box);
     $window->show_all();
 
-    # Focus the DX QTH input
+    # set focus properly in the input box
+    $mygrid_input->grab_focus();
+    $mygrid_input->set_position(0);
     $dxgrid_input->grab_focus();
 
     # if configured as such, hide the window automatically
