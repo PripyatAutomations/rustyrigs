@@ -100,6 +100,7 @@ our $def_cfg = {
     ui_vdd_fg           => '#70f070',      # VDD meter active color
     ui_vdd_font         => 'Monospace',
     ui_vdd_text         => '#000000',      # VDD meter text color
+    use_metric		=> 0,		   # 1 will use metric (miles, etc)
     win_border          => 10,
     win_height          => 1024,
     win_resizable       => 1,              # 1 means main window is resizable

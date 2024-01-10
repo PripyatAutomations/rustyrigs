@@ -10,6 +10,7 @@ use Hamlib;
 use rustyrigs_set_colors;
 
 my $log;
+my $cfg;
 
 sub DESTROY {
     ( my $self ) = @_;
@@ -32,7 +33,6 @@ sub update {
     # update lat/lon for the gridsquare if it appears valid length
     if ($dx_len >= 4 && ($dx_len % 2 == 0)) {
        (my $err, $dx_lon, $dx_lat, my $sw) = Hamlib::locator2longlat($dxgrid);
-       print "err: $err\n";
        my $dx_lat_s = int($dx_lat * 100000) / 100000.0;
        my $dx_lon_s = int($dx_lon * 100000) / 100000.0;
        my $latlon = "$dx_lat_s, $dx_lon_s";
@@ -47,14 +47,26 @@ sub update {
 
        ( my $err, $dist, $az ) = Hamlib::qrb($my_lon, $my_lat, $dx_lon, $dx_lat);
        my $longpath = Hamlib::distance_long_path($dist);
-       my $s_longpath = sprintf("%.2f", $longpath);
+       my $s_longpath;
+       
 
-       my $s_dist = sprintf("%.2f", $dist);
-       my $s_az = sprintf("%.2f", $az);
-       $log->Log("user", "info", "Calculated [$mygrid] => [$dxgrid]: ${s_dist} km ($longpath km long path) at ${s_az}) °");
+       my $s_dist;
+       my $s_az;
+       my $use_metric = $$cfg->{'use_metric'};
+       print "use_metric: " . Dumper($use_metric) . "\n";
+       if ($use_metric) {
+          $s_az = sprintf("%.2f deg", $az);
+          $s_dist = sprintf("%.2f km", $dist);
+          $s_longpath = sprintf("%.2f mi", $longpath);
+       } else {
+          $s_az = sprintf("%.2f deg", $az);
+          $s_dist = sprintf("%.2f mi", $dist / 1.60934);
+          $s_longpath = sprintf("%.2f mi", $longpath / 1.60934);
+       }
+       $log->Log("user", "info", "Calculated [$mygrid] => [$dxgrid]: ${s_dist} ($s_longpath long path) at ${s_az}) °");
        $$b_l->set_text($s_az);
-       $$d_l->set_text($s_dist . " km");
-       $$lp_l->set_text($s_longpath . " km");
+       $$d_l->set_text($s_dist);
+       $$lp_l->set_text($s_longpath);
     } else {	# clear results until valid values present
        $$b_l->set_text('----');	# clear bearing label
        $$d_l->set_text('----');	# clear distance label
@@ -73,7 +85,7 @@ sub latlon_entry_clicked {
 sub new {
     my ( $class ) = @_;
 
-    my $cfg = $main::cfg;
+    $cfg = $main::cfg;
     $log = $main::log;
     
     my $wp = $$cfg->{'win_gridtools_placement'};
