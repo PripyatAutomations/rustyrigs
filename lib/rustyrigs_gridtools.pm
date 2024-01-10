@@ -53,7 +53,7 @@ sub update {
        my $s_dist;
        my $s_az;
        my $use_metric = $$cfg->{'use_metric'};
-       print "use_metric: " . Dumper($use_metric) . "\n";
+
        if ($use_metric) {
           $s_az = sprintf("%.2f deg", $az);
           $s_dist = sprintf("%.2f km", $dist);

@@ -407,6 +407,23 @@ sub new {
         }
     );
     $window_options_box->pack_start( $meter_ontop_button, FALSE, FALSE, 0 );
+    my $metric_toggle = Gtk3::CheckButton->new();
+    $metric_toggle->set_label('Use metric?');
+    $metric_toggle->set_active( $cfg->{'use_metric'} );
+    $metric_toggle->signal_connect(
+        'toggled' => sub {
+            my $button = shift;
+
+            if ( $button->get_active() ) {
+                $tmp_cfg->{'use_metric'} = 1;
+            }
+            else {
+                $tmp_cfg->{'use_metric'} = 0;
+            }
+            $changes++;
+        }
+    );
+    $metric_toggle->set_can_focus(1);
 
     ###########
     my $meter_choices_box = Gtk3::Box->new( 'vertical', 5 );
@@ -530,6 +547,7 @@ sub new {
     $vdd_toggle->set_can_focus(1);
     $meter_choices_box->pack_start( $vdd_toggle, FALSE, FALSE, 0 );
 
+
     # Create an OK button to apply settings
     my $colours_button = Gtk3::Button->new('Colo_urs');
     $colours_button->set_tooltip_text("Change GUI colours");
@@ -567,18 +585,23 @@ sub new {
     $button_box->pack_start( $cancel_button, TRUE, TRUE, 0 );
 
     # place the widgets
-    $config_box->pack_start( $address_label,       FALSE, FALSE, 0 );
-    $config_box->pack_start( $address_entry,       FALSE, FALSE, 0 );
-    $config_box->pack_start( $qth_label,           FALSE, FALSE, 0 );
-    $config_box->pack_start( $qth_entry,           FALSE, FALSE, 0 );
-    $config_box->pack_start( $poll_interval_label, FALSE, FALSE, 0 );
-    $config_box->pack_start( $poll_interval_entry, FALSE, FALSE, 0 );
-    $config_box->pack_start( $poll_tray_label,     FALSE, FALSE, 0 );
-    $config_box->pack_start( $poll_tray_entry,     FALSE, FALSE, 0 );
-    $config_box->pack_start( $core_debug_label,    FALSE, FALSE, 0 );
-    $config_box->pack_start( $core_debug,          FALSE, FALSE, 0 );
-    $config_box->pack_start( $hamlib_debug_label,  FALSE, FALSE, 0 );
-    $config_box->pack_start( $hamlib_debug,        FALSE, FALSE, 0 );
+    my $main_box = Gtk3::Box->new('vertical', 5);
+    my $box_label = Gtk3::Label->new('General');
+    $main_box->pack_start( $box_label, FALSE, FALSE, 0);
+    $main_box->pack_start( $address_label,       FALSE, FALSE, 0 );
+    $main_box->pack_start( $address_entry,       FALSE, FALSE, 0 );
+    $main_box->pack_start( $qth_label,           FALSE, FALSE, 0 );
+    $main_box->pack_start( $qth_entry,           FALSE, FALSE, 0 );
+    $main_box->pack_start( $poll_interval_label, FALSE, FALSE, 0 );
+    $main_box->pack_start( $poll_interval_entry, FALSE, FALSE, 0 );
+    $main_box->pack_start( $poll_tray_label,     FALSE, FALSE, 0 );
+    $main_box->pack_start( $poll_tray_entry,     FALSE, FALSE, 0 );
+    $main_box->pack_start( $core_debug_label,    FALSE, FALSE, 0 );
+    $main_box->pack_start( $core_debug,          FALSE, FALSE, 0 );
+    $main_box->pack_start( $hamlib_debug_label,  FALSE, FALSE, 0 );
+    $main_box->pack_start( $hamlib_debug,        FALSE, FALSE, 0 );
+    $main_box->pack_start( $metric_toggle, FALSE, FALSE, 0 );
+    $config_box->pack_start( $main_box, FALSE, FALSE, 0 );
     $config_box->pack_start( $window_options_box,  FALSE, FALSE, 0 );
     $config_box->pack_start( $meter_choices_box,   FALSE, FALSE, 0 );
     $config_box->pack_start( $colours_button,   FALSE, FALSE, 0 );
