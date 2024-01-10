@@ -209,9 +209,9 @@ sub new {
     );
 
     # My gridsquare
-    my $qth_label = Gtk3::Label->new('My gridsquare');
+    my $qth_label = Gtk3::Label->new('My QTH');
     $qth_entry = Gtk3::Entry->new();
-    $qth_entry->set_text( $cfg->{'my_qth'} );    # Default value
+    $qth_entry->set_text( uc($cfg->{'my_qth'}) );    # Default value
     $qth_entry->set_tooltip_text("Maidenhead gridsquare of the rig");
     $qth_entry->set_can_focus(1);
     $qth_entry->signal_connect(
@@ -332,6 +332,25 @@ sub new {
     $autohide_toggle->set_can_focus(1);
     $window_options_box->pack_start( $autohide_toggle, FALSE, FALSE, 0 );
 
+    my $hide_gridtools_button = Gtk3::CheckButton->new();
+    $hide_gridtools_button->set_label('Hide gridtools with main window?');
+    $hide_gridtools_button->set_active( $cfg->{'hide_gridtools_too'} );
+    $hide_gridtools_button->set_can_focus(1);
+    $hide_gridtools_button->signal_connect(
+        'toggled' => sub {
+            my $button = shift;
+
+            if ( $button->get_active() ) {
+                $tmp_cfg->{'hide_gridtools_too'} = 1;
+            }
+            else {
+                $tmp_cfg->{'hide_gridtools_too'} = 0;
+            }
+            $changes++;
+        }
+    );
+    $window_options_box->pack_start( $hide_gridtools_button,    FALSE, FALSE, 0 );
+
     my $hide_logview_button = Gtk3::CheckButton->new();
     $hide_logview_button->set_label('Hide log viewer by default?');
     $hide_logview_button->set_active( $cfg->{'hide_logview_at_start'} );
@@ -360,15 +379,34 @@ sub new {
             my $button = shift;
 
             if ( $button->get_active() ) {
-                $tmp_cfg->{'always_on_logview'} = 1;
+                $tmp_cfg->{'always_on_top_logview'} = 1;
             }
             else {
-                $tmp_cfg->{'always_on_logview'} = 0;
+                $tmp_cfg->{'always_on_top_logview'} = 0;
             }
             $changes++;
         }
     );
     $window_options_box->pack_start( $logview_ontop_button, FALSE, FALSE, 0 );
+
+    my $gridtools_ontop_button = Gtk3::CheckButton->new();
+    $gridtools_ontop_button->set_label('Keep grid tools above others?');
+    $gridtools_ontop_button->set_active( $cfg->{'always_on_top_gridtools'} );
+    $gridtools_ontop_button->set_can_focus(1);
+    $gridtools_ontop_button->signal_connect(
+        'toggled' => sub {
+            my $button = shift;
+
+            if ( $button->get_active() ) {
+                $tmp_cfg->{'always_on_top_gridtools'} = 1;
+            }
+            else {
+                $tmp_cfg->{'always_on_top_gridtools'} = 0;
+            }
+            $changes++;
+        }
+    );
+    $window_options_box->pack_start( $gridtools_ontop_button, FALSE, FALSE, 0 );
 
     my $ontop_button = Gtk3::CheckButton->new();
     $ontop_button->set_label('Keep main window above others?');

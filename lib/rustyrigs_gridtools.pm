@@ -18,8 +18,8 @@ sub DESTROY {
 
 sub update {
     my ( $self ) = @_;
-    my $mygrid = $self->{'mygrid'}->get_text;
-    my $dxgrid = $self->{'dxgrid'}->get_text;
+    my $mygrid = uc($self->{'mygrid'}->get_text);
+    my $dxgrid = uc($self->{'dxgrid'}->get_text);
     my $my_len = length($mygrid);
     my $dx_len = length($dxgrid);
     my ( $dx_lat, $dx_lon, $my_lat, $my_lon, $dist, $az );
@@ -122,7 +122,7 @@ sub new {
     my $mygrid_box = Gtk3::Box->new('vertical', 5);
     my $mygrid_label = Gtk3::Label->new('My QTH');
     my $mygrid_input = Gtk3::Entry->new();
-    $mygrid_input->set_text($$cfg->{'my_qth'});
+    $mygrid_input->set_text(uc($$cfg->{'my_qth'}));
     $mygrid_box->pack_start($mygrid_label, FALSE, FALSE, 0);
     $mygrid_box->pack_start($mygrid_input, FALSE, FALSE, 0);
     $mygrid_input->signal_connect('changed' => sub { my ( $self ) = $main::gridtools; $self->update(); });
@@ -179,6 +179,16 @@ sub new {
     $box->pack_start($in_box, FALSE, FALSE, 0);
     $box->pack_start($out_box, FALSE, FALSE, 0);
 
+    my $rot_box = Gtk3::Box->new('vertical', 5);
+    my $rotate_button = Gtk3::Button->new("Rotate _Antenna");
+    $rotate_button->set_tooltip_text("Rotate antenna towards bearing");
+    $rotate_button->set_can_focus(0);
+    $rotate_button->signal_connect( 'clicked'  => sub { 
+       (my $self) = @_;
+       $main::log->Log("user", "info", "User requested antenna rotation, but that's not yet supported...");
+    });
+    $rot_box->pack_start($rotate_button, TRUE, TRUE, 0);
+
     # Buttons
     my $button_box = Gtk3::Box->new('horizontal', 5);
     my $reset_button = Gtk3::Button->new("_Reset");
@@ -198,6 +208,7 @@ sub new {
 #    $cancel_button->signal_connect( 'clicked'  => sub { (my $self) = @_; cancel($self); } );
 #    $accel->connect(ord('C'), $$cfg->{'shortcut_key'}, 'visible', sub { my ( $self ) = @_; cancel($self); });
 #    $button_box->pack_start($cancel_button, TRUE, TRUE, 0);
+    $box->pack_start($rot_box, TRUE, TRUE, 0);
     $box->pack_end($button_box, FALSE, FALSE, 0);
 
     $window->add($box);
@@ -216,7 +227,6 @@ sub new {
     if (!defined $wgp) {
        $wgp = 'none';
     }
-
 
     # If placement type is none, we should manually place the window at x,y
     if ($wgp =~ m/none/) {

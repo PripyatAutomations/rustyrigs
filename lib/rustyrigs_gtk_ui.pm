@@ -230,6 +230,11 @@ sub w_main_hide {
     if (defined $w) {
        $w->set_visible(0);
     }
+    if ($cfg->{'hide_gridtools_too'}) {
+       my $gt = $main::gridtools;
+       my $gw = ${$gt->{'window'}};
+       $gw->set_visible(0);
+    }
     return FALSE;
 }
 
@@ -247,6 +252,11 @@ sub w_main_show {
     $w_main->show_all();
     $w_main->move( $cfg->{'win_x'}, $cfg->{'win_y'} );
     w_main_fm_toggle();
+    if ($cfg->{'hide_gridtools_too'}) {
+       my $gt = $main::gridtools;
+       my $gw = ${$gt->{'window'}};
+       $gw->set_visible(1);
+    }
 
     return FALSE;
 }

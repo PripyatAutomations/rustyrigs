@@ -17,6 +17,7 @@ our $def_cfg = {
     hamlib_loglevel  => "bug",       # bug err warn verbose trace cache
     hide_logview_at_start => 0,	     # 1 will hide the logview by default
     hide_gridtools_at_start => 1,    # 1 will hide the gridtools by default
+    hide_gridtools_too => 1,	     # 1 will hide gridtools with the main window
     icon_error       => "error.png",
     icon_idle        => "idle.png",
     icon_logview     => "logview.png",
