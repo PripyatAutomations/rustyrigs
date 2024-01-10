@@ -41,22 +41,17 @@ sub update {
     # calculate distance/bearing, only when both are correct
     if (($my_len == 4 || $my_len == 6) && ($dx_len == 4 || $dx_len == 6)) {
        (my $ll_err, $my_lon, $my_lat, my $sw) = Hamlib::locator2longlat($mygrid);
-       print "ll_err: $ll_err\n";
        my $my_lat_s = int($my_lat * 100000) / 100000.0;
        my $my_lon_s = int($my_lon * 100000) / 100000.0;
 
        ( my $err, $dist, $az ) = Hamlib::qrb($my_lon, $my_lat, $dx_lon, $dx_lat);
-       print "Hamlib::qrb - err: $err, dist: $dist, az: $az\n";
        my $longpath = Hamlib::distance_long_path($dist);
 
        my $s_dist = sprintf("%.2f", $dist);
        my $s_az = sprintf("%.2f", $az);
-       my $out = sprintf("my qth ($mygrid) %.3f, %.3f", $my_lat, $my_lon);
-       $out .=   sprintf("dx ($dxgrid) %.3f, %.3f distance: %.2f bearing: %.2f", $dx_lat, $dx_lon, $dist, $az);
-       print "$out\n";
-       my $log_msg = sprintf( "Dist: %.3f km, bearing %.2f, long path: %.3f km from $mygrid to $dxgrid\n",
-           $dist, $az, $longpath);
        $log->Log("user", "info", "Calculated [$mygrid] => [$dxgrid]: ${s_dist} km ($longpath km long path) at ${s_az}) °");
+       $$b_l->set_text($s_az);
+       $$d_l->set_text($s_dist);
     } else {	# clear results until valid values present
        $$b_l->set_text('----');	# clear bearing label
        $$d_l->set_text('----');	# clear distance label
