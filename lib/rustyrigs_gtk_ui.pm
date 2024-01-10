@@ -424,6 +424,17 @@ sub channel_list {
     return $store;
 }
 
+sub open_gridtools {
+    if (defined $main::gridtools) {
+       my $gt_win = $main::gridtools->{'window'};
+       $$gt_win->deiconify();
+       $$gt_win->present();
+    }
+    else {
+       $main::gridtools = rustyrigs_gridtools->new();
+    }
+}
+
 sub draw_main_win {
     $w_main = Gtk3::Window->new('toplevel');
 
@@ -1019,14 +1030,7 @@ sub draw_main_win {
     my $gridtools_button = Gtk3::Button->new_with_mnemonic('_Gridsquare Tools');
     $gridtools_button->signal_connect(
         clicked => sub {
-            if (defined $main::gridtools) {
-               my $gt_win = $main::gridtools->{'window'};
-               $$gt_win->deiconify();
-               $$gt_win->present();
-            }
-            else {
-               $main::gridtools = rustyrigs_gridtools->new();
-            }
+            open_gridtools();
         }
     );
     $gridtools_button->set_tooltip_text("Show gridsquare tools");

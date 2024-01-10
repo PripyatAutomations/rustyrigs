@@ -40,7 +40,7 @@ sub update {
 
     # calculate distance/bearing, only when both are correct
     if (($my_len == 4 || $my_len == 6) && ($dx_len == 4 || $dx_len == 6)) {
-       (my $ll_err, $my_lon, $my_lat, my $sw) = Hamlib::locator2longlat($dxgrid);
+       (my $ll_err, $my_lon, $my_lat, my $sw) = Hamlib::locator2longlat($mygrid);
        print "ll_err: $ll_err\n";
        my $my_lat_s = int($my_lat * 100000) / 100000.0;
        my $my_lon_s = int($my_lon * 100000) / 100000.0;
@@ -51,9 +51,9 @@ sub update {
 
        my $s_dist = sprintf("%.2f", $dist);
        my $s_az = sprintf("%.2f", $az);
-#       my $out = sprintf("my qth ($mygrid) %.3f, %.3f", $my_lat, $my_lon);
-#       $out .=   sprintf("dx ($dxgrid) %.3f, %.3f distance: %.2f bearing: %.2f", $dx_lat, $dx_lon, $dist, $az);
-#       print "$out\n";
+       my $out = sprintf("my qth ($mygrid) %.3f, %.3f", $my_lat, $my_lon);
+       $out .=   sprintf("dx ($dxgrid) %.3f, %.3f distance: %.2f bearing: %.2f", $dx_lat, $dx_lon, $dist, $az);
+       print "$out\n";
        my $log_msg = sprintf( "Dist: %.3f km, bearing %.2f, long path: %.3f km from $mygrid to $dxgrid\n",
            $dist, $az, $longpath);
        $log->Log("user", "info", "Calculated [$mygrid] => [$dxgrid]: ${s_dist} km ($longpath km long path) at ${s_az}) °");
@@ -212,6 +212,7 @@ sub new {
 #           $$cfg->{'win_gridtools_height'} );
     }
 
+    # save resizes/moves
     $window->signal_connect(
         'configure-event' => sub {
             my ( $widget, $event ) = @_;
@@ -231,6 +232,13 @@ sub new {
             return FALSE;
         }
     );
+
+    # make the close button iconify instead
+    $window->signal_connect(delete_event => sub {
+        my ($widget, $event) = @_;
+        $widget->iconify();
+        return TRUE;  			# Prevent default window destruction
+    });
 
     my $self = {
        # functions
