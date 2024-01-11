@@ -27,7 +27,9 @@ our $icon_transmit_pix;
 our $tray_icon;    # systray icon
 our $w_main;       # main window
 our $main_menu;
+our $mem_edit_button;
 our $mem_load_button;
+our $mem_write_button;
 our $mode_entry;
 our $rf_gain_entry;
 our $rig_vol_entry;
@@ -560,7 +562,6 @@ sub draw_main_win {
         $cfg->{'shortcut_key'},
         'visible',
         sub {
-            $chan_combo->grab_focus();
             $chan_combo->popup();
         }
     );
@@ -580,16 +581,26 @@ sub draw_main_win {
         }
     );
 
-    $mem_load_button->grab_focus();
     $mem_btn_box->pack_start( $mem_load_button, TRUE, TRUE, 0 );
+
+    # Memory write button
+    $mem_write_button =
+      Gtk3::Button->new( "Save Chan (" . $cfg->{'key_mem_write'} . ")" );
+    $mem_write_button->set_tooltip_text("write the channel memory");
+
+    $mem_write_button->signal_connect(
+        clicked => sub {
+        }
+    );
+    $mem_btn_box->pack_start( $mem_write_button, TRUE, TRUE, 0 );
 
     # XXX: ACCEL-Replace these with a global function
     $w_main_accel->connect(
-        ord( $cfg->{'key_mem_load'} ),
+        ord( $cfg->{'key_mem_write'} ),
         $cfg->{'shortcut_key'},
         'visible',
         sub {
-            $mem_load_button->grab_focus();
+            $mem_write_button->grab_focus();
 
             # XXX: Apply the settings from the memory entry into active VFO
             # apply_mem_to_vfo();
@@ -597,7 +608,7 @@ sub draw_main_win {
     );
 
     # Memory edit button
-    my $mem_edit_button =
+    $mem_edit_button =
       Gtk3::Button->new( "Edit Chan (" . $cfg->{'key_mem_edit'} . ")" );
     $mem_edit_button->set_tooltip_text("Add or Edit Memory slot");
 
@@ -606,7 +617,6 @@ sub draw_main_win {
             $main::channels->show();
         }
     );
-    $mem_edit_button->grab_focus();
     $mem_btn_box->pack_start( $mem_edit_button, TRUE, TRUE, 0 );
 
     # XXX: ACCEL-Replace these with a global function
@@ -634,7 +644,6 @@ sub draw_main_win {
             rustyrigs_hamlib::next_vfo();
         }
     );
-    $vfo_sel_button->grab_focus();
     $box->pack_start( $vfo_sel_button, FALSE, FALSE, 0 );
 
     # XXX: ACCEL-Replace these with a global function
@@ -1187,6 +1196,8 @@ sub new {
         lock_item      => \$lock_item,
         main_menu      => \$main_menu,
         main_menu_open => \$main_menu_open,
+        mem_add_button => \$mem_load_button,
+        mem_edit_button => \$mem_edit_button,
         mem_load_button => \$mem_load_button,
         mode_entry     => \$mode_entry,
         rf_gain_entry  => \$rf_gain_entry,
