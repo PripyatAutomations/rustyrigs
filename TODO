@@ -1,4 +1,5 @@
-* Maybe move the FM stuff to the rig of the rest?
+* Move the meters to a floating window
+* Maybe move the FM stuff to the rig of the rest? or maybe a floating window?
 * Replace freq slider (gtk3 box with these widgets):
   - numeric entry field
   - up & down buttons
