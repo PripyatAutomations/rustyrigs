@@ -1,3 +1,8 @@
+2024-01-10
+	* bug fixes
+	* added hide feature for gridtools dialog
+	* implemented LOCK feature
+
 2024-01-09
 	* lots of bug fixes
 	* Logview window shows and hides with the main window

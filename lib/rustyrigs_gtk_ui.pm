@@ -27,7 +27,9 @@ our $icon_transmit_pix;
 our $tray_icon;    # systray icon
 our $w_main;       # main window
 our $main_menu;
+our $mem_load_button;
 our $mode_entry;
+our $rf_gain_entry;
 our $rig_vol_entry;
 our $vfo_freq_entry;
 our $vfo_power_entry;
@@ -150,7 +152,7 @@ sub main_menu {
     $lock_item->signal_connect(
         toggled => sub {
             my $widget = shift;
-            toggle_locked("menu");
+            main::toggle_locked("menu");
             $main_menu_open = 0;
             $main_menu->destroy();    # Hide the menu after the choice is made
             return FALSE;
@@ -566,7 +568,7 @@ sub draw_main_win {
     my $mem_btn_box = Gtk3::Box->new( 'horizontal', 5 );
 
     # Memory load button
-    my $mem_load_button =
+    $mem_load_button =
       Gtk3::Button->new( "Load Chan (" . $cfg->{'key_mem_load'} . ")" );
     $mem_load_button->set_tooltip_text("(re)load the channel memory");
 
@@ -834,7 +836,7 @@ sub draw_main_win {
 
     my $rf_gain_label =
       Gtk3::Label->new( 'RF Gain / Atten. (' . $cfg->{'key_rf_gain'} . ')' );
-    my $rf_gain_entry = Gtk3::Scale->new_with_range( 'horizontal', -40, 40, 1 );
+    $rf_gain_entry = Gtk3::Scale->new_with_range( 'horizontal', -40, 40, 1 );
     $rf_gain_entry->set_digits(0);    # Disable decimal places
     $rf_gain_entry->set_draw_value(TRUE)
       ;                               # Display the current value on the slider
@@ -989,12 +991,7 @@ sub draw_main_win {
     $lock_button = Gtk3::ToggleButton->new_with_label("Lock ($key_lock)");
     $lock_button->signal_connect(
         toggled => sub {
-            if ($main::locked) {
-                $main::locked = FALSE;
-            }
-            else {
-                $main::locked = TRUE;
-            }
+            main::toggle_locked("key");
         }
     );
 
@@ -1185,10 +1182,6 @@ sub new {
         icon_settings_pix => \$icon_settings_pix,
         icon_transmit_pix => \$icon_transmit_pix,
         tray_icon         => \$tray_icon,
-        vfo_freq_entry    => \$vfo_freq_entry,
-        vfo_power_entry   => \$vfo_power_entry,
-        vfo_sel_button    => \$vfo_sel_button,
-        width_entry       => \$width_entry,
 
         # GUI widgets
         box            => \$box,
@@ -1197,8 +1190,14 @@ sub new {
         lock_item      => \$lock_item,
         main_menu      => \$main_menu,
         main_menu_open => \$main_menu_open,
+        mem_load_button => \$mem_load_button,
         mode_entry     => \$mode_entry,
+        rf_gain_entry  => \$rf_gain_entry,
         rig_vol_entry  => \$rig_vol_entry,
+        vfo_freq_entry    => \$vfo_freq_entry,
+        vfo_power_entry   => \$vfo_power_entry,
+        vfo_sel_button    => \$vfo_sel_button,
+        width_entry       => \$width_entry,
 
         # Windows
         w_main     => \$w_main,

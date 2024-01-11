@@ -1,9 +1,11 @@
+* Fix crash when toggling locked via systray menu
 * While transmitting, make the power meter show the RFPOWER meter instead of commanded power
   if possible.
 * Add a squelch control
 * Add preamp control
 * Add mic gain control
 * Add DNR/DNF controls
+* PTT button & Light
 * Add signal bar to SWR widget
   - implement multiple bars (ugh!)
 * Move GTK GUI update code from lib/*_hamlib.pm to update() in lib/*_gtk_ui.pm
@@ -14,7 +16,6 @@
 * Add a widget (scale/slider?) under the freq selector to allow chosing the step size
 * Fix the bugs
 * Crap ton of code cleanup is needed...
-* PTT button & Light
 * Finish GTK3 GUI
 * Add settings dialog for using color picker to set the various colors.
 * More keyboard controls! make it so you can type to search the boxes

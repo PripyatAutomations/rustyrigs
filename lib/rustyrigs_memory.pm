@@ -7,9 +7,9 @@ use Glib qw(TRUE FALSE);
 use Data::Dumper;
 
 my $mem_file;
-my $w_mem_edit;
-my $mem_edit_box   = Gtk3::Box->new( 'vertical', 5 );
-my $mem_edit_open  = 0;
+our $w_mem_edit;
+our $mem_edit_box   = Gtk3::Box->new( 'vertical', 5 );
+our $mem_edit_open  = 0;
 my $mem_edit_accel = Gtk3::AccelGroup->new();
 
 # new() sets these up

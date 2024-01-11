@@ -11,18 +11,18 @@ use Glib qw(TRUE FALSE);
 use warnings;
 use rustyrigs_set_colors;
 
-my $config_box;
-my $address_entry;
-my $qth_entry;
-my $poll_interval_entry;
-my $poll_tray_entry;
-my $core_debug;
-my $hamlib_debug;
+our $config_box;
+our $address_entry;
+our $qth_entry;
+our $poll_interval_entry;
+our $poll_tray_entry;
+our $core_debug;
+our $hamlib_debug;
 my $tmp_cfg;
 my $w_main;
 my $changes = 1;	# XXX: fix this
 my $cfg;
-my $w_settings;
+our $w_settings;
 
 ##############################
 # Internal use, not exported #

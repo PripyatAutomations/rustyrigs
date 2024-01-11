@@ -17,12 +17,12 @@ use woodpile;
 use rustyrigs_hamlib;
 
 my $cfg;
-my $fm_box;
+our $fm_box;
 my $vfos = $rustyrigs_hamlib::vfos;
 my $curr_vfo;
 my $vfo;
-my $tone_freq_tx_entry;
-my $tone_freq_rx_entry;
+our $tone_freq_tx_entry;
+our $tone_freq_rx_entry;
 
 sub refresh_tone_freqs {
    my $curr_vfo = $cfg->{'active_vfo'};

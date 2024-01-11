@@ -77,21 +77,58 @@ our $cfg_p;
 $log->Log( "core", "info", $app_name . " is starting" );
 
 sub toggle_locked {
-    my $origin = shift;
+    our ( $origin, $lv ) = @_;
 
-    if ( $locked == TRUE ) {
-        $locked = FALSE;
-    }
-    else {
-        $locked = TRUE;
+    if ( defined $lv ) {
+        $locked = $lv;
+    } else
+    {
+        if ( $locked == TRUE ) {
+            $locked = FALSE;
+        }
+        else {
+            $locked = TRUE;
+        }
     }
 
     if ( !$origin eq "button" ) {
-
         # XXX: We need to check here if using GTK
         $gtk_ui->lock_button->set_active($locked);
     }
 
+    my @widgets = (
+       $gtk_ui->{'mem_load_button'},
+       $gtk_ui->{'mode_entry'},
+       $gtk_ui->{'rf_gain_entry'},
+       $gtk_ui->{'rig_vol_entry'},
+       $gtk_ui->{'vfo_freq_entry'},
+       $gtk_ui->{'vfo_power_entry'},
+       $gtk_ui->{'vfo_sel_button'},
+       $gtk_ui->{'width_entry'}
+    );
+
+    if ($locked) {
+        foreach my $widget (@widgets) {
+            my $actual_widget = $$widget;
+            if ($actual_widget->isa('Gtk3::Entry') || $actual_widget->isa('Gtk3::SpinButton')) {
+                $actual_widget->set_editable(0);
+            } else
+            {
+                $actual_widget->set_sensitive(0);
+            }
+        }
+    } else
+    {
+        foreach my $widget (@widgets) {
+            my $actual_widget = $$widget;
+            if ($actual_widget->isa('Gtk3::Entry') || $actual_widget->isa('Gtk3::SpinButton')) {
+                $actual_widget->set_editable(0);
+            } else
+            {
+                $actual_widget->set_sensitive(0);
+            }
+        }
+    }
     $log->Log( "ui", "debug", "Toggling \$locked to $locked by $origin" );
 }
 
@@ -143,7 +180,7 @@ $gtk_ui->set_icon("connecting");
 #}
 
 # Delay the hamlib init at least a second, for reliability
-my $hamlib_initialized = 0;
+our $hamlib_initialized = 0;
 sub hamlib_init {
     return if $hamlib_initialized;
 

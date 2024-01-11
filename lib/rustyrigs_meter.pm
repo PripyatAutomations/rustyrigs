@@ -7,7 +7,7 @@ use Data::Structure::Util qw/unbless/;
 use warnings;
 use strict;
 
-my $monospace_font;
+our $monospace_font;
 
 my $cfg;
 my $vfos;
