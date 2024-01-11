@@ -989,9 +989,15 @@ sub draw_main_win {
     # Create a toggle button to represent the lock state
     my $key_lock = $cfg->{'key_lock'};
     $lock_button = Gtk3::ToggleButton->new_with_label("Lock ($key_lock)");
+    # lock things
+    my $auto_lock = $cfg->{'start_locked'};
+    if ($auto_lock) {
+        $lock_button->set_active($main::locked);
+        main::toggle_locked("startup", TRUE);
+    }
     $lock_button->signal_connect(
         toggled => sub {
-            main::toggle_locked("key");
+            main::toggle_locked("button", $lock_button->get_active());
         }
     );
 
@@ -1000,16 +1006,7 @@ sub draw_main_win {
         $cfg->{'shortcut_key'},
         'visible',
         sub {
-            if ( $lock_button->get_active() ) {
-                $log->Log( "ui", "info", "UNLOCKing controls" );
-                main::toggle_locked("hotkey");
-                $lock_button->set_active(0);
-            }
-            else {
-                $log->Log( "ui", "info", "LOCKing controls" );
-                main::toggle_locked("hotkey");
-                $lock_button->set_active(1);
-            }
+            main::toggle_locked("hotkey", $lock_button->get_active());
         }
     );
 

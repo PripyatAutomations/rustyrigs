@@ -91,9 +91,9 @@ sub toggle_locked {
         }
     }
 
-    if ( !$origin eq "button" ) {
-        # XXX: We need to check here if using GTK
-        $gtk_ui->lock_button->set_active($locked);
+    if (!($origin eq "button")) {
+        my $lb = $gtk_ui->{'lock_button'};
+        $$lb->set_active($locked);
     }
 
     my @widgets = (
@@ -162,7 +162,6 @@ $gridtools = rustyrigs_gridtools->new();
 $gtk_ui->load_icons();
 $gtk_ui->draw_main_win();
 $gtk_ui->set_icon("connecting");
-
 
 # XXX: Sort this mess out soon
 #$channels = rustyrigs_memory->new($cfg, \$gtk_ui->w_main, $mem_file);

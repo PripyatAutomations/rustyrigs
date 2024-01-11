@@ -60,6 +60,7 @@ our $def_cfg = {
     show_swr            => 1,
     show_temp           => 1,
     show_vdd            => 1,
+    start_locked        => 1,		   # 1 will start with controls locked
     stay_hidden         => 0,
     thresh_alc_min      => 0,
     thresh_alc_max      => 1,
