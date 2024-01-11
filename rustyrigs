@@ -122,10 +122,10 @@ sub toggle_locked {
         foreach my $widget (@widgets) {
             my $actual_widget = $$widget;
             if ($actual_widget->isa('Gtk3::Entry') || $actual_widget->isa('Gtk3::SpinButton')) {
-                $actual_widget->set_editable(0);
+                $actual_widget->set_editable(1);
             } else
             {
-                $actual_widget->set_sensitive(0);
+                $actual_widget->set_sensitive(1);
             }
         }
     }
