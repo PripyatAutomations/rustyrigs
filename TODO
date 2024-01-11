@@ -1,3 +1,8 @@
+* Replace freq slider (gtk3 box with these widgets):
+  - numeric entry field
+  - up & down buttons
+  - step slider
+
 * Fix crash when toggling locked via systray menu
 * While transmitting, make the power meter show the RFPOWER meter instead of commanded power
   if possible.

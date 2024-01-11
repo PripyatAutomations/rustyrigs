@@ -74,7 +74,7 @@ our $cfg     = $def_cfg;
 our $cfg_p;
 
 # Set up logging...
-$log->Log( "core", "info", $app_name . " is starting" );
+$log->Log( "core", "info", "$app_name  is starting" );
 
 sub toggle_locked {
     our ( $origin, $lv ) = @_;
@@ -110,7 +110,7 @@ sub toggle_locked {
     if ($locked) {
         foreach my $widget (@widgets) {
             my $actual_widget = $$widget;
-            if ($actual_widget->isa('Gtk3::Entry') || $actual_widget->isa('Gtk3::SpinButton')) {
+            if ($actual_widget->isa('Gtk3::Entry')) { # || $actual_widget->isa('Gtk3::SpinButton')) {
                 $actual_widget->set_editable(0);
             } else
             {
@@ -121,7 +121,7 @@ sub toggle_locked {
     {
         foreach my $widget (@widgets) {
             my $actual_widget = $$widget;
-            if ($actual_widget->isa('Gtk3::Entry') || $actual_widget->isa('Gtk3::SpinButton')) {
+            if ($actual_widget->isa('Gtk3::Entry')) { #|| $actual_widget->isa('Gtk3::SpinButton')) {
                 $actual_widget->set_editable(1);
             } else
             {
