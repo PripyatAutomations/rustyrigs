@@ -200,6 +200,17 @@ sub new {
 
     # Buttons
     my $button_box = Gtk3::Box->new('horizontal', 5);
+
+    my $hide_button = Gtk3::Button->new("_Hide");
+    $hide_button->set_tooltip_text("Hide Dialog");
+    $hide_button->set_can_focus(1);
+    $hide_button->signal_connect( 'clicked'  => sub { 
+       (my $self) = @_;
+       $window->iconify();
+    });
+    $accel->connect(ord('H'), $$cfg->{'shortcut_key'}, 'visible', sub { my ( $self ) = @_; });
+    $button_box->pack_start($hide_button, TRUE, TRUE, 0);
+
     my $reset_button = Gtk3::Button->new("_Reset");
     $reset_button->set_tooltip_text("Reset dialog");
     $reset_button->set_can_focus(1);
@@ -210,13 +221,6 @@ sub new {
     });
     $accel->connect(ord('R'), $$cfg->{'shortcut_key'}, 'visible', sub { my ( $self ) = @_; });
     $button_box->pack_start($reset_button, TRUE, TRUE, 0);
-
-#    my $cancel_button = Gtk3::Button->new("_Cancel");
-#    $cancel_button->set_tooltip_text("Cancel");
-#    $cancel_button->set_can_focus(1);
-#    $cancel_button->signal_connect( 'clicked'  => sub { (my $self) = @_; cancel($self); } );
-#    $accel->connect(ord('C'), $$cfg->{'shortcut_key'}, 'visible', sub { my ( $self ) = @_; cancel($self); });
-#    $button_box->pack_start($cancel_button, TRUE, TRUE, 0);
     $box->pack_start($rot_box, TRUE, TRUE, 0);
     $box->pack_end($button_box, FALSE, FALSE, 0);
 
