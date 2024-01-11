@@ -1,3 +1,4 @@
+* Maybe move the FM stuff to the rig of the rest?
 * Replace freq slider (gtk3 box with these widgets):
   - numeric entry field
   - up & down buttons
