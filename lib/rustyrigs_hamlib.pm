@@ -227,15 +227,6 @@ sub read_rig {
 
     # XXX: Update the VFO select button if needed
 
-    # Get the RX volume
-    my $volume = $rig->get_level( $Hamlib::RIG_LEVEL_AF, $curr_hlvfo );
-    if (defined $volume) {
-       print "volume: $volume\n";
-       $$cfg->{'rx_volume'} = $volume;
-    }
-    else {
-       $volume = 0;
-    }
 
     # Get the frequency for current VFO
     my $freq = $rig->get_freq($curr_hlvfo);
@@ -255,27 +246,38 @@ sub read_rig {
     $last_mode = $textmode;
 
     my $vme = $$gtk_ui->{'mode_entry'};
-    my $active_index = 0;
+    my $mode_index = 0;
     for my $i (0 .. $#rustyrigs_hamlib::hamlib_modes) {
         if ($rustyrigs_hamlib::hamlib_modes[$i] eq $textmode) {
-            $active_index = $i;
+            $mode_index = $i;
             last;
         }
     }
 
-    # XXX: Figure out which width table applies and find the appropriate width index then select it...
+    # Get the RX volume
+    my $volume = $rig->get_level( $curr_hlvfo, $Hamlib::RIG_LEVEL_AF );
+    if (defined $volume) {
+       $$cfg->{'rx_volume'} = $volume;
+    }
+    else {
+       $volume = 0;
+    }
 
+    # XXX: Figure out which width table applies and find the appropriate width index then select it...
     my ( $alc, $comp, $power, $sig, $swr, $temp, $vdd );
-#    $alc = $rig->get_level($Hamlib::RIG_LEVEL_ALC);
-#    $comp = $rig->get_level($Hamlib::RIG_LEVEL_COMP);
+    $alc = $rig->get_level($Hamlib::RIG_LEVEL_ALC);
+    $comp = $rig->get_level($Hamlib::RIG_LEVEL_COMP);
     # XXX: This needs to use MaxWatts instead of 100...
     $power = int($rig->get_level_f($Hamlib::RIG_LEVEL_RFPOWER) * 100 + 0.5);
     $sig = $rig->get_level_i($Hamlib::RIG_LEVEL_STRENGTH);
     $swr = $rig->get_level_f($Hamlib::RIG_LEVEL_SWR);
 #    $temp = $rig->get_level($Hamlib::RIG_LEVEL_TEMP);
 #    $vdd = $rig->get_level($Hamlib::RIG_LEVEL_VDD);
-#    print "power: $power sig: $sig swr: $swr\n";
     $vfos->{$curr_vfo}{'power'} = $power;
+    $vfos->{$curr_vfo}{'sig'} = $sig;
+    $vfos->{$curr_vfo}{'swr'} = $swr;
+#    $vfos->{$curr_vfo}{'temp'} = $temp;
+#    $vfos->{$curr_vfo}{'vdd'} = $vdd;
     my $stats = $vfos->{$curr_vfo}{'stats'};
     $stats->{'signal'} = $rig->get_level_i( $curr_hlvfo, $Hamlib::RIG_LEVEL_STRENGTH );
 #    $main::log->Log( "hamlib", "debug", "power:\t\t $power\n mode: \t\t$mode\nstrength:\t\t" . $stats->{'signal'} . "\tswr$swr");
@@ -293,9 +295,11 @@ sub read_rig {
     my $vfe = $$gtk_ui->{'vfo_freq_entry'};
     $$vfe->set_value( $vfos->{$curr_vfo}{'freq'} );
     $vfos->{$curr_vfo}{'mode'} = $textmode;
-    $$vme->set_active( $active_index );
+    $$vme->set_active( $mode_index );
+    my $vpe = $$gtk_ui->{'vfo_power_entry'};
+    $$vpe->set_value( $power );
 
-    # XXX: need to move gui stuff out of here later..
+    # Set the icons appropriately & update the tooltip
     if (!$ptt_status) {
        if (!defined $last_ptt_status || $last_ptt_status != $ptt_status) {
           $main::log->Log("hamlib", "info", "PTT off");
@@ -308,6 +312,8 @@ sub read_rig {
        }
     }
     $last_ptt_status = $ptt_status;
+    # XXX: Update the meter widgets
+    # XXX: Update the system tray tooltip
     $rigctld_applying_changes = FALSE;
 }
 
@@ -365,19 +371,25 @@ sub new {
 
     Hamlib::rig_set_debug( hamlib_debug_level( $$cfg->{'hamlib_loglevel'} ) );
     my $model = $$cfg->{'rigctl_model'};
-    my $host  = $$cfg->{'rigctl_addr'};
-    if ( !defined($model) || $model eq "" ) {
+    my $addr  = $$cfg->{'rigctl_addr'};
+
+    # If no model set, use rigctld netrig
+    if ( !defined $model || $model eq "" ) {
         $model = 'RIG_MODEL_RIGCTLD';
+    }
+
+    # If no addr set, use localhost
+    if ( !defined $addr || $addr eq "" ) {
+        $addr = "localhost:4532";
     }
     $rig = new Hamlib::Rig($model);
 
     $rig->set_conf( "retry",        "50" );
-    $rig->set_conf( 'rig_pathname', $host );
+    $rig->set_conf( 'rig_pathname', $addr );
 
-    $main::log->Log( "hamlib", "info", "connecting to $host" );
+    $main::log->Log( "hamlib", "info", "connecting to $addr" );
 
 #  XXX: hamlib seems to immediately return success, even before trying to connect...
-#   $w_main->set_title("rustyrigs: Connecting to $host");
 #   if ($rig->open() != $Hamlib::RIG_OK) {
     my $rv = $rig->open();
 

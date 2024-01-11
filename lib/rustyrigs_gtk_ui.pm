@@ -30,6 +30,7 @@ our $main_menu;
 our $mode_entry;
 our $rig_vol_entry;
 our $vfo_freq_entry;
+our $vfo_power_entry;
 our $vfo_sel_button;
 our $width_entry;
 our $box;
@@ -63,6 +64,13 @@ sub main_menu_item_clicked {
     if ( $item->get_label() eq 'Toggle Window' ) {
         $window->set_visible( !$window->get_visible() );
     }
+    elsif ( $item->get_label() eq 'Show Gridtools' ) {
+        if (!defined $main::gridtools) {
+           $main::gridtools = rustyrigs_gridtools->new();
+        }
+        my $w = ${$main::gridtools->{'window'}};
+        $w->present();
+    }
     elsif ( $item->get_label() eq 'Quit' ) {
         close_main_win();
     }
@@ -79,6 +87,7 @@ sub main_menu_state {
     my $on_top  = 0;
     my $focused = 0;
 
+    # keep menu from being iconified/maximized
     if ( $event->new_window_state =~ m/\biconified\b/ ) {
         $w_main->deiconify();
     }
@@ -113,6 +122,7 @@ sub main_menu {
     $main_menu      = Gtk3::Menu->new();
     my $sep1        = Gtk3::SeparatorMenuItem->new();
     my $sep2        = Gtk3::SeparatorMenuItem->new();
+    my $sep3        = Gtk3::SeparatorMenuItem->new();
     my $toggle_item = Gtk3::MenuItem->new("Toggle Window");
     $toggle_item->signal_connect( activate =>
           sub { main_menu_item_clicked( $toggle_item, $w_main, $main_menu ) } );
@@ -127,6 +137,14 @@ sub main_menu {
     );
     $main_menu->append($settings_item);
     $main_menu->append($sep2);
+
+    my $gridtools_item = Gtk3::MenuItem->new("Show Gridtools");
+    $gridtools_item->signal_connect(
+        activate =>
+          sub { main_menu_item_clicked( $gridtools_item, $w_main, $main_menu ) }
+    );
+    $main_menu->append($gridtools_item);
+    $main_menu->append($sep3);
 
     $lock_item = Gtk3::CheckMenuItem->new("Locked");
     $lock_item->signal_connect(
@@ -851,7 +869,7 @@ sub draw_main_win {
 
     my $vfo_power_label =
       Gtk3::Label->new( 'Power (Watts) (' . $cfg->{'key_power'} . ')' );
-    my $vfo_power_entry = Gtk3::Scale->new_with_range(
+    $vfo_power_entry = Gtk3::Scale->new_with_range(
         'horizontal',            $act_vfo->{'min_power'},
         $act_vfo->{'max_power'}, $act_vfo->{'power_step'}
     );
@@ -879,34 +897,25 @@ sub draw_main_win {
     # Connect a signal to track button press
     $vfo_power_entry->signal_connect(
         'button-press-event' => sub {
-            if (!$main::rig_p->is_busy()) {
-                my ( $widget, $event ) = @_;
-                if (!$main::rig_p->is_busy()) {
-                   $dragging = 1;    # Set dragging flag when the slider is clicked
-                }
-                # reset the value to our stored state to discard this change
-                return FALSE;     # Prevent the default behavior
-            } else {
-               return TRUE;
-            }
+            $dragging = 1;    # Set dragging flag when the slider is clicked
+            my ( $widget, $event ) = @_;
+            # reset the value to our stored state to discard this change
+            return FALSE;     # Prevent the default behavior
         }
     );
 
     # Connect a signal to track button release
     $vfo_power_entry->signal_connect(
         'button-release-event' => sub {
-            if (!$main::rig_p->is_busy()) {
-               $dragging = 0;    # Reset dragging flag on button release
-               if ( !defined( $act_vfo->{'power'} ) || $act_vfo->{'power'} eq "" )
-               {
-                   $act_vfo->{'power'} = $main::rig->get_vfo();
-               }
-
-               # reset it
-               $vfo_power_entry->set_value( $act_vfo->{'power'} );
-            } else {
-               return TRUE;
+            $dragging = 0;    # Reset dragging flag on button release
+            if ( !defined( $act_vfo->{'power'} ) || $act_vfo->{'power'} eq "" )
+            {
+            # XXX: wut?
+#                $act_vfo->{'power'} = $main::rig->get_vfo();
             }
+
+            # reset it
+            $vfo_power_entry->set_value( $act_vfo->{'power'} );
             return FALSE;
         }
     );
@@ -954,7 +963,7 @@ sub draw_main_win {
                    return FALSE;
                }
                return TRUE;
-            }
+           }
         }
     );
 
@@ -1177,6 +1186,7 @@ sub new {
         icon_transmit_pix => \$icon_transmit_pix,
         tray_icon         => \$tray_icon,
         vfo_freq_entry    => \$vfo_freq_entry,
+        vfo_power_entry   => \$vfo_power_entry,
         vfo_sel_button    => \$vfo_sel_button,
         width_entry       => \$width_entry,
 

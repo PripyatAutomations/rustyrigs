@@ -1,5 +1,11 @@
-* Make it so the gridtools dialog can be recalled from systray menu without opening main window
-
+* While transmitting, make the power meter show the RFPOWER meter instead of commanded power
+  if possible.
+* Add a squelch control
+* Add preamp control
+* Add mic gain control
+* Add DNR/DNF controls
+* Add signal bar to SWR widget
+  - implement multiple bars (ugh!)
 * Move GTK GUI update code from lib/*_hamlib.pm to update() in lib/*_gtk_ui.pm
 * Clean up read_rig to update $vfos->{$curr_vfo} and call gtk_ui->update()
 
