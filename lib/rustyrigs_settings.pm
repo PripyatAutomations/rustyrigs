@@ -9,7 +9,6 @@ use Data::Dumper;
 use strict;
 use Glib qw(TRUE FALSE);
 use warnings;
-use rustyrigs_set_colors;
 
 our $config_box;
 our $address_entry;
@@ -23,6 +22,14 @@ my $w_main;
 my $changes = 1;	# XXX: fix this
 my $cfg;
 our $w_settings;
+
+######################
+# Exported Functions #
+######################
+sub set_colors() {
+   my ( $class ) = @_;
+   my $dialog = rustyrigs_meterbar::Colors->new(\$w_settings);
+}
 
 ##############################
 # Internal use, not exported #
@@ -44,14 +51,6 @@ sub combobox_keys {
 sub print_signal_info {
     my ( $widget, $signal_name ) = @_;
     $main::log->Log( "ui", "debug", "Signal emitted by $widget: $signal_name" );
-}
-
-######################
-# Exported Functions #
-######################
-sub colour_dialog() {
-   my ( $class ) = @_;
-   my $dialog = rustyrigs_set_colors->new(\$w_settings);
 }
 
 # XXX: We need to make a list of cfg val => function
@@ -604,8 +603,8 @@ sub new {
     my $colours_button = Gtk3::Button->new('Colo_urs');
     $colours_button->set_tooltip_text("Change GUI colours");
     $colours_button->set_can_focus(1);
-    $colours_button->signal_connect( 'activate' => sub { (my $self) = @_; $class->colour_dialog(); } );
-    $colours_button->signal_connect( 'clicked'  => sub { (my $self) = @_; $class->colour_dialog(); } );
+    $colours_button->signal_connect( 'activate' => sub { (my $self) = @_; $class->set_colors(); } );
+    $colours_button->signal_connect( 'clicked'  => sub { (my $self) = @_; $class->set_colors(); } );
     $w_settings_accel->connect(
         ord('U'),  $cfg->{'shortcut_key'},
         'visible', sub { $colours_button->grab_focus(); }
@@ -666,7 +665,6 @@ sub new {
     $address_entry->grab_focus();
 
     my $self = {
-        colour_dialog => \&colour_dialog,
         close      => \&close,
         save       => \&save,
         w_settings => \$w_settings

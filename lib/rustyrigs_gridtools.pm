@@ -7,7 +7,6 @@ use strict;
 use Glib qw(TRUE FALSE);
 use warnings;
 use Hamlib;
-use rustyrigs_set_colors;
 
 my $log;
 my $cfg;
