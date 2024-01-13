@@ -600,14 +600,14 @@ sub new {
 
 
     # Create an OK button to apply settings
-    my $colours_button = Gtk3::Button->new('Colo_urs');
-    $colours_button->set_tooltip_text("Change GUI colours");
-    $colours_button->set_can_focus(1);
-    $colours_button->signal_connect( 'activate' => sub { (my $self) = @_; $class->set_colors(); } );
-    $colours_button->signal_connect( 'clicked'  => sub { (my $self) = @_; $class->set_colors(); } );
+    my $colors_button = Gtk3::Button->new('Colo_urs');
+    $colors_button->set_tooltip_text("Change GUI colors");
+    $colors_button->set_can_focus(1);
+    $colors_button->signal_connect( 'activate' => sub { (my $self) = @_; $class->set_colors(); } );
+    $colors_button->signal_connect( 'clicked'  => sub { (my $self) = @_; $class->set_colors(); } );
     $w_settings_accel->connect(
         ord('U'),  $cfg->{'shortcut_key'},
-        'visible', sub { $colours_button->grab_focus(); }
+        'visible', sub { $colors_button->grab_focus(); }
     );
 
     ###########
@@ -655,7 +655,7 @@ sub new {
     $config_box->pack_start( $main_box, FALSE, FALSE, 0 );
     $config_box->pack_start( $window_options_box,  FALSE, FALSE, 0 );
     $config_box->pack_start( $meter_choices_box,   FALSE, FALSE, 0 );
-    $config_box->pack_start( $colours_button,   FALSE, FALSE, 0 );
+    $config_box->pack_start( $colors_button,   FALSE, FALSE, 0 );
     $config_box->pack_end( $button_box, FALSE, FALSE, 0 );
 
     # Add the config box, show the window, and focus first input
