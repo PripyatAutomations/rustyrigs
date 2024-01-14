@@ -180,10 +180,10 @@ sub new {
             my ( $x,     $y )      = $widget->get_position();
 
             # Save the data...
-            $cfg->{'win_settings_x'}      = $x;
-            $cfg->{'win_settings_y'}      = $y;
-            $cfg->{'win_settings_height'} = $height;
-            $cfg->{'win_settings_width'}  = $width;
+            $tmp_cfg->{'win_settings_x'}      = $x;
+            $tmp_cfg->{'win_settings_y'}      = $y;
+            $tmp_cfg->{'win_settings_height'} = $height;
+            $tmp_cfg->{'win_settings_width'}  = $width;
 
             # Return FALSE to allow the event to propagate
             return FALSE;
@@ -208,7 +208,7 @@ sub new {
     $address_entry->signal_connect(
         changed => sub {
             my $val = $address_entry->get_text();
-            $cfg->{'rigctl_addr'} = $val;
+            $tmp_cfg->{'rigctl_addr'} = $val;
         }
     );
 
@@ -221,7 +221,7 @@ sub new {
     $qth_entry->signal_connect(
         changed => sub {
             my $val = $qth_entry->get_text();
-            $cfg->{'my_qth'} = $val;
+            $tmp_cfg->{'my_qth'} = $val;
         }
     );
 

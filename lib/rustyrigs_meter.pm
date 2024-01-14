@@ -10,7 +10,7 @@ use strict;
 # Our default font
 our $monospace_font;
 our $docked;
-
+our $tmp_cfg;
 my $cfg;
 my $vfos;
 my $w_main;
@@ -254,6 +254,12 @@ sub cancel {
 
 sub save {
    my ( $self ) = @_;
+
+   if (defined $tmp_cfg) {
+      $main::cfg_p->apply($tmp_cfg);
+   } else {
+      print "no changes to save (meters)\n";
+   }
    $color_win->destroy();
 }
 
@@ -379,7 +385,7 @@ sub new {
       $bg_input->signal_connect(
          changed => sub {
             my ($self) = @_;
-            $m_bg = $meter->{$m_name}{'bg'} = $$cfg->{'ui_' . $m_name . '_bg'} = $self->get_text();
+            $tmp_cfg->{'ui_' . $m_name . '_bg'} = $self->get_text();
          }
       );
       $bg_input->signal_connect(
@@ -390,7 +396,7 @@ sub new {
                my $color = color_picker($color_win, $def_color);
                if ($color) {
                   $self->set_text($color->to_string());
-                  $m_bg = $meter->{$m_name} = $$cfg->{'ui_' . $m_name . '_bg'} = woodpile::gdk_rgb_to_hex($color);
+                  $tmp_cfg->{'ui_' . $m_name . '_bg'} = woodpile::gdk_rgb_to_hex($color);
                }
             }
          }
@@ -410,7 +416,7 @@ sub new {
       $alarm_bg_input->signal_connect(
          changed => sub {
             my ($self) = @_;
-            $m_bg = $meter->{$m_name}{'alarm_bg'} = $$cfg->{'ui_' . $m_name . '_alarm_bg'} = $self->get_text();
+            $tmp_cfg->{'ui_' . $m_name . '_alarm_bg'} = $self->get_text();
          }
       );
       $alarm_bg_input->signal_connect(
@@ -421,7 +427,7 @@ sub new {
                my $color = color_picker($color_win, $def_color);
                if ($color) {
                   $self->set_text($color->to_string());
-                  $m_bg = $$cfg->{'ui_' . $m_name . '_alarm_bg'} = $meter->{$m_name} = woodpile::gdk_rgb_to_hex($color);;
+                  $tmp_cfg->{'ui_' . $m_name . '_alarm_bg'} = woodpile::gdk_rgb_to_hex($color);;
                }
             }
          }
@@ -441,7 +447,7 @@ sub new {
       $fg_input->signal_connect(
          changed => sub {
             my ($self) = @_;
-            $m_bg = $$cfg->{'ui_' . $m_name . '_fg'} = $meter->{$m_name}{'fg'} = $self->get_text();
+            $tmp_cfg->{'ui_' . $m_name . '_fg'} = $self->get_text();
          }
       );
       $fg_input->signal_connect(
@@ -452,7 +458,7 @@ sub new {
                my $color = color_picker($color_win, $def_color);
                if ($color) {
                   $self->set_text($color->to_string());
-                  $m_bg = $meter->{$m_name} = $$cfg->{'ui_' . $m_name . '_fg'} = woodpile::gdk_rgb_to_hex($color);
+                  $tmp_cfg->{'ui_' . $m_name . '_fg'} = woodpile::gdk_rgb_to_hex($color);
                }
             }
          }
@@ -472,7 +478,7 @@ sub new {
       $text_input->signal_connect(
          changed => sub {
             my ($self) = @_;
-            $m_bg = $$cfg->{'ui_' . $m_name . '_text'} = $meter->{$m_name}{'text'} = $self->get_text();
+            $tmp_cfg->{'ui_' . $m_name . '_text'} = $self->get_text();
          }
       );
       $text_input->signal_connect(
@@ -483,7 +489,7 @@ sub new {
                my $color = color_picker($color_win, $def_color);
                if ($color) {
                   $self->set_text($color->to_string());
-                  $m_bg = $meter->{$m_name} = $$cfg->{'ui_' . $m_name . '_text'} = woodpile::gdk_rgb_to_hex($color);
+                  $tmp_cfg->{'ui_' . $m_name . '_text'} = woodpile::gdk_rgb_to_hex($color);
                }
             }
          }
@@ -494,8 +500,9 @@ sub new {
       my $font_button = Gtk3::Button->new_with_label("Font: $m_font");
       $font_button->signal_connect(clicked => sub {
           my $font = font_chooser($color_win, $m_font);
-          if ($font) {
-              $m_font = $meter->{'font'} = $$cfg->{'ui_' . $m_name . '_font'} = $font;
+
+          if (defined $font) {
+             $tmp_cfg->{'ui_' . $m_name . '_font'} = $font;
           }
       });
 
