@@ -303,17 +303,16 @@ sub read_rig {
     if (!$ptt_status) {
        if (!defined $last_ptt_status || $last_ptt_status != $ptt_status) {
           $main::log->Log("hamlib", "info", "PTT off");
-          $main::gtk_ui->set_icon("idle");
        }
+       $main::gtk_ui->set_icon("idle");
     } else {
        if (!defined $last_ptt_status || $last_ptt_status != $ptt_status) {
           $main::log->Log("hamlib", "info", "PTT on");
-          $main::gtk_ui->set_icon("transmit");
        }
+       $main::gtk_ui->set_icon("transmit");
     }
     $last_ptt_status = $ptt_status;
     # XXX: Update the meter widgets
-    # XXX: Update the system tray tooltip
     $rigctld_applying_changes = FALSE;
 }
 
