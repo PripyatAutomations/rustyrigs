@@ -322,6 +322,42 @@ sub new {
     $hamlib_debug->set_can_focus(1);
     $hamlib_debug->signal_connect( key_release_event => \&combobox_keys );
 
+    my $metric_toggle = Gtk3::CheckButton->new();
+    $metric_toggle->set_label('Use metric?');
+    $metric_toggle->set_active( $cfg->{'use_metric'} );
+    $metric_toggle->signal_connect(
+        'toggled' => sub {
+            my $button = shift;
+
+            if ( $button->get_active() ) {
+                $tmp_cfg->{'use_metric'} = 1;
+            }
+            else {
+                $tmp_cfg->{'use_metric'} = 0;
+            }
+            $changes++;
+        }
+    );
+    $metric_toggle->set_can_focus(1);
+
+    my $start_locked_toggle = Gtk3::CheckButton->new();
+    $start_locked_toggle->set_label('Start locked?');
+    $start_locked_toggle->set_active( $cfg->{'start_locked'} );
+    $start_locked_toggle->signal_connect(
+        'toggled' => sub {
+            my $button = shift;
+
+            if ( $button->get_active() ) {
+                $tmp_cfg->{'start_locked'} = 1;
+            }
+            else {
+                $tmp_cfg->{'start_locked'} = 0;
+            }
+            $changes++;
+        }
+    );
+    $start_locked_toggle->set_can_focus(1);
+
     my $window_options_box   = Gtk3::Box->new( 'vertical', 5 );
     my $window_options_label = Gtk3::Label->new('Window Behaviour');
     $window_options_box->pack_start( $window_options_label, FALSE, FALSE, 0 );
@@ -458,23 +494,6 @@ sub new {
         }
     );
     $window_options_box->pack_start( $meter_ontop_button, FALSE, FALSE, 0 );
-    my $metric_toggle = Gtk3::CheckButton->new();
-    $metric_toggle->set_label('Use metric?');
-    $metric_toggle->set_active( $cfg->{'use_metric'} );
-    $metric_toggle->signal_connect(
-        'toggled' => sub {
-            my $button = shift;
-
-            if ( $button->get_active() ) {
-                $tmp_cfg->{'use_metric'} = 1;
-            }
-            else {
-                $tmp_cfg->{'use_metric'} = 0;
-            }
-            $changes++;
-        }
-    );
-    $metric_toggle->set_can_focus(1);
 
     ###########
     my $meter_choices_box = Gtk3::Box->new( 'vertical', 5 );
@@ -652,6 +671,7 @@ sub new {
     $main_box->pack_start( $hamlib_debug_label,  FALSE, FALSE, 0 );
     $main_box->pack_start( $hamlib_debug,        FALSE, FALSE, 0 );
     $main_box->pack_start( $metric_toggle, FALSE, FALSE, 0 );
+    $main_box->pack_start( $start_locked_toggle, FALSE, FALSE, 0 );
     $config_box->pack_start( $main_box, FALSE, FALSE, 0 );
     $config_box->pack_start( $window_options_box,  FALSE, FALSE, 0 );
     $config_box->pack_start( $meter_choices_box,   FALSE, FALSE, 0 );
