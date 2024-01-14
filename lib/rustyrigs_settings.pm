@@ -28,7 +28,7 @@ our $w_settings;
 ######################
 sub set_colors() {
    my ( $class ) = @_;
-   my $dialog = rustyrigs_meterbar::Colors->new(\$w_settings);
+   my $dialog = rustyrigs_meterbar::Settings->new(\$w_settings);
 }
 
 ##############################
@@ -495,132 +495,10 @@ sub new {
     );
     $window_options_box->pack_start( $meter_ontop_button, FALSE, FALSE, 0 );
 
-    ###########
-    my $meter_choices_box = Gtk3::Box->new( 'vertical', 5 );
-    my $meters_label      = Gtk3::Label->new('Displayed Meters');
-
-    # XXX: Make this 2 checkboxes per row: main dialog & meter popup
-
-    $meter_choices_box->pack_start( $meters_label, FALSE, FALSE, 0 );
-
-    my $alc_toggle = Gtk3::CheckButton->new();
-    $alc_toggle->set_label('Show ALC meter?');
-    $alc_toggle->set_active( $cfg->{'show_alc'} );
-    $alc_toggle->signal_connect(
-        'toggled' => sub {
-            my $button = shift;
-
-            if ( $button->get_active() ) {
-                $tmp_cfg->{'show_alc'} = 1;
-            }
-            else {
-                $tmp_cfg->{'show_alc'} = 0;
-            }
-            $changes++;
-        }
-    );
-    $alc_toggle->set_can_focus(1);
-    $meter_choices_box->pack_start( $alc_toggle, FALSE, FALSE, 0 );
-
-    my $comp_toggle = Gtk3::CheckButton->new();
-    $comp_toggle->set_label('Show ALC meter?');
-    $comp_toggle->set_active( $cfg->{'show_comp'} );
-    $comp_toggle->signal_connect(
-        'toggled' => sub {
-            my $button = shift;
-
-            if ( $button->get_active() ) {
-                $tmp_cfg->{'show_comp'} = 1;
-            }
-            else {
-                $tmp_cfg->{'show_comp'} = 0;
-            }
-            $changes++;
-        }
-    );
-    $comp_toggle->set_can_focus(1);
-    $meter_choices_box->pack_start( $comp_toggle, FALSE, FALSE, 0 );
-
-    my $pow_toggle = Gtk3::CheckButton->new();
-    $pow_toggle->set_label('Show power meter?');
-    $pow_toggle->set_active( $cfg->{'show_pow'} );
-    $pow_toggle->signal_connect(
-        'toggled' => sub {
-            my $button = shift;
-
-            if ( $button->get_active() ) {
-                $tmp_cfg->{'show_pow'} = 1;
-            }
-            else {
-                $tmp_cfg->{'show_pow'} = 0;
-            }
-            $changes++;
-        }
-    );
-    $pow_toggle->set_can_focus(1);
-    $meter_choices_box->pack_start( $pow_toggle, FALSE, FALSE, 0 );
-
-    my $swr_toggle = Gtk3::CheckButton->new();
-    $swr_toggle->set_label('Show SWR meter?');
-    $swr_toggle->set_active( $cfg->{'show_swr'} );
-    $swr_toggle->signal_connect(
-        'toggled' => sub {
-            my $button = shift;
-
-            if ( $button->get_active() ) {
-                $tmp_cfg->{'show_swr'} = 1;
-            }
-            else {
-                $tmp_cfg->{'show_swr'} = 0;
-            }
-            $changes++;
-        }
-    );
-    $swr_toggle->set_can_focus(1);
-    $meter_choices_box->pack_start( $swr_toggle, FALSE, FALSE, 0 );
-
-    my $temp_toggle = Gtk3::CheckButton->new();
-    $temp_toggle->set_label('Show temp meter?');
-    $temp_toggle->set_active( $cfg->{'show_temp'} );
-    $temp_toggle->signal_connect(
-        'toggled' => sub {
-            my $button = shift;
-
-            if ( $button->get_active() ) {
-                $tmp_cfg->{'show_temp'} = 1;
-            }
-            else {
-                $tmp_cfg->{'show_temp'} = 0;
-            }
-            $changes++;
-        }
-    );
-    $temp_toggle->set_can_focus(1);
-    $meter_choices_box->pack_start( $temp_toggle, FALSE, FALSE, 0 );
-
-    my $vdd_toggle = Gtk3::CheckButton->new();
-    $vdd_toggle->set_label('Show VDD meter?');
-    $vdd_toggle->set_active( $cfg->{'show_vdd'} );
-    $vdd_toggle->signal_connect(
-        'toggled' => sub {
-            my $button = shift;
-
-            if ( $button->get_active() ) {
-                $tmp_cfg->{'show_vdd'} = 1;
-            }
-            else {
-                $tmp_cfg->{'show_vdd'} = 0;
-            }
-            $changes++;
-        }
-    );
-    $vdd_toggle->set_can_focus(1);
-    $meter_choices_box->pack_start( $vdd_toggle, FALSE, FALSE, 0 );
-
 
     # Create an OK button to apply settings
-    my $colors_button = Gtk3::Button->new('Co_lors');
-    $colors_button->set_tooltip_text("Change GUI colors");
+    my $colors_button = Gtk3::Button->new('_Meters');
+    $colors_button->set_tooltip_text("Change Meter settings");
     $colors_button->set_can_focus(1);
     $colors_button->signal_connect( 'activate' => sub { (my $self) = @_; $class->set_colors(); } );
     $colors_button->signal_connect( 'clicked'  => sub { (my $self) = @_; $class->set_colors(); } );
@@ -674,7 +552,6 @@ sub new {
     $main_box->pack_start( $start_locked_toggle, FALSE, FALSE, 0 );
     $config_box->pack_start( $main_box, FALSE, FALSE, 0 );
     $config_box->pack_start( $window_options_box,  FALSE, FALSE, 0 );
-    $config_box->pack_start( $meter_choices_box,   FALSE, FALSE, 0 );
     $config_box->pack_start( $colors_button,   FALSE, FALSE, 0 );
     $config_box->pack_end( $button_box, FALSE, FALSE, 0 );
 

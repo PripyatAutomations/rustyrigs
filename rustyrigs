@@ -148,6 +148,75 @@ if ($cfg_readonly) {
     $cfg->{'read_only'} = 1;
 }
 
+our $meters = {
+   'alc' => {
+      'title' => 'ALC',
+      'enabled' => TRUE,
+      'alarm_bg' => $$cfg->{'ui_alc_alarm_bg'},
+      'bg' => $$cfg->{'ui_alc_bg'},
+      'fg' => $$cfg->{'ui_alc_fg'},
+      'font' => $$cfg->{'ui_alc_font'},
+      'text' => $$cfg->{'ui_alc_text'},
+      'thresh_min' => $$cfg->{'thresh_alc_min'},
+      'thresh_max' => $$cfg->{'thresh_alc_max'}
+   },
+   'comp' => {
+      'title' => 'Comp',
+      'enabled' => TRUE,
+      'alarm_bg' => $$cfg->{'ui_comp_alarm_bg'},
+      'bg' => $$cfg->{'ui_comp_bg'},
+      'fg' => $$cfg->{'ui_comp_fg'},
+      'font' => $$cfg->{'ui_comp_font'},
+      'text' => $$cfg->{'ui_comp_text'},
+      'thresh_min' => $$cfg->{'thresh_comp_min'},
+      'thresh_max' => $$cfg->{'thresh_comp_max'}
+   },
+   'power' => {
+      'title' => 'Power',
+      'enabled' => TRUE,
+      'alarm_bg' => $$cfg->{'ui_power_alarm_bg'},
+      'bg' => $$cfg->{'ui_power_bg'},
+      'fg' => $$cfg->{'ui_power_fg'},
+      'font' => $$cfg->{'ui_power_font'},
+      'text' => $$cfg->{'ui_power_text'},
+      'thresh_min' => $$cfg->{'thresh_power_min'},
+      'thresh_max' => $$cfg->{'thresh_power_max'}
+   },
+   'swr' => {
+      'title' => 'SWR',
+      'enabled' => TRUE,
+      'alarm_bg' => $$cfg->{'ui_swr_alarm_bg'},
+      'bg' => $$cfg->{'ui_swr_bg'},
+      'fg' => $$cfg->{'ui_swr_fg'},
+      'font' => $$cfg->{'ui_swr_font'},
+      'text' => $$cfg->{'ui_swr_text'},
+      'thresh_min' => $$cfg->{'thresh_swr_min'},
+      'thresh_max' => $$cfg->{'thresh_swr_max'}
+   },
+   'temp' => {
+      'title' => 'Temp',
+      'enabled' => TRUE,
+      'alarm_bg' => $$cfg->{'ui_temp_alarm_bg'},
+      'bg' => $$cfg->{'ui_temp_bg'},
+      'fg' => $$cfg->{'ui_temp_fg'},
+      'font' => $$cfg->{'ui_temp_font'},
+      'text' => $$cfg->{'ui_temp_text'},
+      'thresh_min' => $$cfg->{'thresh_temp_min'},
+      'thresh_max' => $$cfg->{'thresh_temp_max'}
+   },
+   'volt' => {
+      'title' => 'Volt',
+      'enabled' => TRUE,
+      'alarm_bg' => $$cfg->{'ui_volt_alarm_bg'},
+      'bg' => $$cfg->{'ui_volt_bg'},
+      'fg' => $$cfg->{'ui_volt_fg'},
+      'font' => $$cfg->{'ui_volt_font'},
+      'text' => $$cfg->{'ui_volt_text'},
+      'thresh_min' => $$cfg->{'thresh_volt_min'},
+      'thresh_max' => $$cfg->{'thresh_volt_max'}
+   }
+};
+
 # Initialize the GTK GUI
 $gtk_ui = rustyrigs_gtk_ui->new( $cfg, $log, $vfos );
 

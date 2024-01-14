@@ -29,6 +29,12 @@ sub gdk_rgba_to_hex {
     return sprintf("#%02X%02X%02X", $r, $g, $b);
 }
 
+sub gdk_rgb_to_hex {
+    my ($rgb) = @_;
+    my ($r, $g, $b) = map { sprintf("%02X", $_ / 256) } ($rgb->red, $rgb->green, $rgb->blue);
+    return "#$r$g$b";
+}
+
 sub find_offset {
     # Wut?
     my $array_ref = shift;

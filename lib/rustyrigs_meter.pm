@@ -13,9 +13,6 @@ my $cfg;
 my $vfos;
 my $w_main;
 
-# XXX: Make methods for these
-#	- SetValue
-#	- Zero
 sub set_label {
 }
 
@@ -52,20 +49,17 @@ sub on_drag_end {
     $widget->reparent($w_main);
 }
 
-# This needs sorted out so it makes only one widget.
 # The widget will need supplied the following parameters
 #	- Name
 #	- Height, Width
 #	- Fill color
 #	- Active fill color
 #	- Label text
-
 sub set_threshold {
     ( my $class, my $min, my $max ) = @_;
 
     if ( !defined $class || !defined $min || !defined $max ) {
-        die
-"Improper call to set_threshold - please pass TWO options: min, max! Got ($min, $max)\n";
+        die "Improper call to set_threshold - please pass TWO options: min, max! Got ($min, $max)\n";
     }
 
     $class->{"threshold_min"} = $min;
@@ -73,15 +67,14 @@ sub set_threshold {
 }
 
 sub new {
-    ( my $class, $cfg, $vfos, $w_main, my $label, my $min_val, my $max_val ) =
-      @_;
+    ( my $class, $cfg, $vfos, $w_main, my $label, my $min_val, my $max_val ) = @_;
     my $l        = lc($label);
     my $s        = "ui_${l}";
-    my $bg       = woodpile::hex_to_gdk_rgba( $cfg->{"${s}_bg"} );
-    my $alarm_bg   = woodpile::hex_to_gdk_rgba( $cfg->{"${s}_alarm_bg"} );
-    my $fg       = woodpile::hex_to_gdk_rgba( $cfg->{"${s}_fg"} );
-    my $txt_fg   = woodpile::hex_to_gdk_rgba( $cfg->{"${s}_text"} );
-    my $txt_font = $cfg->{"${s}_font"};
+    my $bg       = woodpile::hex_to_gdk_rgba( $$cfg->{"${s}_bg"} );
+    my $alarm_bg = woodpile::hex_to_gdk_rgba( $$cfg->{"${s}_alarm_bg"} );
+    my $fg       = woodpile::hex_to_gdk_rgba( $$cfg->{"${s}_fg"} );
+    my $txt_fg   = woodpile::hex_to_gdk_rgba( $$cfg->{"${s}_text"} );
+    my $txt_font = $$cfg->{"${s}_font"};
     my $value;
 
     if ( undef($monospace_font) ) {
@@ -161,125 +154,47 @@ sub DESTROY {
     my ($class) = @_;
 }
 
-our $meters;
-
 # This will return an object containing all the meters and their properties
 sub render_meterbars {
-    ( my $cfg, my $vfos, my $w_main ) = @_;
+    ( my $class, my $meters_ref, my $cfg, my $vfos, my $w_main ) = @_;
 
-    $meters = {
-       'alc' => {
-          'title' => 'ALC',
-          'enabled' => TRUE,
-          'alarm_bg' => $cfg->{'ui_alc_alarm_bg'},
-          'bg' => $cfg->{'ui_alc_bg'},
-          'fg' => $cfg->{'ui_alc_fg'},
-          'font' => $cfg->{'ui_alc_font'},
-          'text' => $cfg->{'ui_alc_text'}
-       },
-       'comp' => {
-          'title' => 'Comp',
-          'enabled' => TRUE,
-          'alarm_bg' => $cfg->{'ui_comp_alarm_bg'},
-          'bg' => $cfg->{'ui_comp_bg'},
-          'fg' => $cfg->{'ui_comp_fg'},
-          'font' => $cfg->{'ui_comp_font'},
-          'text' => $cfg->{'ui_comp_text'}
-       },
-       'pow' => {
-          'title' => 'Power',
-          'enabled' => TRUE,
-          'alarm_bg' => $cfg->{'ui_pow_alarm_bg'},
-          'bg' => $cfg->{'ui_pow_bg'},
-          'fg' => $cfg->{'ui_pow_fg'},
-          'font' => $cfg->{'ui_pow_font'},
-          'text' => $cfg->{'ui_pow_text'}
-       },
-       'swr' => {
-          'title' => 'SWR',
-          'enabled' => TRUE,
-          'alarm_bg' => $cfg->{'ui_swr_alarm_bg'},
-          'bg' => $cfg->{'ui_swr_bg'},
-          'fg' => $cfg->{'ui_swr_fg'},
-          'font' => $cfg->{'ui_swr_font'},
-          'text' => $cfg->{'ui_swr_text'}
-       },
-       'temp' => {
-          'title' => 'Temp',
-          'enabled' => TRUE,
-          'alarm_bg' => $cfg->{'ui_temp_alarm_bg'},
-          'bg' => $cfg->{'ui_temp_bg'},
-          'fg' => $cfg->{'ui_temp_fg'},
-          'font' => $cfg->{'ui_temp_font'},
-          'text' => $cfg->{'ui_temp_text'}
-       },
-       'vdd' => {
-          'title' => 'Volt',
-          'enabled' => TRUE,
-          'alarm_bg' => $cfg->{'ui_vdd_alarm_bg'},
-          'bg' => $cfg->{'ui_vdd_bg'},
-          'fg' => $cfg->{'ui_vdd_fg'},
-          'font' => $cfg->{'ui_vdd_font'},
-          'text' => $cfg->{'ui_vdd_text'}
-       }
-    };
-
-    # Add the meters
+    my $meters = ${$meters_ref};
+    # Box for the meters
     my $meter_box   = Gtk3::Box->new( 'vertical', 5 );
     my $meter_label = Gtk3::Label->new("Meters");
     $meter_box->pack_start( $meter_label, FALSE, FALSE, 0 );
 
-    my $stat_alc = $meters->{'alc'}{'widget'} =
-      rustyrigs_meterbar->new( $cfg, $vfos, $w_main, "ALC", 0, 10 );
-    $stat_alc->set_threshold( $cfg->{'thresh_alc_min'},
-        $cfg->{'thresh_alc_max'} );
-    $meter_box->pack_start( $stat_alc->{'grid'}, TRUE, TRUE, 0 );
+    my @meter_names = sort keys %$meters;
+    my $sorted_meters = { map { $_ => $meters->{$_} } sort keys %$meters };
+    foreach my $index (0 .. $#meter_names) {
+       my $m_name = $meter_names[$index];
+       my $meter = $meters->{$m_name};
+       my $m_title = $meter->{'title'};
+       my $m_enabled = $meter->{'enabled'};
+       my $m_alarm_bg = $meter->{'alarm_bg'};
+       my $m_bg = $meter->{'bg'};
+       my $m_fg = $meter->{'fg'};
+       my $m_font = $meter->{'font'};
+       my $m_text = $meter->{'text'};
+       my $m_box = Gtk3::Box->new('vertical', 5);
+       my $m_thresh_min = $meter->{'thresh_min'};
+       my $m_thresh_max = $meter->{'thresh_max'};
 
-    my $stat_comp = $meters->{'comp'}{'widget'} =
-      rustyrigs_meterbar->new( $cfg, $vfos, $w_main, "COMP", 0, 10 );
-    $stat_comp->set_threshold( $cfg->{'thresh_comp_min'},
-        $cfg->{'thresh_comp_max'} );
-    $meter_box->pack_start( $stat_comp->{'grid'}, TRUE, TRUE, 0 );
+       my $widget = 
+          rustyrigs_meterbar->new( $cfg, $vfos, $w_main, uc($m_title), 0, 10 );
 
-    my $stat_pow = $meters->{'pow'}{'widget'} =
-      rustyrigs_meterbar->new( $cfg, $vfos, $w_main, "POW", 0, 100 );
-    $stat_pow->set_threshold( $cfg->{'thresh_pow_min'},
-        $cfg->{'thresh_pow_max'} );
-    $meter_box->pack_start( $stat_pow->{'grid'}, TRUE, TRUE, 0 );
-
-    my $stat_swr = $meters->{'swr'}{'widget'} =
-      rustyrigs_meterbar->new( $cfg, $vfos, $w_main, "SWR", 0, 50 );
-    $stat_swr->set_threshold( $cfg->{'thresh_swr_min'},
-        $cfg->{'thresh_swr_max'} );
-    $meter_box->pack_start( $stat_swr->{'grid'}, TRUE, TRUE, 0 );
-
-    my $stat_temp = $meters->{'temp'}{'widget'} =
-      rustyrigs_meterbar->new( $cfg, $vfos, $w_main, "TEMP", 0, 200 );
-    $stat_temp->set_threshold( $cfg->{'thresh_temp_min'},
-        $cfg->{'thresh_temp_max'} );
-    $meter_box->pack_start( $stat_temp->{'grid'}, TRUE, TRUE, 0 );
-
-    my $stat_vdd = $meters->{'vdd'}{'widget'} =
-      rustyrigs_meterbar->new( $cfg, $vfos, $w_main, "VDD", 0, 50 );
-    $stat_vdd->set_threshold( $cfg->{'thresh_vdd_min'},
-        $cfg->{'thresh_vdd_max'} );
-    $meter_box->pack_start( $stat_vdd->{'grid'}, TRUE, TRUE, 0 );
+       $widget->set_threshold($m_thresh_min, $m_thresh_max);
+       $meter_box->pack_start( $widget->{'grid'}, TRUE, TRUE, 0 );
+    }
 
     my $self = {
         box => $meter_box,
-        # these will go away soon...
-        meters => \$meters,
-        alc => \$stat_alc,
-        comp => \$stat_comp,
-        pow => \$stat_pow,
-        swr => \$stat_swr,
-        temp => \$stat_temp,
-        vdd => \$stat_vdd,        
+        meters => \$meters
     };        
     return $self;
 }
 
-package rustyrigs_meterbar::Colors;
+package rustyrigs_meterbar::Settings;
 use Carp;
 use Data::Dumper;
 use Glib                  qw(TRUE FALSE);
@@ -366,7 +281,7 @@ sub new {
       position => 'center_on_parent'
    );
    $color_win->set_transient_for($w_set);
-   $color_win->set_title("Colour settings");
+   $color_win->set_title("Meter Settings");
    $color_win->set_border_width(5);
    $color_win->set_keep_above(1);
    $color_win->set_default_size(300, 200);
@@ -386,23 +301,25 @@ sub new {
    my $box_label_sep = Gtk3::Separator->new('horizontal');
    $box->pack_start($box_label_sep, FALSE, FALSE, 0);
 
+   # Iterate over the available meters and render them into the box
    my $wrap_box = Gtk3::Box->new('horizontal', 5);
-
-   # Iterate over the available meters
+   my $meters = $main::meters;
    my @meter_names = sort keys %$meters;
+
    foreach my $index (0 .. $#meter_names) {
       my $m_name = $meter_names[$index];
       my $meter = $meters->{$m_name};
       my $m_title = $meter->{'title'};
       my $m_enabled = $meter->{'enabled'};
-      my $m_alarm_bg = $meter->{'alarm_bg'};
-      my $m_bg = $meter->{'bg'};
-      my $m_fg = $meter->{'fg'};
-      my $m_font = $meter->{'font'};
-      my $m_text = $meter->{'text'};
+      my $m_alarm_bg = $meter->{'alarm_bg'} ? $meter->{'alarm_bg'} : "#f0c0c0";
+      my $m_bg = $meter->{'bg'} ? $meter->{'bg'} : "#000000";
+      my $m_fg = $meter->{'fg'} ? $meter->{'fg'} : "#ffffff";
+      my $m_font = $meter->{'font'} ? $meter->{'font'} : "Monospace";
+      my $m_text = $meter->{'text'} ? $meter->{'text'} : "#ffffff";
+
+      # wrap everything in a box
       my $m_box = Gtk3::Box->new('vertical', 5);
       
-      print "m_text: $m_text\n";
       # Meter name
       my $m_label = Gtk3::Label->new(uc($m_title));
       $m_box->pack_start($m_label, TRUE, TRUE, 0);
@@ -430,7 +347,7 @@ sub new {
                my $color = color_picker($color_win, $def_color);
                if ($color) {
                   $self->set_text($color->to_string());
-                  $m_bg = $meter->{$m_name} = $$cfg->{'ui_' . $m_name . '_bg'} = woodpile::gdk_rgba_to_hex($color);
+                  $m_bg = $meter->{$m_name} = $$cfg->{'ui_' . $m_name . '_bg'} = woodpile::gdk_rgb_to_hex($color);
                }
             }
          }
@@ -461,7 +378,7 @@ sub new {
                my $color = color_picker($color_win, $def_color);
                if ($color) {
                   $self->set_text($color->to_string());
-                  $m_bg = $$cfg->{'ui_' . $m_name . '_alarm_bg'} = $meter->{$m_name} = woodpile::gdk_rgba_to_hex($color);;
+                  $m_bg = $$cfg->{'ui_' . $m_name . '_alarm_bg'} = $meter->{$m_name} = woodpile::gdk_rgb_to_hex($color);;
                }
             }
          }
@@ -492,7 +409,7 @@ sub new {
                my $color = color_picker($color_win, $def_color);
                if ($color) {
                   $self->set_text($color->to_string());
-                  $m_bg = $meter->{$m_name} = $$cfg->{'ui_' . $m_name . '_fg'} = woodpile::gdk_rgba_to_hex($color);
+                  $m_bg = $meter->{$m_name} = $$cfg->{'ui_' . $m_name . '_fg'} = woodpile::gdk_rgb_to_hex($color);
                }
             }
          }
@@ -523,7 +440,7 @@ sub new {
                my $color = color_picker($color_win, $def_color);
                if ($color) {
                   $self->set_text($color->to_string());
-                  $m_bg = $meter->{$m_name} = $$cfg->{'ui_' . $m_name . '_text'} = woodpile::gdk_rgba_to_hex($color);
+                  $m_bg = $meter->{$m_name} = $$cfg->{'ui_' . $m_name . '_text'} = woodpile::gdk_rgb_to_hex($color);
                }
             }
          }
@@ -541,6 +458,14 @@ sub new {
 
       # Add the font button to your container
       $m_box->pack_start($font_button, TRUE, TRUE, 0);
+
+      # Add a toggle button
+      my $toggle_button = Gtk3::CheckButton->new();
+      $toggle_button->set_label("Enabled?");
+      $toggle_button->set_active($m_enabled);
+      $toggle_button->set_can_focus(1);
+      # XXX: add signal handler
+      $m_box->pack_start($toggle_button, TRUE, TRUE, 0);
 
       # add it to our outer box
       $wrap_box->pack_start($m_box, TRUE, TRUE, 0);
