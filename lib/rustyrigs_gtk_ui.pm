@@ -1147,7 +1147,6 @@ sub set_tray_icon {
     $tray_tooltip .= "Meters:\n";
     $tray_tooltip .= "\t\tPower: ${power_text}W\n\t\tSWR: ${swr_txt}:1\n";
     $self->set_tray_tooltip( $tray_icon, $tray_tooltip );
-#    print "tooltip: " . Dumper($tray_tooltip) . "\n";
 
     $tray_icon->set_from_pixbuf( get_state_icon($status) );
 }

@@ -94,8 +94,6 @@ sub Log {
     my ( $self, $log_type, $log_level ) = @_;
     my $filter_level = $self->{log_level};
 
-#    print "of: $filter_level log_level: $log_level\n";
-
     my $buf;
 
     if ( $log_levels{$filter_level} < $log_levels{$log_level} ) {
@@ -143,7 +141,7 @@ sub set_log_level {
 sub add_handler {
    ( my $self, my $handler ) = @_;
 
-    $self->Log("core", "notice", "Switching logging to external handler, tty will go silent except runtime errors... Logfile is at " . $self->{'log_file'});
+    $self->Log("core", "notice", "Switching logging to external handler, tty will go silent except runtime errors/debugging info... Logfile is at " . $self->{'log_file'});
     $self->{'handler'} = $handler;
 }
 

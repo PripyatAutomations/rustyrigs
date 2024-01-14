@@ -97,7 +97,6 @@ sub show {
         }
     );
 
-    print "*** 1 ***\n";
     $w_mem_edit->show_all();
 }
 

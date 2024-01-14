@@ -324,6 +324,11 @@ my $update_needed   = 0;
 sub exec_read_rig {
     ( my $class ) = @_;
 
+    # Don't read the rig while GUI is applying changes...
+    if ($gui_applying_changes) {
+       return;
+    }
+
     my $tray_every = $$cfg->{'poll_tray_every'};
 
     if ( !$main::connected ) {

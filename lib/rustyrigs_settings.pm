@@ -68,9 +68,6 @@ sub apply {
 }
 
 sub save {
-# XXX: Check if we have 1 or 2 arguments (called via class or directly)
-#    ( my $self, my $tc ) = @_;
-#     print "self: " . Dumper($self) . "\n";
      my ( $tc ) = @_;
 # XXX: enable this once we've added $changes++ everywhere needed
 #    if ( $changes && defined $tc ) {
@@ -148,7 +145,6 @@ sub new {
     $w_settings->set_transient_for($w_main);
     $w_settings->set_title("Settings");
     $w_settings->set_border_width(5);
-#    $w_settings->set_default_size( 300, 200 );
     $w_settings->set_keep_above(1);
     $w_settings->set_modal(1);
     $w_settings->set_resizable(0);
