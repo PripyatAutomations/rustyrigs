@@ -99,7 +99,7 @@ sub new {
 
    my $lvp = $cfg->{'win_logview_placement'};
 
-   my $gtk_ui = $main::gtk_ui;
+   my $gtk_ui = \$main::gtk_ui;
 
    if (!defined $lvp) {
       $lvp = 'none';
@@ -120,8 +120,13 @@ sub new {
    $window->set_keep_above($keep_above);
    $window->set_modal(0);
    $window->set_resizable(1);
-   my $icon = $gtk_ui->{'icon_logview_pix'};
-   $window->set_icon($icon);
+   my $icon = $$gtk_ui->{'icon_logview_pix'};
+
+   if (defined $icon) {
+      $window->set_icon($$icon);
+   } else {
+      $main::log->Log("core", "warn", "We appear to be missing logview icon!");
+   }
 
    # Set width/height of teh window
    $window->set_default_size( $cfg->{'win_logview_width'},

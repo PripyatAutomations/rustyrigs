@@ -54,6 +54,8 @@ sub print_signal_info {
 }
 
 # XXX: We need to make a list of cfg val => function
+# XXX: Then we can call this at startup, after woodpile::Config is loaded, instead of dealing with settings scattered
+# XXX: about the initialization code. This should be a lot more compact...
 sub apply {
     ( my $class ) = @_;
 

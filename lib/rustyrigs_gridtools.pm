@@ -96,8 +96,8 @@ sub new {
     my $box;
 
     # get the main window
-    my $gtk_ui = $main::gtk_ui;
-    my $w_main = ${$gtk_ui->{'w_main'}};
+    my $gtk_ui = \$main::gtk_ui;
+    my $w_main = $$gtk_ui->{'w_main'};
 
     my $window = Gtk3::Window->new(
         'toplevel',
@@ -105,15 +105,20 @@ sub new {
         destroy_with_parent => TRUE,
         position => $wp
     );
-    $window->set_transient_for($w_main);
+    $window->set_transient_for($$w_main);
     $window->set_title("Grid tools");
     $window->set_border_width(5);
     $window->set_default_size(320, 320);
     $window->set_keep_above($on_top);
     $window->set_resizable(0);
 
-    my $icon = ${$gtk_ui->{'icon_settings_pix'}};
-    $window->set_icon($icon);
+    my $icon = $$gtk_ui->{'icon_gridtools_pix'};
+
+    if (defined $icon) {
+       $window->set_icon($$icon);
+    } else {
+       $main::log->Log("core", "warn", "We appear to be missing gridtools icon!");
+    }
 
     my $accel = Gtk3::AccelGroup->new();
     $window->add_accel_group($accel);

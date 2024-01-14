@@ -1,6 +1,8 @@
 # This package presents a GTK3 user interface for rustyrigs
 #
 # It's a bit ugly for now...
+# Cleanup targets:
+#	* Icon loading could be more compact
 package rustyrigs_gtk_ui;
 use Carp;
 use Data::Dumper;
@@ -17,6 +19,7 @@ our $cfg_file;
 # shared resources
 our $icon_error_pix;
 our $icon_idle_pix;
+our $icon_gridtools_pix;
 our $icon_logview_pix;
 our $icon_main_pix;
 our $icon_meters_pix;
@@ -267,9 +270,13 @@ sub w_main_show {
     $w_main->deiconify();
     $w_main->set_visible(1);
     my $lv = $main::logview;
-    my $w = ${$lv->{'window'}};
-    if (defined $w) {
-       $w->set_visible(1);
+
+    # Raise logview with main window, if configured to do so
+    if (defined $lv) {
+       my $w = ${$lv->{'window'}};
+       if (defined $w) {
+          $w->set_visible(1);
+       }
     }
     $w_main->show_all();
     $w_main->move( $cfg->{'win_x'}, $cfg->{'win_y'} );
@@ -329,6 +336,7 @@ sub load_icons {
     my $res           = $cfg->{'res_dir'};
     my $icon_error    = $res . "/" . $cfg->{'icon_error'};
     my $icon_idle     = $res . "/" . $cfg->{'icon_idle'};
+    my $icon_gridtools    = $res . "/" . $cfg->{'icon_gridtools'};
     my $icon_logview  = $res . "/" . $cfg->{'icon_logview'};
     my $icon_meters   = $res . "/" . $cfg->{'icon_meters'};
     my $icon_settings = $res . "/" . $cfg->{'icon_settings'};
@@ -337,6 +345,9 @@ sub load_icons {
     # Load images, if not already loaded
     if ( !defined($icon_error_pix) ) {
         $icon_error_pix = load_icon($icon_error);
+    }
+    if ( !defined($icon_gridtools_pix) ) {
+        $icon_gridtools_pix = load_icon($icon_gridtools);
     }
     if ( !defined($icon_idle_pix) ) {
         $icon_idle_pix = load_icon($icon_idle);
@@ -1183,6 +1194,8 @@ sub new {
         # Variables
         icon_error_pix    => \$icon_error_pix,
         icon_idle_pix     => \$icon_idle_pix,
+        icon_gridtools_pix => \$icon_gridtools_pix,
+        icon_logview_pix  => \$icon_logview_pix,
         icon_main_pix     => \$icon_main_pix,
         icon_settings_pix => \$icon_settings_pix,
         icon_transmit_pix => \$icon_transmit_pix,

@@ -21,6 +21,7 @@ our $def_cfg = {
     icon_error       => "error.png",
     icon_idle        => "idle.png",
     icon_logview     => "logview.png",
+    icon_gridtools   => "gridtools.png",
     icon_meters      => "meters.png",
     icon_settings    => "settings.png",
     icon_transmit    => "transmit.png",

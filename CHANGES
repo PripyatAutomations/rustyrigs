@@ -1,6 +1,7 @@
 2024-01-14
 	* Added color/font selector for the meters
 	* Moved meters settings to their own dialog (Meters button in settings)
+	* Fixed icons for the various sub-windows
 
 2024-01-13
 	* reworking the meter widgets a bit to be easier to maintain

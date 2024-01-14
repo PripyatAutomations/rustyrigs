@@ -1,3 +1,5 @@
+* Move anywhere that changes $cfg to use a $tmp_cfg then prompt for confirmation
+  - This should go through rr::Settings
 * Maybe make blocks able to be pulled out into the own window or returned to main window?
   - how?
 * Move the meters to a floating window

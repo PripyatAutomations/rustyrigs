@@ -220,16 +220,20 @@ our $meters = {
 # Initialize the GTK GUI
 $gtk_ui = rustyrigs_gtk_ui->new( $cfg, $log, $vfos );
 
-# Open the log window and redirect log output there
-$logview = rustyrigs_logview->new($cfg);
-$log->add_handler($logview);
-
-# open the grid tools dialog
-$gridtools = rustyrigs_gridtools->new();
 
 # Finish GUI setup
 $gtk_ui->load_icons();
 $gtk_ui->draw_main_win();
+
+# open the grid tools dialog
+$gridtools = rustyrigs_gridtools->new();
+
+# and the log viewer
+$logview = rustyrigs_logview->new($cfg);
+
+# Open the log window and redirect log output there
+$log->add_handler($logview);
+
 $gtk_ui->set_icon("connecting");
 
 # XXX: Sort this mess out soon
