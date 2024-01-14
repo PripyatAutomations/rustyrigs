@@ -68,8 +68,10 @@ sub set_threshold {
 
 sub new {
     ( my $class, $cfg, $vfos, $w_main, my $label, my $min_val, my $max_val ) = @_;
-    my $l        = lc($label);
-    my $s        = "ui_${l}";
+    my $lc_label = lc($label);
+    my $s        = "ui_${lc_label}";
+    my $l        = $main::meters->{$lc_label}{'title'};
+
     my $bg       = woodpile::hex_to_gdk_rgba( $$cfg->{"${s}_bg"} );
     my $alarm_bg = woodpile::hex_to_gdk_rgba( $$cfg->{"${s}_alarm_bg"} );
     my $fg       = woodpile::hex_to_gdk_rgba( $$cfg->{"${s}_fg"} );
@@ -86,7 +88,7 @@ sub new {
     $grid->set_column_homogeneous(FALSE);
     $grid->set_row_homogeneous(FALSE);
 
-    my $bar_label = Gtk3::Label->new($label);
+    my $bar_label = Gtk3::Label->new($l);
     my $val_label = Gtk3::Label->new($value);
     $bar_label->set_width_chars(6);
     $val_label->set_width_chars(6);
@@ -103,7 +105,7 @@ sub new {
     my $bar = Gtk3::Box->new( 'horizontal', 0 );
     $bar_sep   = Gtk3::Separator->new('horizontal');
     $val_sep   = Gtk3::Separator->new('horizontal');
-    $bar_label = Gtk3::Label->new($label);
+    $bar_label = Gtk3::Label->new($l);
     $val_label = Gtk3::Label->new($value);
     $bar_label->set_width_chars(6);
     $val_label->set_width_chars(6);
@@ -181,7 +183,7 @@ sub render_meterbars {
        my $m_thresh_max = $meter->{'thresh_max'};
 
        my $widget = 
-          rustyrigs_meterbar->new( $cfg, $vfos, $w_main, uc($m_title), 0, 10 );
+          rustyrigs_meterbar->new( $cfg, $vfos, $w_main, $m_name, 0, 10 );
 
        $widget->set_threshold($m_thresh_min, $m_thresh_max);
        $meter_box->pack_start( $widget->{'grid'}, TRUE, TRUE, 0 );
@@ -321,7 +323,7 @@ sub new {
       my $m_box = Gtk3::Box->new('vertical', 5);
       
       # Meter name
-      my $m_label = Gtk3::Label->new(uc($m_title));
+      my $m_label = Gtk3::Label->new(uc($m_name));
       $m_box->pack_start($m_label, TRUE, TRUE, 0);
 
       # background color

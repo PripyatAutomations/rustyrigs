@@ -172,7 +172,7 @@ our $meters = {
       'thresh_max' => $$cfg->{'thresh_comp_max'}
    },
    'power' => {
-      'title' => 'Power',
+      'title' => 'PWR',
       'enabled' => TRUE,
       'alarm_bg' => $$cfg->{'ui_power_alarm_bg'},
       'bg' => $$cfg->{'ui_power_bg'},
