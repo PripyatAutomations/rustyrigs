@@ -175,7 +175,7 @@ sub render_meterbars {
           'bg' => $cfg->{'ui_alc_bg'},
           'fg' => $cfg->{'ui_alc_fg'},
           'font' => $cfg->{'ui_alc_font'},
-          'text' => $cfg->{'ui_alc_font'}
+          'text' => $cfg->{'ui_alc_text'}
        },
        'comp' => {
           'title' => 'Comp',
@@ -184,7 +184,7 @@ sub render_meterbars {
           'bg' => $cfg->{'ui_comp_bg'},
           'fg' => $cfg->{'ui_comp_fg'},
           'font' => $cfg->{'ui_comp_font'},
-          'text' => $cfg->{'ui_comp_font'}
+          'text' => $cfg->{'ui_comp_text'}
        },
        'pow' => {
           'title' => 'Power',
@@ -193,7 +193,7 @@ sub render_meterbars {
           'bg' => $cfg->{'ui_pow_bg'},
           'fg' => $cfg->{'ui_pow_fg'},
           'font' => $cfg->{'ui_pow_font'},
-          'text' => $cfg->{'ui_pow_font'}
+          'text' => $cfg->{'ui_pow_text'}
        },
        'swr' => {
           'title' => 'SWR',
@@ -202,7 +202,7 @@ sub render_meterbars {
           'bg' => $cfg->{'ui_swr_bg'},
           'fg' => $cfg->{'ui_swr_fg'},
           'font' => $cfg->{'ui_swr_font'},
-          'text' => $cfg->{'ui_swr_font'}
+          'text' => $cfg->{'ui_swr_text'}
        },
        'temp' => {
           'title' => 'Temp',
@@ -211,7 +211,7 @@ sub render_meterbars {
           'bg' => $cfg->{'ui_temp_bg'},
           'fg' => $cfg->{'ui_temp_fg'},
           'font' => $cfg->{'ui_temp_font'},
-          'text' => $cfg->{'ui_temp_font'}
+          'text' => $cfg->{'ui_temp_text'}
        },
        'vdd' => {
           'title' => 'Volt',
@@ -220,7 +220,7 @@ sub render_meterbars {
           'bg' => $cfg->{'ui_vdd_bg'},
           'fg' => $cfg->{'ui_vdd_fg'},
           'font' => $cfg->{'ui_vdd_font'},
-          'text' => $cfg->{'ui_vdd_font'}
+          'text' => $cfg->{'ui_vdd_text'}
        }
     };
 
@@ -383,12 +383,12 @@ sub new {
    $box->pack_start($box_label, FALSE, FALSE, 0);
 
    my $box_label_sep = Gtk3::Separator->new('horizontal');
-#   $box_label_sep->set_size_request(-1, -1);
    $box->pack_start($box_label_sep, FALSE, FALSE, 0);
+
+   my $wrap_box = Gtk3::Box->new('horizontal', 5);
 
    # Iterate over the available meters
    my @meter_names = sort keys %$meters;
-#   foreach my $m_name (sort keys %$meters) {
    foreach my $index (0 .. $#meter_names) {
       my $m_name = $meter_names[$index];
       my $meter = $meters->{$m_name};
@@ -400,14 +400,16 @@ sub new {
       my $m_font = $meter->{'font'};
       my $m_text = $meter->{'text'};
       my $m_box = Gtk3::Box->new('vertical', 5);
+      
+      print "m_text: $m_text\n";
       # Meter name
       my $m_label = Gtk3::Label->new(uc($m_title));
-      $m_box->pack_start($m_label, FALSE, FALSE, 0);
+      $m_box->pack_start($m_label, TRUE, FALSE, 0);
 
       # background color
       my $bg_box = Gtk3::Box->new('horizontal', 5);
-      my $bg_label = Gtk3::Label->new("Background:");
-      $bg_box->pack_start($bg_label, FALSE, FALSE, 0);
+      my $bg_label = Gtk3::Label->new("BG");
+      $bg_box->pack_start($bg_label, TRUE, FALSE, 0);
 
       my $bg_input = Gtk3::Entry->new();
       $bg_input->set_text($m_bg);
@@ -432,13 +434,13 @@ sub new {
             }
          }
       );
-      $bg_box->pack_start($bg_input, FALSE, FALSE, 0);
+      $bg_box->pack_start($bg_input, TRUE, FALSE, 0);
       $m_box->pack_start($bg_box, FALSE, FALSE, 0);
 
       # alarm background color
       my $alarm_bg_box = Gtk3::Box->new('horizontal', 5);
-      my $alarm_bg_label = Gtk3::Label->new("Alarm bg:");
-      $alarm_bg_box->pack_start($alarm_bg_label, FALSE, FALSE, 0);
+      my $alarm_bg_label = Gtk3::Label->new("ALARM");
+      $alarm_bg_box->pack_start($alarm_bg_label, TRUE, FALSE, 0);
 
       my $alarm_bg_input = Gtk3::Entry->new();
       $alarm_bg_input->set_text($m_alarm_bg);
@@ -463,13 +465,13 @@ sub new {
             }
          }
       );
-      $alarm_bg_box->pack_start($alarm_bg_input, FALSE, FALSE, 0);
-      $m_box->pack_start($alarm_bg_box, FALSE, FALSE, 0);
+      $alarm_bg_box->pack_start($alarm_bg_input, TRUE, FALSE, 0);
+      $m_box->pack_start($alarm_bg_box, TRUE, FALSE, 0);
 
-      # alarm background color
+      # foreground color
       my $fg_box = Gtk3::Box->new('horizontal', 5);
-      my $fg_label = Gtk3::Label->new("Foreground:");
-      $fg_box->pack_start($fg_label, FALSE, FALSE, 0);
+      my $fg_label = Gtk3::Label->new("FG");
+      $fg_box->pack_start($fg_label, TRUE, FALSE, 0);
 
       my $fg_input = Gtk3::Entry->new();
       $fg_input->set_text($m_fg);
@@ -494,9 +496,39 @@ sub new {
             }
          }
       );
-      $fg_box->pack_start($fg_input, FALSE, FALSE, 0);
-      $m_box->pack_start($fg_box, FALSE, FALSE, 0);
-      print "\t* text: $m_text (font: $m_font)\n";
+      $fg_box->pack_start($fg_input, TRUE, FALSE, 0);
+      $m_box->pack_start($fg_box, TRUE, FALSE, 0);
+
+      # text color
+      my $text_box = Gtk3::Box->new('horizontal', 5);
+      my $text_label = Gtk3::Label->new("Text:");
+      $text_box->pack_start($text_label, TRUE, FALSE, 0);
+
+      my $text_input = Gtk3::Entry->new();
+      $text_input->set_text($m_text);
+      $text_input->set_tooltip_text("Text color color for $m_title widget");
+      $text_input->set_can_focus(1);
+      $text_input->signal_connect(
+         changed => sub {
+            my ($self) = @_;
+            $m_bg = $$cfg->{'ui_' . $m_name . '_text'} = $meter->{$m_name}{'text'} = $self->get_text();
+         }
+      );
+      $text_input->signal_connect(
+         button_press_event => sub {
+            my ($self, $event) = @_;
+            if ($event->type eq 'button-press') {
+               my $def_color = woodpile::hex_to_gdk_rgba($m_bg);
+               my $color = color_picker($color_win, $def_color);
+               if ($color) {
+                  $self->set_text($color->to_string());
+                  $m_bg = $meter->{$m_name} = $$cfg->{'ui_' . $m_name . '_text'} = woodpile::gdk_rgba_to_hex($color);
+               }
+            }
+         }
+      );
+      $text_box->pack_start($text_input, TRUE, FALSE, 0);
+      $m_box->pack_start($text_box, TRUE, FALSE, 0);
 
       my $font_button = Gtk3::Button->new_with_label("Font: $m_font");
       $font_button->signal_connect(clicked => sub {
@@ -509,17 +541,18 @@ sub new {
       });
 
       # Add the font button to your container
-      $m_box->pack_start($font_button, FALSE, FALSE, 0);
+      $m_box->pack_start($font_button, TRUE, FALSE, 0);
 
       # add it to our outer box
-      $box->pack_start($m_box, FALSE, FALSE, 0);
+      $wrap_box->pack_start($m_box, TRUE, FALSE, 0);
 
       # add a separator, only if it's not the last one
-      $box->pack_start(Gtk3::Separator->new('horizontal'), FALSE, FALSE, 0) unless $index == $#meter_names;
+      $wrap_box->pack_start(Gtk3::Separator->new('vertical'), TRUE, FALSE, 0) unless $index == $#meter_names;
    }
+   $box->pack_start($wrap_box, FALSE, FALSE, 0);
 
    my $after_sep = Gtk3::Separator->new('horizontal');
-   $box->pack_start($after_sep, FALSE, FALSE, 0);
+   $box->pack_start($after_sep, TRUE, FALSE, 0);
    my $button_box = Gtk3::Box->new('horizontal', 5);
    my $save_button = Gtk3::Button->new("_Save");
    $save_button->set_tooltip_text("Save settings");
@@ -534,7 +567,7 @@ sub new {
    $cancel_button->signal_connect( 'clicked'  => sub { (my $self) = @_; cancel($self); } );
    $accel->connect(ord('C'), $$cfg->{'shortcut_key'}, 'visible', sub { my ( $self ) = @_; cancel($self); });
    $button_box->pack_start($cancel_button, TRUE, TRUE, 0);
-   $box->pack_end($button_box, FALSE, FALSE, 0);
+   $box->pack_end($button_box, TRUE, FALSE, 0);
 
    $color_win->add($box);
    $color_win->show_all();
