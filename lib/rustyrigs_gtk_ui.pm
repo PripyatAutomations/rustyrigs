@@ -47,6 +47,7 @@ our $lock_item;
 
 # objects
 our $settings;
+our $meters;
 
 # status flags
 our $main_menu_open = 0;
@@ -479,6 +480,8 @@ sub open_gridtools {
 }
 
 sub draw_main_win {
+    my ( $self ) = @_;
+
     $w_main = Gtk3::Window->new('toplevel');
 
     my $curr_vfo = $cfg->{active_vfo};
@@ -540,9 +543,21 @@ sub draw_main_win {
     $w_main->add_accel_group($w_main_accel);
     $box = Gtk3::Box->new( 'vertical', 5 );
 
-    my $meters = rustyrigs_meterbar->render_meterbars( \$main::meters, \$cfg, $vfos, $w_main );
-    my $meter_box = $meters->{'box'};
-    $box->pack_start( $meter_box, TRUE, TRUE, 0 );
+    # add a placeholder box we can insert/edit easily
+    my $meters_dock_box = Gtk3::Box->new('vertical', 5);
+    $self->{'meter_dock'} = \$meters_dock_box;
+    $box->pack_start( $meters_dock_box, TRUE, TRUE, 0);
+
+    $meters = rustyrigs_meterbar->render_meterbars( \$main::meters, \$cfg, $vfos, $w_main );
+    # Do we render the meters in the main window?
+    my $meters_in_main = $cfg->{'meters_in_main'};
+    if ($meters_in_main) {
+       my $meter_box = $meters->{'box'};
+       $meters_dock_box->pack_start( $meter_box, TRUE, TRUE, 0 );
+    } else {
+       # Show the meters window
+#       $meters->show();
+    }
 
     #################
     # Channel stuff #

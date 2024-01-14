@@ -44,6 +44,7 @@ our $def_cfg = {
     key_volume       => 'K',
     key_width        => 'Z',
     log_level        => "debug",
+    meters_in_main   => 0,			  # 1 will show meters in main window
     my_qth           => "AA00aa",		  # my 6 digit gridsquare
     poll_interval    => 250,                      # every 1/4 sec
     poll_tray_every  => 20,                       # at 1/20th the rate of normal (every 5 sec)

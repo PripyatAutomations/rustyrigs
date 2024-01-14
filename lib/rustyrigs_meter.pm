@@ -7,7 +7,9 @@ use Data::Structure::Util qw/unbless/;
 use warnings;
 use strict;
 
+# Our default font
 our $monospace_font;
+our $docked;
 
 my $cfg;
 my $vfos;
@@ -156,6 +158,41 @@ sub DESTROY {
     my ($class) = @_;
 }
 
+sub dock_meterbars {
+    my ( $self ) = @_;
+    my $dock = $self->{'meter_dock'};
+    my $gtk_ui = $main::gtk_ui;
+
+    if (!$docked) {
+       # XXX: Remove from it's own window
+#       $dock->pack_start($meters, TRUE, TRUE, 0);
+#       $docked = 1;
+    } else {
+       print "already docked!\n";
+    }
+    print "dock meters win\n";
+}
+
+sub hide_meterbars {
+    my ( $self ) = @_;
+    my $dock = $self->{'meter_dock'};
+    my $gtk_ui = $main::gtk_ui;
+
+    print "hide meters win\n";
+}
+
+sub show_meterbar_win {
+    my ( $self ) = @_;
+    my $dock = $self->{'meter_dock'};
+    my $docked = $self->{'docked'};
+    my $gtk_ui = $main::gtk_ui;
+
+    if ($docked) {
+       # XXX: Remove from dock first
+    }
+    print "show meters win\n";
+}
+
 # This will return an object containing all the meters and their properties
 sub render_meterbars {
     ( my $class, my $meters_ref, my $cfg, my $vfos, my $w_main ) = @_;
@@ -190,8 +227,12 @@ sub render_meterbars {
     }
 
     my $self = {
+        dock_meterbars => \&dock_meterbars,	# Dock in main window
+        hide_meterbars => \&hide_meterbars,	# Hide the popup window
+        show_meterbar_win => \&show_meterbar_win,	# Show in a popup window
         box => $meter_box,
-        meters => \$meters
+        meters => \$meters,
+        docked => \$docked
     };        
     return $self;
 }
