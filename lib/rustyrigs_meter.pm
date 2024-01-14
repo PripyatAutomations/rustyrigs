@@ -257,6 +257,7 @@ sub save {
 
    if (defined $tmp_cfg) {
       $main::cfg_p->apply($tmp_cfg);
+      undef $tmp_cfg;
    } else {
       print "no changes to save (meters)\n";
    }

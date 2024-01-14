@@ -96,6 +96,7 @@ sub Log {
 
     my $buf;
 
+    # XXX: We should do log levels per destination: logview, logfile, stdout
     if ( $log_levels{$filter_level} < $log_levels{$log_level} ) {
         return 0;
     }
@@ -117,15 +118,20 @@ sub Log {
     }
     $buf .= "\n";
 
+    # send to the log file, always
+    print { $self->{log_fh} } $buf;
+
     # If we've established a log output handler, send it there
     if (defined $self->{'handler'}) {
        my $i = $self->{'handler'};
        $i->write($buf);
-    } else { # else, to the tty
+    }
+
+    # if we're debugging, or no handler send it to stdout
+    if (!defined $self->{'handler'} || $lvl eq 'debug') {
        print $buf;
     }
-    # send to the log file, always
-    print { $self->{log_fh} } $buf;
+
 }
 
 sub set_log_level {

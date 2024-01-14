@@ -65,6 +65,7 @@ our $vfos = {
         stats      => {
             attn   => 0,
             signal => 0,
+            swr    => 0
         },
         fm => {
             split_mode   => "-",
@@ -89,6 +90,7 @@ our $vfos = {
         stats      => {
             attn   => 0,
             signal => 0,
+            swr    => 0
         },
         fm => {
             split_mode   => "-",

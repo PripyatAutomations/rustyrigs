@@ -122,6 +122,7 @@ sub main_menu_state {
 sub main_menu {
     my ( $status_icon, $button, $time ) = @_;
 
+    # destroy old menu, if it exists
     if ($main_menu_open) {
         $main_menu->destroy();
     }
@@ -337,7 +338,7 @@ sub load_icons {
     my $res           = $cfg->{'res_dir'};
     my $icon_error    = $res . "/" . $cfg->{'icon_error'};
     my $icon_idle     = $res . "/" . $cfg->{'icon_idle'};
-    my $icon_gridtools    = $res . "/" . $cfg->{'icon_gridtools'};
+    my $icon_gridtools = $res . "/" . $cfg->{'icon_gridtools'};
     my $icon_logview  = $res . "/" . $cfg->{'icon_logview'};
     my $icon_meters   = $res . "/" . $cfg->{'icon_meters'};
     my $icon_settings = $res . "/" . $cfg->{'icon_settings'};
@@ -804,7 +805,6 @@ sub draw_main_win {
     foreach my $mode (@rustyrigs_hamlib::hamlib_modes) {
         $mode_entry->append_text($mode);
     }
-    $mode_entry->set_active(0);
 
     # XXX: ACCEL-Replace these with a global function
     $w_main_accel->connect(
@@ -816,7 +816,6 @@ sub draw_main_win {
             $mode_entry->popup();
         }
     );
-#    $mode_entry->set_active(0);
 
     # Callback function to handle selection change
     $mode_entry->signal_connect(
@@ -1159,11 +1158,14 @@ sub set_tray_icon {
     else {
         $status_txt = "INITIALIZING";
     }
+
     my $freq_txt   = $act_vfo->{'freq'};
     my $mode_txt   = $act_vfo->{'mode'};
     my $width_text = $act_vfo->{'width'};
     my $power_text = $act_vfo->{'power'};
-    my $swr_txt    = "1";
+    my $swr_txt    = $act_vfo->{'stats'}{'swr'};
+    my $sig_txt    = $act_vfo->{'stats'}{'signal'};
+    my $atten      = $act_vfo->{'stats'}{'atten'};
 
     # create and apply the tooltip help for tray icon...
     my $tray_tooltip =
@@ -1217,25 +1219,25 @@ sub new {
         tray_icon         => \$tray_icon,
 
         # GUI widgets
-        box            => \$box,
-        fm_box         => \$fm_box,
-        lock_button    => \$lock_button,
-        lock_item      => \$lock_item,
-        main_menu      => \$main_menu,
-        main_menu_open => \$main_menu_open,
-        mem_add_button => \$mem_load_button,
-        mem_edit_button => \$mem_edit_button,
-        mem_load_button => \$mem_load_button,
-        mode_entry     => \$mode_entry,
-        rf_gain_entry  => \$rf_gain_entry,
-        rig_vol_entry  => \$rig_vol_entry,
+        box               => \$box,
+        fm_box            => \$fm_box,
+        lock_button       => \$lock_button,
+        lock_item         => \$lock_item,
+        main_menu         => \$main_menu,
+        main_menu_open    => \$main_menu_open,
+        mem_add_button    => \$mem_load_button,
+        mem_edit_button   => \$mem_edit_button,
+        mem_load_button   => \$mem_load_button,
+        mode_entry        => \$mode_entry,
+        rf_gain_entry     => \$rf_gain_entry,
+        rig_vol_entry     => \$rig_vol_entry,
         vfo_freq_entry    => \$vfo_freq_entry,
         vfo_power_entry   => \$vfo_power_entry,
         vfo_sel_button    => \$vfo_sel_button,
         width_entry       => \$width_entry,
 
         # Windows
-        w_main     => \$w_main,
+        w_main            => \$w_main,
 
         # Functions
         autosize_height          => \&autosize_height,

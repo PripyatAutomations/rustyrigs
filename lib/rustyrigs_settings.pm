@@ -77,12 +77,15 @@ sub save {
         print "Changes to be applied:\n$tc_dump\n";
         $main::log->Log( "config", "debug", "Applying config changes:\n\t$tc_dump");
         $main::cfg_p->apply($tc);
+        # Get rid of chances we've already applied
+        undef $tc;
     }
     else {
         print "No changes to apply.\n";
         $main::log->Log( "config", "info", "no changes to save" );
     }
     apply();
+    undef $tc;
     $w_settings->close();
     $w_settings->destroy();
 }

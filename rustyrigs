@@ -237,19 +237,19 @@ $log->add_handler($logview);
 $gtk_ui->set_icon("connecting");
 
 # XXX: Sort this mess out soon
-#$channels = rustyrigs_memory->new($cfg, \$gtk_ui->w_main, $mem_file);
-#
-#if (defined $mem_file && -f $mem_file) {
-#   $mem_file = $cfg->{'mem_file'};
-#   $channels->load_from_yaml();
-#} else {
-#   # Load default memories
-#   $channels->load_defaults($rustyrigs_defconfig::default_memories);
-#
-#   # Save default memories to memory file
-#   # XXX: Save memories
-#   $channels->save($cfg->{'mem_file'});
-#}
+$channels = rustyrigs_memory->new($cfg, $gtk_ui->{'w_main'}, $mem_file);
+
+if (defined $mem_file && -f $mem_file) {
+   $mem_file = $cfg->{'mem_file'};
+   $channels->load_from_yaml();
+} else {
+   # Load default memories
+   $channels->load_defaults($rustyrigs_defconfig::default_memories);
+
+   # Save default memories to memory file
+   # XXX: Save memories
+   $channels->save($$cfg->{'mem_file'});
+}
 
 # Delay the hamlib init at least a second, for reliability
 our $hamlib_initialized = 0;
