@@ -619,7 +619,7 @@ sub new {
 
 
     # Create an OK button to apply settings
-    my $colors_button = Gtk3::Button->new('Colo_urs');
+    my $colors_button = Gtk3::Button->new('Co_lors');
     $colors_button->set_tooltip_text("Change GUI colors");
     $colors_button->set_can_focus(1);
     $colors_button->signal_connect( 'activate' => sub { (my $self) = @_; $class->set_colors(); } );

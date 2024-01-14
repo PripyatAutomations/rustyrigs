@@ -161,11 +161,13 @@ sub DESTROY {
     my ($class) = @_;
 }
 
+our $meters;
+
 # This will return an object containing all the meters and their properties
 sub render_meterbars {
     ( my $cfg, my $vfos, my $w_main ) = @_;
 
-    our $meters = {
+    $meters = {
        'alc' => {
           'title' => 'ALC',
           'enabled' => TRUE,
@@ -297,6 +299,48 @@ sub save {
    $color_win->destroy();
 }
 
+# Function to handle color selection
+sub color_picker {
+    my ($parent_window, $default_color) = @_;
+
+    my $color_dialog = Gtk3::ColorSelectionDialog->new('Choose Color');
+    my $color_selection = $color_dialog->get_color_selection();
+
+    if ($default_color) {
+        $color_selection->set_current_rgba($default_color);
+    }
+
+    my $response = $color_dialog->run();
+    $color_dialog->destroy();
+
+    if ($response eq 'ok') {
+        my $selected_color = $color_selection->get_current_rgba();
+        return $selected_color;
+    } else {
+        return undef;  # User canceled the dialog
+    }
+}
+
+sub font_chooser {
+    my ($parent_window, $default_font) = @_;
+
+    my $font_dialog = Gtk3::FontChooserDialog->new('Choose Font', $parent_window);
+    
+    if ($default_font) {
+        $font_dialog->set_font($default_font);
+    }
+
+    my $response = $font_dialog->run();
+
+    my $selected_font;
+    if ($response eq 'ok') {
+        $selected_font = $font_dialog->get_font();
+    }
+
+    $font_dialog->destroy();
+    return $selected_font;
+}
+
 sub DESTROY {
    my ( $self ) = @_;
 }
@@ -335,6 +379,147 @@ sub new {
    $color_win->add_accel_group($accel);
    $box = Gtk3::Box->new('vertical', 5);
 
+   my $box_label = Gtk3::Label->new("Meters");
+   $box->pack_start($box_label, FALSE, FALSE, 0);
+
+   my $box_label_sep = Gtk3::Separator->new('horizontal');
+#   $box_label_sep->set_size_request(-1, -1);
+   $box->pack_start($box_label_sep, FALSE, FALSE, 0);
+
+   # Iterate over the available meters
+   my @meter_names = sort keys %$meters;
+#   foreach my $m_name (sort keys %$meters) {
+   foreach my $index (0 .. $#meter_names) {
+      my $m_name = $meter_names[$index];
+      my $meter = $meters->{$m_name};
+      my $m_title = $meter->{'title'};
+      my $m_enabled = $meter->{'enabled'};
+      my $m_alarm_bg = $meter->{'alarm_bg'};
+      my $m_bg = $meter->{'bg'};
+      my $m_fg = $meter->{'fg'};
+      my $m_font = $meter->{'font'};
+      my $m_text = $meter->{'text'};
+      my $m_box = Gtk3::Box->new('vertical', 5);
+      # Meter name
+      my $m_label = Gtk3::Label->new(uc($m_title));
+      $m_box->pack_start($m_label, FALSE, FALSE, 0);
+
+      # background color
+      my $bg_box = Gtk3::Box->new('horizontal', 5);
+      my $bg_label = Gtk3::Label->new("Background:");
+      $bg_box->pack_start($bg_label, FALSE, FALSE, 0);
+
+      my $bg_input = Gtk3::Entry->new();
+      $bg_input->set_text($m_bg);
+      $bg_input->set_tooltip_text("Background color for $m_title widget");
+      $bg_input->set_can_focus(1);
+      $bg_input->signal_connect(
+         changed => sub {
+            my ($self) = @_;
+            $m_bg = $meter->{$m_name}{'bg'} = $$cfg->{'ui_' . $m_name . '_bg'} = $self->get_text();
+         }
+      );
+      $bg_input->signal_connect(
+         button_press_event => sub {
+            my ($self, $event) = @_;
+            if ($event->type eq 'button-press') {
+               my $def_color = woodpile::hex_to_gdk_rgba($m_bg);
+               my $color = color_picker($color_win, $def_color);
+               if ($color) {
+                  $self->set_text($color->to_string());
+                  $m_bg = $meter->{$m_name} = $$cfg->{'ui_' . $m_name . '_bg'} = woodpile::gdk_rgba_to_hex($color);
+               }
+            }
+         }
+      );
+      $bg_box->pack_start($bg_input, FALSE, FALSE, 0);
+      $m_box->pack_start($bg_box, FALSE, FALSE, 0);
+
+      # alarm background color
+      my $alarm_bg_box = Gtk3::Box->new('horizontal', 5);
+      my $alarm_bg_label = Gtk3::Label->new("Alarm bg:");
+      $alarm_bg_box->pack_start($alarm_bg_label, FALSE, FALSE, 0);
+
+      my $alarm_bg_input = Gtk3::Entry->new();
+      $alarm_bg_input->set_text($m_alarm_bg);
+      $alarm_bg_input->set_tooltip_text("Alarm background color for $m_title widget");
+      $alarm_bg_input->set_can_focus(1);
+      $alarm_bg_input->signal_connect(
+         changed => sub {
+            my ($self) = @_;
+            $m_bg = $meter->{$m_name}{'alarm_bg'} = $$cfg->{'ui_' . $m_name . '_alarm_bg'} = $self->get_text();
+         }
+      );
+      $alarm_bg_input->signal_connect(
+         button_press_event => sub {
+            my ($self, $event) = @_;
+            if ($event->type eq 'button-press') {
+               my $def_color = woodpile::hex_to_gdk_rgba($m_bg);
+               my $color = color_picker($color_win, $def_color);
+               if ($color) {
+                  $self->set_text($color->to_string());
+                  $m_bg = $$cfg->{'ui_' . $m_name . '_alarm_bg'} = $meter->{$m_name} = woodpile::gdk_rgba_to_hex($color);;
+               }
+            }
+         }
+      );
+      $alarm_bg_box->pack_start($alarm_bg_input, FALSE, FALSE, 0);
+      $m_box->pack_start($alarm_bg_box, FALSE, FALSE, 0);
+
+      # alarm background color
+      my $fg_box = Gtk3::Box->new('horizontal', 5);
+      my $fg_label = Gtk3::Label->new("Foreground:");
+      $fg_box->pack_start($fg_label, FALSE, FALSE, 0);
+
+      my $fg_input = Gtk3::Entry->new();
+      $fg_input->set_text($m_fg);
+      $fg_input->set_tooltip_text("Foreground color for $m_title widget");
+      $fg_input->set_can_focus(1);
+      $fg_input->signal_connect(
+         changed => sub {
+            my ($self) = @_;
+            $m_bg = $$cfg->{'ui_' . $m_name . '_fg'} = $meter->{$m_name}{'fg'} = $self->get_text();
+         }
+      );
+      $fg_input->signal_connect(
+         button_press_event => sub {
+            my ($self, $event) = @_;
+            if ($event->type eq 'button-press') {
+               my $def_color = woodpile::hex_to_gdk_rgba($m_bg);
+               my $color = color_picker($color_win, $def_color);
+               if ($color) {
+                  $self->set_text($color->to_string());
+                  $m_bg = $meter->{$m_name} = $$cfg->{'ui_' . $m_name . '_fg'} = woodpile::gdk_rgba_to_hex($color);
+               }
+            }
+         }
+      );
+      $fg_box->pack_start($fg_input, FALSE, FALSE, 0);
+      $m_box->pack_start($fg_box, FALSE, FALSE, 0);
+      print "\t* text: $m_text (font: $m_font)\n";
+
+      my $font_button = Gtk3::Button->new_with_label("Font: $m_font");
+      $font_button->signal_connect(clicked => sub {
+          my $font = font_chooser($color_win, $m_font);
+          if ($font) {
+              $m_font = $meter->{'font'} = $cfg->{'ui_alc_font'} = $font;
+              # Handle the selected font as needed
+              print "Selected Font: $font\n";
+          }
+      });
+
+      # Add the font button to your container
+      $m_box->pack_start($font_button, FALSE, FALSE, 0);
+
+      # add it to our outer box
+      $box->pack_start($m_box, FALSE, FALSE, 0);
+
+      # add a separator, only if it's not the last one
+      $box->pack_start(Gtk3::Separator->new('horizontal'), FALSE, FALSE, 0) unless $index == $#meter_names;
+   }
+
+   my $after_sep = Gtk3::Separator->new('horizontal');
+   $box->pack_start($after_sep, FALSE, FALSE, 0);
    my $button_box = Gtk3::Box->new('horizontal', 5);
    my $save_button = Gtk3::Button->new("_Save");
    $save_button->set_tooltip_text("Save settings");
