@@ -8,7 +8,6 @@
   - numeric entry field
   - up & down buttons
   - step slider
-
 * Fix crash when toggling locked via systray menu
 * While transmitting, make the power meter show the RFPOWER meter instead of commanded power
   if possible.
@@ -21,14 +20,7 @@
   - implement multiple bars (ugh!)
 * Move GTK GUI update code from lib/*_hamlib.pm to update() in lib/*_gtk_ui.pm
 * Clean up read_rig to update $vfos->{$curr_vfo} and call gtk_ui->update()
-
-* Move all the polling and setting into read_rig and write_rig
-  - Call these periodically, if needed, but throttled best we can
 * Add a widget (scale/slider?) under the freq selector to allow chosing the step size
-* Fix the bugs
-* Crap ton of code cleanup is needed...
-* Finish GTK3 GUI
-* Add settings dialog for using color picker to set the various colors.
 * More keyboard controls! make it so you can type to search the boxes
 * When user starts typing in the frequency field, suspend actions on the field and allow typing normally
 * Replace freq entry with a normal text box, tune up/down buttons, and a step combo

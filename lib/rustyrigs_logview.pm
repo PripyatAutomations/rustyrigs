@@ -44,7 +44,7 @@ sub write {
 
 #    # Get preferred height for the current width
 #    my ( $min_height, $nat_height ) =
-#      $box->get_preferred_height_for_width( $cfg->{'win_x'} );
+#      $box->get_preferred_height_for_width( $$cfg->{'win_x'} );
 
     # Set window height based on the preferred height of visible boxes
 #    $window->resize( $window->get_allocated_width(), $min_height );
@@ -66,7 +66,7 @@ sub window_state {
 
     # Only allow the window to be hidden with the main window
     if ( $event->new_window_state =~ m/\bwithdrawn\b/ ) {
-       my $visible = $cfg->{'win_visible'};
+       my $visible = $$cfg->{'win_visible'};
        if ($visible) {
           # Instead, iconify it
           $widget->unhide();
@@ -94,11 +94,10 @@ sub DESTROY {
 }
 
 sub new {
-   ( my $class, my $cfg_ref ) = @_;
-   $cfg = ${$cfg_ref};
+   ( my $class, my $cfg ) = @_;
 
-   my $lvp = $cfg->{'win_logview_placement'};
-
+   my $lvp = $$cfg->{'win_logview_placement'};
+   my $tmp_cfg;		# hold changed configuration values until apply()'d
    my $gtk_ui = \$main::gtk_ui;
 
    if (!defined $lvp) {
@@ -112,7 +111,7 @@ sub new {
       position  => $lvp
    );
 
-   my $keep_above = $cfg->{'always_on_top_logview'};
+   my $keep_above = $$cfg->{'always_on_top_logview'};
    # this makes the stacking order reasonable
    $window->set_transient_for($main::w_main);
    $window->set_title("Log Viewer");
@@ -129,13 +128,13 @@ sub new {
    }
 
    # Set width/height of teh window
-   $window->set_default_size( $cfg->{'win_logview_width'},
-       $cfg->{'win_logview_height'} );
+   $window->set_default_size( $$cfg->{'win_logview_width'},
+       $$cfg->{'win_logview_height'} );
 
    # If placement type is none, we should manually place the window at x,y
    if ($lvp =~ m/none/) {
       # Place the window
-      $window->move( $cfg->{'win_logview_x'}, $cfg->{'win_logview_y'} );
+      $window->move( $$cfg->{'win_logview_x'}, $$cfg->{'win_logview_y'} );
    }
 
    # Keyboard accelerators
@@ -151,10 +150,11 @@ sub new {
            my ( $x,     $y )      = $widget->get_position();
 
            # Save the data...
-           $cfg->{'win_logview_x'}      = $x;
-           $cfg->{'win_logview_y'}      = $y;
-           $cfg->{'win_logview_height'} = $height;
-           $cfg->{'win_logview_width'}  = $width;
+           $tmp_cfg->{'win_logview_x'}      = $x;
+           $tmp_cfg->{'win_logview_y'}      = $y;
+           $tmp_cfg->{'win_logview_height'} = $height;
+           $tmp_cfg->{'win_logview_width'}  = $width;
+           $main::cfg_p->apply($tmp_cfg);
 
            # Return FALSE to allow the event to propagate
            return FALSE;
@@ -187,7 +187,7 @@ sub new {
    $window->add($box);
    $window->show_all();
 
-   my $auto_hide = $cfg->{'hide_logview_at_start'};
+   my $auto_hide = $$cfg->{'hide_logview_at_start'};
    if (defined $auto_hide && $auto_hide) {
       $window->iconify();
    }

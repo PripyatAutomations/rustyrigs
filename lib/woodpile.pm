@@ -179,6 +179,19 @@ use Data::Structure::Util qw/unbless/;
 my $cfg_readonly = 0;    # if 1, config won't be written out
 my $cfg_file;
 
+sub apply {
+    my ( $self, $tmp_cfg ) = @_;
+    my $x = \$self->{'cfg'};
+    my $rv = { %$$x, %$tmp_cfg };
+
+    # Apply globally
+    $self->{'cfg'} = $rv;
+
+    # Save to the configuration file
+    my $cfg_file = $self->{'cfg_file'};
+    $self->save($$cfg_file);
+}
+
 sub load {
     my ( $self, $cfg_file, $def_cfg ) = @_;
     my $rv;
@@ -216,7 +229,7 @@ sub save {
     my ( $self, $cfg_file ) = @_;
 
     if ( !$cfg_readonly ) {
-        print "[core/debug] saving config to $cfg_file\n";
+#        print "[core/debug] saving config to $cfg_file\n";
         my $cfg_out_txt = YAML::XS::Dump( $self->{cfg} );
         if ( !defined($cfg_out_txt) ) {
             die "Exporting YAML configuration failed\n";
@@ -228,7 +241,7 @@ sub save {
     }
     else {
         $self->log->Log( "core", "info",
-            "not saving configuration as cfg_readonly is enabled..." );
+            "not saving configuration $cfg_file as cfg_readonly is enabled..." );
     }
 }
 
@@ -238,6 +251,7 @@ sub new {
 
     my $self = {
         # Functions we export
+        apply => \&apply,
         load => \&load,
         save => \&save,
 

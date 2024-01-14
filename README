@@ -1,10 +1,12 @@
 This is a small gtk3 and perl frontend for rigctld.
 
-Configuration will be created at ~/.config/rustyrigs.yaml or the location given by -f the first time its started and either settings/Save clicked or exited.
+Configuration will be created at ~/.config/rustyrigs.yaml or the location given by -f the first time its started and either settings/Save clicked or program exited.
+Eventually all settings should be in the dialogs, but there's too much more important to do for now!
 
-Install needed perl packages--
-
-sudo apt install -y libgtk3-perl libglib-perl libyaml-perl libhamlib-perl libdata-structure-util-perl
+Install needed perl packages:
+	sudo apt install -y libgtk3-perl libglib-perl libyaml-perl libhamlib-perl libdata-structure-util-perl
+- or -
+	make deb
 
 ---
 
@@ -13,4 +15,4 @@ You'll probably want to quiet down the debug level in the settings.
 
 Things that are broken but should be fixed soon:
 	Various settings aren't saved/applied properly, I'm aware.
-	
+	For now, you might need to restart for some settings to apply...

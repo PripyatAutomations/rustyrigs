@@ -19,7 +19,6 @@ our $core_debug;
 our $hamlib_debug;
 my $tmp_cfg;
 my $w_main;
-my $changes = 1;	# XXX: fix this
 my $cfg;
 our $w_settings;
 
@@ -71,25 +70,19 @@ sub apply {
 
 sub save {
      my ( $tc ) = @_;
-# XXX: enable this once we've added $changes++ everywhere needed
-#    if ( $changes && defined $tc ) {
    if (defined $tc) {
         $main::log->Log( "config", "info",
             "Merging settings into in-memory config" );
         my $tc_dump = Dumper($tc);
         print "Changes to be applied:\n$tc_dump\n";
         $main::log->Log( "config", "debug", "Applying config changes:\n\t$tc_dump");
-        my $tmp = { %$cfg, %$tc };
-        $cfg = $tmp;
-        $main::cfg = $cfg;
+        $main::cfg_p->apply($tc);
     }
     else {
         print "No changes to apply.\n";
         $main::log->Log( "config", "info", "no changes to save" );
     }
-
     apply();
-    main::save_config();
     $w_settings->close();
     $w_settings->destroy();
 }
@@ -248,7 +241,6 @@ sub new {
         value_changed => sub {
             my $val = $poll_interval_entry->get_value();
             $tmp_cfg->{'poll_interval'} = $val;
-            $changes++;
         }
     );
 
@@ -268,7 +260,6 @@ sub new {
         value_changed => sub {
             my $val = $poll_tray_entry->get_value();
             $tmp_cfg->{'poll_tray_every'} = $val;
-            $changes++;
         }
     );
 
@@ -333,7 +324,6 @@ sub new {
             else {
                 $tmp_cfg->{'use_metric'} = 0;
             }
-            $changes++;
         }
     );
     $metric_toggle->set_can_focus(1);
@@ -351,7 +341,6 @@ sub new {
             else {
                 $tmp_cfg->{'start_locked'} = 0;
             }
-            $changes++;
         }
     );
     $start_locked_toggle->set_can_focus(1);
@@ -373,7 +362,6 @@ sub new {
             else {
                 $tmp_cfg->{'stay_hidden'} = 0;
             }
-            $changes++;
         }
     );
     $autohide_toggle->set_can_focus(1);
@@ -393,7 +381,6 @@ sub new {
             else {
                 $tmp_cfg->{'hide_gridtools_too'} = 0;
             }
-            $changes++;
         }
     );
     $window_options_box->pack_start( $hide_gridtools_button,    FALSE, FALSE, 0 );
@@ -412,7 +399,6 @@ sub new {
             else {
                 $tmp_cfg->{'hide_logview_at_start'} = 0;
             }
-            $changes++;
         }
     );
     $window_options_box->pack_start( $hide_logview_button,    FALSE, FALSE, 0 );
@@ -431,7 +417,6 @@ sub new {
             else {
                 $tmp_cfg->{'always_on_top_logview'} = 0;
             }
-            $changes++;
         }
     );
     $window_options_box->pack_start( $logview_ontop_button, FALSE, FALSE, 0 );
@@ -450,7 +435,6 @@ sub new {
             else {
                 $tmp_cfg->{'always_on_top_gridtools'} = 0;
             }
-            $changes++;
         }
     );
     $window_options_box->pack_start( $gridtools_ontop_button, FALSE, FALSE, 0 );
@@ -469,7 +453,6 @@ sub new {
             else {
                 $tmp_cfg->{'always_on_top'} = 0;
             }
-            $changes++;
         }
     );
     $window_options_box->pack_start( $ontop_button,    FALSE, FALSE, 0 );
@@ -488,7 +471,6 @@ sub new {
             else {
                 $tmp_cfg->{'always_on_top_meters'} = 0;
             }
-            $changes++;
         }
     );
     $window_options_box->pack_start( $meter_ontop_button, FALSE, FALSE, 0 );
