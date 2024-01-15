@@ -21,6 +21,7 @@ my @log_buffer;
 
 sub write {
     ( my $self, my $message ) = @_;
+    my $scrollback_lines = $cfg->{'scrollback_lines'};
     my $buffer = $text_view->get_buffer();
     push @log_buffer, "$message";
 
@@ -38,35 +39,15 @@ sub write {
     $text_view->scroll_mark_onscreen($mark);
 }
 
-# This needs adapted to our use
-#sub autosize_height {
-#    my ($window) = @_;
-
-#    # Get preferred height for the current width
-#    my ( $min_height, $nat_height ) =
-#      $box->get_preferred_height_for_width( $$cfg->{'win_x'} );
-
-    # Set window height based on the preferred height of visible boxes
-#    $window->resize( $window->get_allocated_width(), $min_height );
-#}
-
 sub window_state {
     my ( $widget, $event ) = @_;
     my $on_top  = 0;
     my $focused = 0;
 
-    if ( $event->new_window_state =~ m/\biconified\b/ ) {
-        # Prevent the window from being iconified
-#        $widget->deiconify();
-
-#        # and minimize it to the system tray icon
-#        $widget->hide();
-        return TRUE;
-    }
-
     # Only allow the window to be hidden with the main window
     if ( $event->new_window_state =~ m/\bwithdrawn\b/ ) {
        my $visible = $$cfg->{'win_visible'};
+
        if ($visible) {
           # Instead, iconify it
           $widget->unhide();
@@ -82,10 +63,6 @@ sub window_state {
         $focused = 1;
     }
 
-    # the window shouldn't ever be maximized...
-#    if ( $event->new_window_state =~ m/\bmaximized\b/ ) {
-#        $widget->unmaximize();
-#    }
     return FALSE;
 }
 

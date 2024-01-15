@@ -388,6 +388,24 @@ sub new {
     );
     $window_options_box->pack_start( $hide_gridtools_button,    FALSE, FALSE, 0 );
 
+    my $hide_gridtools_def_button = Gtk3::CheckButton->new();
+    $hide_gridtools_def_button->set_label('Hide gridtools by default?');
+    $hide_gridtools_def_button->set_active( $cfg->{'hide_gridtools_at_start'} );
+    $hide_gridtools_def_button->set_can_focus(1);
+    $hide_gridtools_def_button->signal_connect(
+        'toggled' => sub {
+            my $button = shift;
+
+            if ( $button->get_active() ) {
+                $tmp_cfg->{'hide_gridtools_at_start'} = 1;
+            }
+            else {
+                $tmp_cfg->{'hide_gridtools_at_start'} = 0;
+            }
+        }
+    );
+    $window_options_box->pack_start( $hide_gridtools_def_button,    FALSE, FALSE, 0 );
+
     my $hide_logview_button = Gtk3::CheckButton->new();
     $hide_logview_button->set_label('Hide log viewer by default?');
     $hide_logview_button->set_active( $cfg->{'hide_logview_at_start'} );

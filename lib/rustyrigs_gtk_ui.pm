@@ -498,6 +498,7 @@ sub draw_main_win {
     $w_main->set_title("rustyrigs: Not connected");
     $w_main->set_default_size( $cfg->{'win_width'}, $cfg->{'win_height'} );
     $w_main->set_border_width( $cfg->{'win_border'} );
+    $w_main->present();
     my $resizable = 0;
 
     if ( defined( $cfg->{'win_resizable'} ) ) {

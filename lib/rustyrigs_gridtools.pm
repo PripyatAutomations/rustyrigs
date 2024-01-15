@@ -37,6 +37,7 @@ sub update {
     my $d_l = $self->{'dist_label'};
     my $l_l = $self->{'latlon_entry'};
     my $lp_l = $self->{'longpath_label'};
+    my $rb = $self->{'rotate_button'};
 
     # update lat/lon for the gridsquare if it appears valid length
     if ($dx_len >= 4 && ($dx_len % 2 == 0)) {
@@ -57,23 +58,25 @@ sub update {
        $longpath = Hamlib::distance_long_path($dist);
 
        if ($use_metric) {
-          $s_az = sprintf("%.2f deg", $az);
+          $s_az = sprintf("%.0f deg", $az);
           $s_dist = sprintf("%.2f km", $dist);
-          $s_longpath = sprintf("%.2f mi", $longpath);
+          $s_longpath = sprintf("%.2f km", $longpath);
        } else {
-          $s_az = sprintf("%.2f deg", $az);
+          $s_az = sprintf("%.0f deg", $az);
           $s_dist = sprintf("%.2f mi", $dist / 1.60934);
           $s_longpath = sprintf("%.2f mi", $longpath / 1.60934);
        }
-       $log->Log("user", "info", "Calculated [$mygrid] $s_my_lat, $s_my_lon => [$dxgrid] $s_dx_lat, $s_dx_lon - ${s_dist} ($s_longpath long path) at ${s_az}");
+       $log->Log("user", "info", "Calculated [$mygrid] $s_my_lat, $s_my_lon to [$dxgrid] $s_dx_lat, $s_dx_lon is ${s_dist} at ${s_az}, $s_longpath long path");
        $$b_l->set_text($s_az);
        $$d_l->set_text($s_dist);
        $$lp_l->set_text($s_longpath);
+       $$rb->set_sensitive(1);
     } else {	# clear results until valid values present
        $$b_l->set_text('----');	# clear bearing label
        $$d_l->set_text('----');	# clear distance label
        $$l_l->set_text('');	# clear lat lon label
        $$lp_l->set_text('----');
+       $$rb->set_sensitive(0);
     }
  }
 
@@ -195,7 +198,8 @@ sub new {
     my $rot_box = Gtk3::Box->new('vertical', 5);
     my $rotate_button = Gtk3::Button->new("Rotate _Antenna");
     $rotate_button->set_tooltip_text("Rotate antenna towards bearing");
-    $rotate_button->set_can_focus(0);
+    $rotate_button->set_can_focus(1);
+    $rotate_button->set_sensitive(0);
     $rotate_button->signal_connect( 'clicked'  => sub { 
        (my $self) = @_;
        $main::log->Log("user", "info", "User requested antenna rotation, but that's not yet supported...");
@@ -227,8 +231,6 @@ sub new {
     $button_box->pack_start($reset_button, TRUE, TRUE, 0);
     $box->pack_start($rot_box, TRUE, TRUE, 0);
     $box->pack_end($button_box, FALSE, FALSE, 0);
-
-
     $window->add($box);
     $window->show_all();
 
@@ -288,10 +290,11 @@ sub new {
        box => \$box,
        bear_label => \$o_bear_label,
        dist_label => \$o_dist_label,
+       dxgrid => $dxgrid_input,
        longpath_label => \$o_longpath_label,
        latlon_entry => \$o_latlon_entry,
-       dxgrid => $dxgrid_input,
        mygrid => $mygrid_input,
+       rotate_button => \$rotate_button,
        window => \$window
     };
 

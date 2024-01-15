@@ -63,9 +63,7 @@ sub parse {
         $main::cfg->{'win_y'} = $cl_y;
     }
     elsif ( defined($cl_x) || defined($cl_y) ) {
-        $main::log->Log( "ui", "error",
-"You must specify both -x and -y options to place the window at startup"
-        );
+        $main::log->Log( "ui", "error", "You must specify both -x and -y options to place the window at startup" );
         exit 1;
     }
 }

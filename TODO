@@ -1,3 +1,5 @@
+* Add more verification/error checking
+  - gridtools - Confirm if grids are valid or not
 * Clean up read_rig to update $vfos->{$curr_vfo} and call gtk_ui->update()
 * Move GTK GUI update code from lib/*_hamlib.pm to update() in lib/*_gtk_ui.pm
 * Finish font loading
