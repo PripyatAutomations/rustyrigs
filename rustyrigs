@@ -269,6 +269,9 @@ sub hamlib_init {
 }
 Glib::Timeout->add( 1000, \&hamlib_init );
 
+my $w_main = $gtk_ui->{'w_main'};
+$$w_main->present();
+
 # Andd.... go!
 Gtk3->main();
 $log->Log( "core", "info", "$app_name is shutting down!" );

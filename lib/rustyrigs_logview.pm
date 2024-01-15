@@ -46,7 +46,7 @@ sub window_state {
 
     # Only allow the window to be hidden with the main window
     if ( $event->new_window_state =~ m/\bwithdrawn\b/ ) {
-       my $visible = $$cfg->{'win_visible'};
+       my $visible = $cfg->{'win_visible'};
 
        if ($visible) {
           # Instead, iconify it
@@ -132,6 +132,7 @@ sub new {
            $tmp_cfg->{'win_logview_height'} = $height;
            $tmp_cfg->{'win_logview_width'}  = $width;
            $main::cfg_p->apply($tmp_cfg);
+           undef $tmp_cfg;
 
            # Return FALSE to allow the event to propagate
            return FALSE;
@@ -141,7 +142,8 @@ sub new {
    $window->signal_connect(
        delete_event => sub {
            ( my $class ) = @_;
-           $class->close();
+#           $class->close();
+           $window->iconify();
            return TRUE;    # Suppress default window destruction
        }
    );

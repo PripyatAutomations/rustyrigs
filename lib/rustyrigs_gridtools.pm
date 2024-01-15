@@ -10,6 +10,7 @@ use Hamlib;
 
 my $log;
 my $cfg;
+our $tmp_cfg;
 
 sub DESTROY {
     ( my $self ) = @_;
@@ -57,19 +58,25 @@ sub update {
        ( my $err, $dist, $az ) = Hamlib::qrb($my_lon, $my_lat, $dx_lon, $dx_lat);
        $longpath = Hamlib::distance_long_path($dist);
 
+       $s_az = sprintf("%.0f deg", $az);
+       my $s_dist_km = sprintf("%.0f km", $dist);
+       my $s_dist_mi = sprintf("%.0f mi", $dist / 1.60934);
+       my $s_longpath_km = sprintf("%.0f km", $longpath);
+       my $s_longpath_mi = sprintf("%.0f mi", $longpath / 1.60934);
+       my $s_longpath_az = sprintf("%.0f deg", (360 - $az));
+
        if ($use_metric) {
-          $s_az = sprintf("%.0f deg", $az);
-          $s_dist = sprintf("%.2f km", $dist);
-          $s_longpath = sprintf("%.2f km", $longpath);
+          $s_dist = $s_dist_km;
+          $s_longpath = $s_longpath_km;
        } else {
-          $s_az = sprintf("%.0f deg", $az);
-          $s_dist = sprintf("%.2f mi", $dist / 1.60934);
-          $s_longpath = sprintf("%.2f mi", $longpath / 1.60934);
+          $s_dist = $s_dist_mi; 
+          $s_longpath = $s_longpath_mi;
+          sprintf("%.0f mi", $longpath / 1.60934);
        }
-       $log->Log("user", "info", "Calculated [$mygrid] $s_my_lat, $s_my_lon to [$dxgrid] $s_dx_lat, $s_dx_lon is ${s_dist} at ${s_az}, $s_longpath long path");
+       $log->Log("user", "info", "Calculated [$mygrid] $s_my_lat, $s_my_lon to [$dxgrid] $s_dx_lat, $s_dx_lon is ${s_dist_mi} (${s_dist_km}) at ${s_az}, longpath: $s_longpath at ${s_longpath_az}");
        $$b_l->set_text($s_az);
        $$d_l->set_text($s_dist);
-       $$lp_l->set_text($s_longpath);
+       $$lp_l->set_text($s_longpath . " @ " . $s_longpath_az);
        $$rb->set_sensitive(1);
     } else {	# clear results until valid values present
        $$b_l->set_text('----');	# clear bearing label
@@ -240,7 +247,8 @@ sub new {
     $dxgrid_input->grab_focus();
 
     # if configured as such, hide the window automatically
-    if ($$cfg->{'hide_gridtools_at_start'}) {
+    my $gt_autohide = $$cfg->{'hide_gridtools_at_start'};
+    if ($gt_autohide) {
        $window->iconify();
     }
 
@@ -255,6 +263,7 @@ sub new {
        $window->move( $$cfg->{'win_gridtools_x'}, $$cfg->{'win_gridtools_y'} );
     }
 
+
     # save resizes/moves
     $window->signal_connect(
         'configure-event' => sub {
@@ -265,10 +274,12 @@ sub new {
             my ( $x,     $y )      = $widget->get_position();
 
             # Save the data...
-            $$cfg->{'win_gridtools_x'}      = $x;
-            $$cfg->{'win_gridtools_y'}      = $y;
-            $$cfg->{'win_gridtools_height'} = $height;
-            $$cfg->{'win_gridtools_width'}  = $width;
+            $tmp_cfg->{'win_gridtools_x'}      = $x;
+            $tmp_cfg->{'win_gridtools_y'}      = $y;
+            $tmp_cfg->{'win_gridtools_height'} = $height;
+            $tmp_cfg->{'win_gridtools_width'}  = $width;
+            $main::cfg_p->apply($tmp_cfg);
+            undef $tmp_cfg;
 
             # Return FALSE to allow the event to propagate
             return FALSE;
@@ -297,6 +308,22 @@ sub new {
        rotate_button => \$rotate_button,
        window => \$window
     };
+
+    my $gw_ref = $self->{'window'};
+    my $gw = $$gw_ref;
+    my $gt_ah = $$cfg->{'hide_gridtools_at_start'};
+
+    if ($gt_ah) {
+        if (defined $gw) {
+           print "hide\n";
+           $gw->iconify();
+        }
+    } else {
+        if (defined $gw) {
+           print "show\n";
+           $gw->deiconify();
+        }
+    }
 
     bless $self, $class;
     return $self;

@@ -1,3 +1,4 @@
+* Fix bug where gridtools is shown when main is hidden/show even when hide_gridtools_too is false
 * Add more verification/error checking
   - gridtools - Confirm if grids are valid or not
 * Clean up read_rig to update $vfos->{$curr_vfo} and call gtk_ui->update()

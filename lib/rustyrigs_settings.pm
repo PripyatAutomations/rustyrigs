@@ -69,7 +69,7 @@ sub apply {
 }
 
 sub save {
-     my ( $tc ) = @_;
+   my ( $tc ) = @_;
    if (defined $tc) {
         $main::log->Log( "config", "info",
             "Merging settings into in-memory config" );
@@ -106,6 +106,7 @@ sub close {
     my $response = $dialog->run();
 
     if ( $response eq 'yes' ) {
+        undef $tmp_cfg;
         $dialog->destroy();
         $w_settings->destroy();
         bless $self, 'undef';

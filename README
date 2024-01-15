@@ -14,5 +14,5 @@ You'll probably want to quiet down the debug level in the settings.
 
 
 Things that are broken but should be fixed soon:
-	Various settings aren't saved/applied properly, I'm aware.
-	For now, you might need to restart for some settings to apply...
+	For now, you might need to restart for many settings to apply.
+	- This is in work as we move things to rr_gtk_ui::apply()

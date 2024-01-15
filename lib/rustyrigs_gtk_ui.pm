@@ -228,7 +228,7 @@ sub w_main_click {
 
     # Right mouse click (display menu)
     if ( $event->type eq 'button-press' && $event->button == 3 ) {
-        main_menu( $tray_icon, 3, $event->time );
+#        main_menu( $tray_icon, 3, $event->time );
     }
 }
 
@@ -260,7 +260,8 @@ sub w_main_hide {
     if (defined $w) {
        $w->set_visible(0);
     }
-    if ($cfg->{'hide_gridtools_too'}) {
+    my $hide_gt_too = $cfg->{'hide_gridtools_too'};
+    if ($hide_gt_too) {
        my $gt = $main::gridtools;
        my $gw = ${$gt->{'window'}};
        $gw->set_visible(0);
@@ -286,10 +287,13 @@ sub w_main_show {
     $w_main->show_all();
     $w_main->move( $cfg->{'win_x'}, $cfg->{'win_y'} );
     w_main_fm_toggle();
+
     if ($cfg->{'hide_gridtools_too'}) {
        my $gt = $main::gridtools;
-       my $gw = ${$gt->{'window'}};
-       $gw->set_visible(1);
+       my $gw = $gt->{'window'};
+       if (defined $gw) {
+          $gw->set_visible(1);
+       }
     }
 
     return FALSE;
@@ -377,7 +381,7 @@ sub load_icons {
 
         # Create a system tray icon with the loaded icon
         $tray_icon->signal_connect( 'activate'   => sub { $self->w_main_toggle(); });
-        $tray_icon->signal_connect( 'popup-menu' => \&main_menu );
+#        $tray_icon->signal_connect( 'popup-menu' => \&main_menu );
     }
 }
 
@@ -467,8 +471,6 @@ sub channel_list {
 
     $iter = $store->append();
     $store->set( $iter, 0, '5', 1, ' WWV 25MHz', 2, ' 25,000.000 KHz AM' );
-
-    #$combo->set_active(1);
     return $store;
 }
 
@@ -480,6 +482,8 @@ sub open_gridtools {
     }
     else {
        $main::gridtools = rustyrigs_gridtools->new();
+       my $gt_win = $main::gridtools->{'window'};
+       $$gt_win->present();
     }
 }
 
@@ -494,11 +498,9 @@ sub draw_main_win {
     }
     my $act_vfo = $vfos->{$curr_vfo};
 
-    # XXX: We need to set the window icon
     $w_main->set_title("rustyrigs: Not connected");
     $w_main->set_default_size( $cfg->{'win_width'}, $cfg->{'win_height'} );
     $w_main->set_border_width( $cfg->{'win_border'} );
-    $w_main->present();
     my $resizable = 0;
 
     if ( defined( $cfg->{'win_resizable'} ) ) {
@@ -1226,7 +1228,7 @@ sub new {
         fm_box            => \$fm_box,
         lock_button       => \$lock_button,
         lock_item         => \$lock_item,
-        main_menu         => \$main_menu,
+#        main_menu         => \$main_menu,
         main_menu_open    => \$main_menu_open,
         mem_add_button    => \$mem_load_button,
         mem_edit_button   => \$mem_edit_button,
@@ -1250,9 +1252,9 @@ sub new {
         get_state_icon           => \&get_state_icon,
         load_icon                => \&load_icon,
         load_icons               => \&load_icons,
-        main_menu                => \&main_menu,
-        main_menu_item_clicked   => \&main_menu_item_clicked,
-        main_menu_state          => \&main_menu_state,
+#        main_menu                => \&main_menu,
+#        main_menu_item_clicked   => \&main_menu_item_clicked,
+#        main_menu_state          => \&main_menu_state,
         refresh_available_widths => \&refresh_available_widths,
         save_config              => \&save_config,
         set_icon                 => \&set_icon,

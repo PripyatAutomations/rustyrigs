@@ -249,6 +249,7 @@ my $color_win;
 
 sub cancel {
    my ( $self ) = @_;
+   undef $tmp_cfg;
    $color_win->destroy();
 }
 
