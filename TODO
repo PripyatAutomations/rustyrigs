@@ -1,3 +1,5 @@
+* Clean up read_rig to update $vfos->{$curr_vfo} and call gtk_ui->update()
+* Move GTK GUI update code from lib/*_hamlib.pm to update() in lib/*_gtk_ui.pm
 * Finish font loading
 * Move anywhere that changes $cfg to use a $tmp_cfg then prompt for confirmation
   - This should go through rr::Settings
@@ -19,8 +21,6 @@
 * PTT button & Light
 * Add signal bar to SWR widget
   - implement multiple bars (ugh!)
-* Move GTK GUI update code from lib/*_hamlib.pm to update() in lib/*_gtk_ui.pm
-* Clean up read_rig to update $vfos->{$curr_vfo} and call gtk_ui->update()
 * Add a widget (scale/slider?) under the freq selector to allow chosing the step size
 * More keyboard controls! make it so you can type to search the boxes
 * When user starts typing in the frequency field, suspend actions on the field and allow typing normally

@@ -1,6 +1,8 @@
 # This package presents a GTK3 user interface for rustyrigs
 #
 # It's a bit ugly for now...
+#
+# why is this almost as big as the rest of program? :o
 # Cleanup targets:
 #	* Icon loading could be more compact
 package rustyrigs_gtk_ui;
@@ -9,6 +11,7 @@ use Data::Dumper;
 use strict;
 use Glib qw(TRUE FALSE);
 use warnings;
+Gtk3::Settings->get_default->set_property('gtk-tooltip-timeout', 100);
 
 # These will be initialized by new()
 our $vfos;
@@ -1175,7 +1178,6 @@ sub set_tray_icon {
     $tray_tooltip .= "Meters:\n";
     $tray_tooltip .= "\t\tPower: ${power_text}W\n\t\tSWR: ${swr_txt}:1\n";
     $self->set_tray_tooltip( $tray_icon, $tray_tooltip );
-
     $tray_icon->set_from_pixbuf( get_state_icon($status) );
 }
 

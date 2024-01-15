@@ -220,7 +220,6 @@ our $meters = {
 # Initialize the GTK GUI
 $gtk_ui = rustyrigs_gtk_ui->new( $cfg, $log, $vfos );
 
-
 # Finish GUI setup
 $gtk_ui->load_icons();
 $gtk_ui->draw_main_win();
