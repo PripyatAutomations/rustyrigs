@@ -101,6 +101,18 @@ sub update {
     }
  }
 
+# Function to filter non-numeric characters
+sub on_insert_text {
+    my ($entry, $new_text, $new_text_length, $position) = @_;
+
+    # Allow only numeric characters (0-9) and optionally a decimal point
+    if ($new_text =~ /^[0-9.]*$/) {
+        return 0;  # Allow the insertion of the new text
+    } else {
+        return 1;  # Block the insertion of non-numeric text
+    }
+}
+
 sub latlon_entry_clicked {
 #    my ($class, $entry) = @_;
 #    die "class: " . Dumper($class) . "\nentry: " . Dumper($entry) . "\n";
@@ -222,6 +234,7 @@ sub new {
     $elev_input->set_editable(1);
     $elev_input->set_max_length(3);
     $elev_input->set_text(0);
+    $elev_input->signal_connect(insert_text => \&on_insert_text);
     $elev_box->pack_start($elev_label, TRUE, TRUE, 0);
     $elev_box->pack_start($elev_input, TRUE, TRUE, 0);
     $box->pack_start($elev_box, TRUE, TRUE, 0);

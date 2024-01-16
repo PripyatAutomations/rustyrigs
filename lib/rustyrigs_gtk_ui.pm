@@ -694,12 +694,9 @@ sub draw_main_win {
     my $rig_vol_label =
       Gtk3::Label->new( "Volume % (" . $cfg->{'key_volume'} . ")" );
     $rig_vol_entry = Gtk3::Scale->new_with_range( 'horizontal', 0, 100, 1 );
-    $rig_vol_entry->set_digits(0);    # Disable decimal places
-    $rig_vol_entry->set_draw_value(TRUE)
-      ;                               # Display the current value on the slider
-    $rig_vol_entry->set_has_origin(FALSE);    # Disable origin value
-    $rig_vol_entry->set_value_pos('right')
-      ;    # Set the position of the value indicator
+    $rig_vol_entry->set_digits(0);
+    $rig_vol_entry->set_draw_value(TRUE);
+    $rig_vol_entry->set_value_pos('right');
     $rig_vol_entry->set_value( $cfg->{'rig_volume'} );
     $rig_vol_entry->set_tooltip_text("Please click and drag to set RX volume");
 
@@ -877,12 +874,9 @@ sub draw_main_win {
     my $rf_gain_label =
       Gtk3::Label->new( 'RF Gain / Atten. (' . $cfg->{'key_rf_gain'} . ')' );
     $rf_gain_entry = Gtk3::Scale->new_with_range( 'horizontal', -40, 40, 1 );
-    $rf_gain_entry->set_digits(0);    # Disable decimal places
-    $rf_gain_entry->set_draw_value(TRUE)
-      ;                               # Display the current value on the slider
-    $rf_gain_entry->set_has_origin(FALSE);    # Disable origin value
-    $rf_gain_entry->set_value_pos('right')
-      ;    # Set the position of the value indicator
+    $rf_gain_entry->set_digits(0);
+    $rf_gain_entry->set_draw_value(TRUE);
+    $rf_gain_entry->set_value_pos('right');
     $rf_gain_entry->set_value( $act_vfo->{'rf_gain'} );
     $rf_gain_entry->set_tooltip_text("Please Click and DRAG to change RF gain");
 
@@ -915,12 +909,9 @@ sub draw_main_win {
         'horizontal',            $act_vfo->{'min_power'},
         $act_vfo->{'max_power'}, $act_vfo->{'power_step'}
     );
-    $vfo_power_entry->set_digits(0);    # Disable decimal places
-    $vfo_power_entry->set_draw_value(TRUE)
-      ;    # Display the current value on the slider
-    $vfo_power_entry->set_has_origin(FALSE);    # Disable origin value
-    $vfo_power_entry->set_value_pos('right')
-      ;    # Set the position of the value indicator
+    $vfo_power_entry->set_digits(0);
+    $vfo_power_entry->set_draw_value(TRUE);
+    $vfo_power_entry->set_value_pos('right');
     $vfo_power_entry->set_value( $act_vfo->{'power'} );
     $vfo_power_entry->set_tooltip_text(
         "Please Click and DRAG to change TX power");

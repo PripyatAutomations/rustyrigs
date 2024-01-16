@@ -1,3 +1,5 @@
+* Add a WSJT-X listener for displaying the messages from WSJT-X
+  - Add support to re-sending them to other addresses?
 * Fix bug where gridtools is shown when main is hidden/show even when hide_gridtools_too is false
 * Add more verification/error checking
   - gridtools - Confirm if grids are valid or not

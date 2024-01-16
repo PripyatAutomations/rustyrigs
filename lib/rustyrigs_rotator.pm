@@ -26,7 +26,6 @@ sub rotate {
 
 sub DESTROY {
    my ( $self ) = @_;
-   $self->{'rotator'}->close;
 }
 
 sub new {

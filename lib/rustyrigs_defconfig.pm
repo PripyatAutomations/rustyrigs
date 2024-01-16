@@ -7,6 +7,14 @@ package rustyrigs_defconfig;
 
 # - Default configuration
 our $def_cfg = {
+    # Addresses for the backends
+    ampctl_addr      => 'localhost:4531',
+    ampctl_model     => $Hamlib::AMP_MODEL_NETAMPCTL,
+    rigctl_addr      => 'localhost:4532',
+    rigctl_model     => $Hamlib::RIG_MODEL_NETRIGCTL,
+    rotctl_addr      => 'localhost:4533',
+    rotctl_model     => $Hamlib::ROT_MODEL_NETROTCTL,
+    # general configuration
     active_vfo           => 'A',
     always_on_top        => 0,       # 1 will keep window always on top by default
     always_on_top_gridtools => 1,    # 1 will keep grid tools window on top by default
@@ -51,10 +59,6 @@ our $def_cfg = {
     poll_tray_every  => 20,                       # at 1/20th the rate of normal (every 5 sec)
     rig_volume       => 0,
     res_dir          => "./res",
-    rigctl_addr      => 'localhost:4532',
-    rigctl_model     => $Hamlib::RIG_MODEL_NETRIGCTL,
-    rotctl_addr      => 'localhost:4533',
-    rotctl_model     => $Hamlib::ROT_MODEL_NETROTCTL,
     scrollback_lines => 300,		   # number of lines to hold in logview buffer
     shortcut_key        => 'mod1-mask',    # alt (use control-mask for ctrl)
     show_alc            => 1,
@@ -108,8 +112,9 @@ our $def_cfg = {
     ui_volt_fg          => '#70f070',      # VDD meter active color
     ui_volt_font        => 'Monospace',
     ui_volt_text        => '#000000',      # VDD meter text color
-    use_metric		=> 0,		   # 1 will use metric (miles, etc)
+    use_amp             => 0,              # 1 will enable amplifier support
     use_rotator         => 0,              # 1 will enable rotator support
+    use_metric		=> 0,		   # 1 will use metric (miles, etc)
     win_border          => 10,
     win_height          => 1024,
     win_resizable       => 1,              # 1 means main window is resizable

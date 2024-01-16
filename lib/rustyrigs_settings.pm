@@ -11,7 +11,9 @@ use Glib qw(TRUE FALSE);
 use warnings;
 
 our $config_box;
-our $address_entry;
+our $amp_addr_entry;
+our $rig_addr_entry;
+our $rot_addr_entry;
 our $qth_entry;
 our $elev_entry;
 our $poll_interval_entry;
@@ -203,19 +205,57 @@ sub new {
         }
     );
 
-    # Rigctl address
-    my $address_label = Gtk3::Label->new('Rigctld Address:Port');
-    $address_entry = Gtk3::Entry->new();
-    $address_entry->set_text( $cfg->{'rigctl_addr'} );
-    $address_entry->set_tooltip_text(
+    # rigctld address
+    my $rigctl_box = Gtk3::Box->new('vertical', 5);
+    my $rig_addr_label = Gtk3::Label->new('rigctld Address:Port');
+    $rig_addr_entry = Gtk3::Entry->new();
+    $rig_addr_entry->set_text( $cfg->{'rigctl_addr'} );
+    $rig_addr_entry->set_tooltip_text(
         "Address of rigctld server (default localhost:4532)");
-    $address_entry->set_can_focus(1);
-    $address_entry->signal_connect(
+    $rig_addr_entry->set_can_focus(1);
+    $rig_addr_entry->signal_connect(
         changed => sub {
-            my $val = $address_entry->get_text();
+            my $val = $rig_addr_entry->get_text();
             $tmp_cfg->{'rigctl_addr'} = $val;
         }
     );
+    $rigctl_box->pack_start( $rig_addr_label,       FALSE, FALSE, 0 );
+    $rigctl_box->pack_start( $rig_addr_entry,       FALSE, FALSE, 0 );
+
+    # ampctld address
+    my $ampctl_box = Gtk3::Box->new('vertical', 5);
+    my $amp_addr_label = Gtk3::Label->new('ampctld Address:Port');
+    $amp_addr_entry = Gtk3::Entry->new();
+    $amp_addr_entry->set_text( $cfg->{'ampctl_addr'} );
+    $amp_addr_entry->set_tooltip_text(
+        "Address of ampctld server (default localhost:4531)");
+    $amp_addr_entry->set_can_focus(1);
+    $amp_addr_entry->signal_connect(
+        changed => sub {
+            my $val = $amp_addr_entry->get_text();
+            $tmp_cfg->{'ampctl_addr'} = $val;
+        }
+    );
+    $ampctl_box->pack_start( $amp_addr_label,       FALSE, FALSE, 0 );
+    $ampctl_box->pack_start( $amp_addr_entry,       FALSE, FALSE, 0 );
+
+    # rotatctld address
+    my $rotctl_box = Gtk3::Box->new('vertical', 5);
+    my $rotctl_box = Gtk3::Box->new('vertical', 5);
+    my $rot_addr_label = Gtk3::Label->new('rotctld Address:Port');
+    $rot_addr_entry = Gtk3::Entry->new();
+    $rot_addr_entry->set_text( $cfg->{'rotctl_addr'} );
+    $rot_addr_entry->set_tooltip_text(
+        "Address of rotctld server (default localhost:4532)");
+    $rot_addr_entry->set_can_focus(1);
+    $rot_addr_entry->signal_connect(
+        changed => sub {
+            my $val = $rot_addr_entry->get_text();
+            $tmp_cfg->{'rotctl_addr'} = $val;
+        }
+    );
+    $rotctl_box->pack_start( $rot_addr_label,       FALSE, FALSE, 0 );
+    $rotctl_box->pack_start( $rot_addr_entry,       FALSE, FALSE, 0 );
 
     # my qth box
     my $qth_box = Gtk3::Box->new('horizontal', 5);
@@ -258,7 +298,7 @@ sub new {
       Gtk3::Scale->new_with_range( 'horizontal', 250, 60000, 250 );
     $poll_interval_entry->set_digits(0);
     $poll_interval_entry->set_draw_value(TRUE);
-    $poll_interval_entry->set_has_origin(FALSE);
+#    $poll_interval_entry->set_has_origin(FALSE);
     $poll_interval_entry->set_value_pos('right');
     $poll_interval_entry->set_value( $cfg->{'poll_interval'} );
     $poll_interval_entry->set_tooltip_text(
@@ -277,7 +317,7 @@ sub new {
     $poll_tray_entry = Gtk3::Scale->new_with_range( 'horizontal', 1, 120, 1 );
     $poll_tray_entry->set_digits(0);
     $poll_tray_entry->set_draw_value(TRUE);
-    $poll_tray_entry->set_has_origin(FALSE);
+#    $poll_tray_entry->set_has_origin(FALSE);
     $poll_tray_entry->set_value_pos('right');
     $poll_tray_entry->set_value( $cfg->{'poll_tray_every'} );
     $poll_tray_entry->set_tooltip_text(
@@ -337,6 +377,23 @@ sub new {
     }
     $hamlib_debug->set_can_focus(1);
     $hamlib_debug->signal_connect( key_release_event => \&combobox_keys );
+
+    my $amp_toggle = Gtk3::CheckButton->new();
+    $amp_toggle->set_label('Use amp?');
+    $amp_toggle->set_active( $cfg->{'use_amp'} );
+    $amp_toggle->signal_connect(
+        'toggled' => sub {
+            my $button = shift;
+
+            if ( $button->get_active() ) {
+                $tmp_cfg->{'use_amp'} = 1;
+            }
+            else {
+                $tmp_cfg->{'use_amp'} = 0;
+            }
+        }
+    );
+    $amp_toggle->set_can_focus(1);
 
     my $rotator_toggle = Gtk3::CheckButton->new();
     $rotator_toggle->set_label('Use rotator?');
@@ -578,8 +635,9 @@ sub new {
     my $main_box = Gtk3::Box->new('vertical', 5);
     my $box_label = Gtk3::Label->new('General');
     $main_box->pack_start( $box_label, FALSE, FALSE, 0);
-    $main_box->pack_start( $address_label,       FALSE, FALSE, 0 );
-    $main_box->pack_start( $address_entry,       FALSE, FALSE, 0 );
+    $main_box->pack_start( $rigctl_box, FALSE, FALSE, 0);
+    $main_box->pack_start( $rotctl_box, FALSE, FALSE, 0);
+    $main_box->pack_start( $ampctl_box, FALSE, FALSE, 0);
     $main_box->pack_start( $qth_box,             FALSE, FALSE, 0 );
     $main_box->pack_start( $elev_box,           FALSE, FALSE, 0 );
     $main_box->pack_start( $poll_interval_label, FALSE, FALSE, 0 );
@@ -590,6 +648,7 @@ sub new {
     $main_box->pack_start( $core_debug,          FALSE, FALSE, 0 );
     $main_box->pack_start( $hamlib_debug_label,  FALSE, FALSE, 0 );
     $main_box->pack_start( $hamlib_debug,        FALSE, FALSE, 0 );
+    $main_box->pack_start( $amp_toggle, FALSE, FALSE, 0 );
     $main_box->pack_start( $rotator_toggle, FALSE, FALSE, 0 );
     $main_box->pack_start( $metric_toggle, FALSE, FALSE, 0 );
     $main_box->pack_start( $start_locked_toggle, FALSE, FALSE, 0 );
@@ -602,7 +661,7 @@ sub new {
     $w_settings->signal_connect( key_release_event => \&combobox_keys );
     $w_settings->add($config_box);
     $w_settings->show_all();
-    $address_entry->grab_focus();
+    $rig_addr_entry->grab_focus();
 
     my $self = {
         close      => \&close,
