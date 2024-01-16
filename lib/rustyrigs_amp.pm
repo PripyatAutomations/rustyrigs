@@ -1,3 +1,4 @@
+# Support for hamlib's ampctld
 package rustyrigs_amp;
 use strict;
 use warnings;

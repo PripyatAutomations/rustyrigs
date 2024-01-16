@@ -270,6 +270,9 @@ sub color_picker {
     my ($parent_window, $default_color) = @_;
 
     my $color_dialog = Gtk3::ColorSelectionDialog->new('Choose Color');
+    $color_dialog->set_modal(1);
+    $color_dialog->present();
+    $color_dialog->set_transient_for($parent_window);
     my $color_selection = $color_dialog->get_color_selection();
 
     if ($default_color) {

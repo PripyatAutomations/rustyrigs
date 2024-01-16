@@ -146,7 +146,6 @@ our $def_cfg = {
 };
 
 our $default_memories = {
-
     # stuff
 };
 

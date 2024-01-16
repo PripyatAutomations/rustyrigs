@@ -298,8 +298,8 @@ sub read_rig {
     ####################
     # Apply the values #
     ####################
-    my $rve = $$gtk_ui->{'rig_vol_entry'};
-    $$rve->set_value($volume);
+#    my $rve = $$gtk_ui->{'rig_vol_entry'};
+#    $$rve->set_value($volume);
     my $vfe = $$gtk_ui->{'vfo_freq_entry'};
     $$vfe->set_value( $vfos->{$curr_vfo}{'freq'} );
     $vfos->{$curr_vfo}{'mode'} = $textmode;

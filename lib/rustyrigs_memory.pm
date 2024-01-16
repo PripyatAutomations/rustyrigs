@@ -25,12 +25,11 @@ sub show {
     ( my $class ) = @_;
 
     if ($mem_edit_open) {
-
-        #      $w_mem_edit->present();
-        #      $w_mem_edit->grab_focus();
-        #      print "reusing existing memory editor window\n";
-        #      return TRUE;
-        $w_mem_edit->destroy();
+#       $w_mem_edit->present();
+#       $w_mem_edit->grab_focus();
+#       print "reusing existing memory editor window\n";
+#       return TRUE;
+       $w_mem_edit->destroy();
     }
 
     my $button_box = Gtk3::Box->new( 'vertical', 5 );
@@ -107,8 +106,6 @@ sub close {
         $quiet = FALSE;
     }
 
-    #   print "hmmm.. quiet: $quiet, meo: $mem_edit_open // wme: $w_mem_edit\n";
-
     if ( !$mem_edit_open || !defined $w_mem_edit ) {
         print "mem_edit not open, bailing! caller: " . ( caller(1) )[3] . "\n";
         return;
@@ -166,12 +163,34 @@ sub load_from_yaml {
     ( my $class, my $file ) = @_;
 }
 
+sub get_list {
+    my $store =
+      Gtk3::ListStore->new( 'Glib::String', 'Glib::String', 'Glib::String' );
+
+    my $iter = $store->append();
+    $store->set( $iter, 0, '1', 1, ' WWV 5MHz', 2, ' 5,000.000 KHz AM' );
+
+    $iter = $store->append();
+    $store->set( $iter, 0, '2', 1, ' WWV 10MHz', 2, ' 10,000.000 KHz AM' );
+
+    $iter = $store->append();
+    $store->set( $iter, 0, '3', 1, ' WWV 15MHz', 2, ' 15,000.000 KHz AM' );
+
+    $iter = $store->append();
+    $store->set( $iter, 0, '4', 1, ' WWV 20MHz', 2, ' 20,000.000 KHz AM' );
+
+    $iter = $store->append();
+    $store->set( $iter, 0, '5', 1, ' WWV 25MHz', 2, ' 25,000.000 KHz AM' );
+    return $store;
+}
+
 sub new {
     ( my $class, $cfg, $w_main, $mem_file ) = @_;
 
     my $self = {
         file           => $mem_file,
         close          => \&close,
+        get_list       => \&get_list,
         load_defaults  => \&load_defaults,
         load_from_yaml => \&load_from_yaml,
         save           => \&save,

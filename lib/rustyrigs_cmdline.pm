@@ -1,3 +1,4 @@
+# Command line handling
 package rustyrigs_cmdline;
 use strict;
 use warnings;

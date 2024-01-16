@@ -1,5 +1,6 @@
 # Here we generate a box packed with the FM mode settings
 # which can be inserted/removed on the main window as needed
+#
 package rustyrigs_fm;
 use strict;
 use warnings;
@@ -25,6 +26,8 @@ our $tone_freq_tx_entry;
 our $tone_freq_rx_entry;
 
 sub refresh_tone_freqs {
+   my ( $self ) = @_;
+
    my $curr_vfo = $cfg->{'active_vfo'};
    if (defined($curr_vfo)) {
       $vfo = $vfos->{$curr_vfo};
@@ -190,7 +193,7 @@ sub new {
       refresh_tone_freqs => \&refresh_tone_freqs
    };
 
-   bless $self, $class;
+   bless $self, $class if (defined $self);
    return $self;
 }
 

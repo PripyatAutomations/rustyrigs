@@ -1,17 +1,18 @@
 # This package presents a GTK3 user interface for rustyrigs
 #
-# It's a bit ugly for now...
-#
-# why is this almost as big as the rest of program? :o
 # Cleanup targets:
 #	* Icon loading could be more compact
+#	* Split menus off to their own file
+
 package rustyrigs_gtk_ui;
 use Carp;
 use Data::Dumper;
 use strict;
 use Glib qw(TRUE FALSE);
 use warnings;
-#Gtk3::Settings->get_default->set_property('gtk-tooltip-timeout', 100);
+
+# Try to make the tooltip's appear faster
+Gtk3::Settings->get_default->set_property('gtk-tooltip-timeout', 100);
 
 # These will be initialized by new()
 our $vfos;
@@ -30,8 +31,8 @@ our $icon_settings_pix;
 our $icon_transmit_pix;
 
 # gui widgets
-our $tray_icon;    # systray icon
-our $w_main;       # main window
+our $tray_icon;
+our $w_main;
 our $main_menu;
 our $mem_edit_button;
 our $mem_load_button;
@@ -452,28 +453,6 @@ sub refresh_available_widths {
     $width_entry->set_active($rv);
 }
 
-# XXX: Move this to ${profile}.mem.yaml where $profile is the $cfg_file minus the .yaml ;)
-sub channel_list {
-    my $store =
-      Gtk3::ListStore->new( 'Glib::String', 'Glib::String', 'Glib::String' );
-
-    my $iter = $store->append();
-    $store->set( $iter, 0, '1', 1, ' WWV 5MHz', 2, ' 5,000.000 KHz AM' );
-
-    $iter = $store->append();
-    $store->set( $iter, 0, '2', 1, ' WWV 10MHz', 2, ' 10,000.000 KHz AM' );
-
-    $iter = $store->append();
-    $store->set( $iter, 0, '3', 1, ' WWV 15MHz', 2, ' 15,000.000 KHz AM' );
-
-    $iter = $store->append();
-    $store->set( $iter, 0, '4', 1, ' WWV 20MHz', 2, ' 20,000.000 KHz AM' );
-
-    $iter = $store->append();
-    $store->set( $iter, 0, '5', 1, ' WWV 25MHz', 2, ' 25,000.000 KHz AM' );
-    return $store;
-}
-
 sub open_gridtools {
     if (defined $main::gridtools) {
        my $gt_win = $main::gridtools->{'window'};
@@ -575,7 +554,8 @@ sub draw_main_win {
     $chan_box->pack_start( $chan_label, FALSE, FALSE, 0 );
 
     # Show the channel choser combobox
-    my $chan_combo = Gtk3::ComboBox->new_with_model( channel_list() );
+    my $chan_combo = Gtk3::ComboBox->new();
+    $chan_combo->set_model( rustyrigs_memory::get_list() );
     $chan_combo->set_active(1);
     $chan_combo->set_entry_text_column(1);
     my $render1 = Gtk3::CellRendererText->new();
@@ -702,7 +682,6 @@ sub draw_main_win {
     $rig_vol_entry->signal_connect(
         button_press_event => sub {
             my $rp = $main::rig_p->{'gui_applying_changes'};
-            print "old_rp: $$rp\n";
             $$rp = TRUE;
             return FALSE;
         }
@@ -710,7 +689,7 @@ sub draw_main_win {
     $rig_vol_entry->signal_connect(
         button_release_event => sub {
             my $rp = $main::rig_p->{'gui_applying_changes'};
-            undef $rp;
+            $$rp = FALSE;
             return FALSE;
         }
     );
@@ -719,7 +698,7 @@ sub draw_main_win {
             my ( $widget ) = @_;
             my $vol = $widget->get_value();
 
-            # Why do we have to do it like this...? Idk.. minimal docs lol
+            # XXX: Why do we have to do it like this...? Idk.. minimal docs lol
             $main::rig->set_level($Hamlib::RIG_LEVEL_AF, $vol / 100);
             return FALSE;
         }
