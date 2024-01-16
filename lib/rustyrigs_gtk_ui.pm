@@ -12,7 +12,7 @@ use Glib qw(TRUE FALSE);
 use warnings;
 
 # Try to make the tooltip's appear faster
-Gtk3::Settings->get_default->set_property('gtk-tooltip-timeout', 100);
+#Gtk3::Settings->get_default->set_property('gtk-tooltip-timeout', 100);
 
 # These will be initialized by new()
 our $vfos;

@@ -53,6 +53,7 @@ sub window_state {
           $widget->unhide();
           $widget->iconify();
        }
+       return FALSE;
     }
 
     if ( $event->new_window_state =~ m/\babove\b/ ) {

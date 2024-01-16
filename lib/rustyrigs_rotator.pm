@@ -32,17 +32,19 @@ sub new {
    my ( $class ) = @_;
    # Connect to rotctld on localhost at port 4533
    my $rot_model = $$main::cfg->{'rotctl_model'};
+
+#   Hamlib::rig_set_debug( hamlib_debug_level( $$cfg->{'hamlib_loglevel'} ) );
+
    if (!defined $rot_model) {
       $rot_model = $Hamlib::ROT_MODEL_NETROTCTL;
    }
 
    my $rot_path = $$main::cfg->{'rotctl_addr'};
    if (!defined $rot_path) {
-      $rot_path = "rotctld:localhost:4533";
+      $rot_path = "localhost:4533";
    }
 
    my $rot = new Hamlib::Rot($rot_model);
-   print "rot: " . Dumper($rot) . "\n";
    $rot->set_conf('rot_pathname', $rot_path);
 
    # Initialize the rotator connection

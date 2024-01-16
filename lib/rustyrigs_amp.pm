@@ -13,7 +13,11 @@ sub DESTROY {
 sub new {
    my ( $class ) = @_;
 
+#   Hamlib::rig_set_debug( hamlib_debug_level( $$cfg->{'hamlib_loglevel'} ) );
+
+   my $amp;
    my $self = {
+      amp => \$amp
    };
    bless $self, $class if (defined $self);
    return $self;

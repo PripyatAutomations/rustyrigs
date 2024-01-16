@@ -2,6 +2,7 @@
 	* Added support for rotators via hamlib's rotctld
 	  - You can input a grid and optional elev. in gridtools dialog
             then click the Rotate or Rotate LP buttons to apply it
+	* Much GUI cleanup and many bug fixes
 
 2024-01-14
 	* Added color/font selector for the meters
@@ -34,3 +35,5 @@
           called when read_rig() is applied. Should probably implement a similar
           lock around write_rig() at a later time
         * Started work on a color selection dialog
+
+Older changes aren't recorded. Sorry.
