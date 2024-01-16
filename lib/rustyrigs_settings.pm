@@ -80,15 +80,13 @@ sub save {
         print "Changes to be applied:\n$tc_dump\n";
         $main::log->Log( "config", "debug", "Applying config changes:\n\t$tc_dump");
         $main::cfg_p->apply($tc);
-        # Get rid of chances we've already applied
-        undef $tc;
+        apply();
+#        undef $tc;
     }
     else {
         print "No changes to apply.\n";
         $main::log->Log( "config", "info", "no changes to save" );
     }
-    apply();
-    undef $tc;
     $w_settings->close();
     $w_settings->destroy();
 }
@@ -205,6 +203,23 @@ sub new {
         }
     );
 
+    # ampctld address
+    my $ampctl_box = Gtk3::Box->new('vertical', 5);
+    my $amp_addr_label = Gtk3::Label->new('ampctld Address:Port');
+    $amp_addr_entry = Gtk3::Entry->new();
+    $amp_addr_entry->set_text( $cfg->{'ampctl_addr'} );
+    $amp_addr_entry->set_tooltip_text(
+        "Address of ampctld server (default localhost:4531)");
+    $amp_addr_entry->set_can_focus(1);
+    $amp_addr_entry->signal_connect(
+        changed => sub {
+            my $val = $amp_addr_entry->get_text();
+            $tmp_cfg->{'ampctl_addr'} = $val;
+        }
+    );
+    $ampctl_box->pack_start( $amp_addr_label,       FALSE, FALSE, 0 );
+    $ampctl_box->pack_start( $amp_addr_entry,       FALSE, FALSE, 0 );
+
     # rigctld address
     my $rigctl_box = Gtk3::Box->new('vertical', 5);
     my $rig_addr_label = Gtk3::Label->new('rigctld Address:Port');
@@ -222,22 +237,6 @@ sub new {
     $rigctl_box->pack_start( $rig_addr_label,       FALSE, FALSE, 0 );
     $rigctl_box->pack_start( $rig_addr_entry,       FALSE, FALSE, 0 );
 
-    # ampctld address
-    my $ampctl_box = Gtk3::Box->new('vertical', 5);
-    my $amp_addr_label = Gtk3::Label->new('ampctld Address:Port');
-    $amp_addr_entry = Gtk3::Entry->new();
-    $amp_addr_entry->set_text( $cfg->{'ampctl_addr'} );
-    $amp_addr_entry->set_tooltip_text(
-        "Address of ampctld server (default localhost:4531)");
-    $amp_addr_entry->set_can_focus(1);
-    $amp_addr_entry->signal_connect(
-        changed => sub {
-            my $val = $amp_addr_entry->get_text();
-            $tmp_cfg->{'ampctl_addr'} = $val;
-        }
-    );
-    $ampctl_box->pack_start( $amp_addr_label,       FALSE, FALSE, 0 );
-    $ampctl_box->pack_start( $amp_addr_entry,       FALSE, FALSE, 0 );
 
     # rotatctld address
     my $rotctl_box = Gtk3::Box->new('vertical', 5);
@@ -634,9 +633,9 @@ sub new {
     my $main_box = Gtk3::Box->new('vertical', 5);
     my $box_label = Gtk3::Label->new('General');
     $main_box->pack_start( $box_label, FALSE, FALSE, 0);
+    $main_box->pack_start( $ampctl_box, FALSE, FALSE, 0);
     $main_box->pack_start( $rigctl_box, FALSE, FALSE, 0);
     $main_box->pack_start( $rotctl_box, FALSE, FALSE, 0);
-    $main_box->pack_start( $ampctl_box, FALSE, FALSE, 0);
     $main_box->pack_start( $qth_box,             FALSE, FALSE, 0 );
     $main_box->pack_start( $elev_box,           FALSE, FALSE, 0 );
     $main_box->pack_start( $poll_interval_label, FALSE, FALSE, 0 );

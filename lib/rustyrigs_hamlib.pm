@@ -116,9 +116,9 @@ my $pending_changes = {
     }
 };
 
-########################################################################
-########################################################################
+our $volume;
 
+########################################################################
 sub hamlib_debug_level {
     ( my $self ) = @_;
     my $new_lvl = $_[0];
@@ -258,7 +258,7 @@ sub read_rig {
     }
 
     # Get the RX volume
-    my $volume = $rig->get_level( $Hamlib::RIG_LEVEL_AF );
+    $volume = $rig->get_level( $Hamlib::RIG_LEVEL_AF );
     print "vol: " . Dumper($volume) . "\n" if (defined $volume);
     if (defined $volume) {
        print "setting volume: $volume\n";
@@ -320,7 +320,7 @@ sub read_rig {
        $main::gtk_ui->set_icon("transmit");
     }
     $last_ptt_status = $ptt_status;
-    # XXX: Update the meter widgets
+    $main::gtk_ui->update_widgets();
     $rigctld_applying_changes = FALSE;
 }
 
@@ -334,7 +334,7 @@ sub exec_read_rig {
 
     # Don't read the rig while GUI is applying changes...
     if ($gui_applying_changes) {
-       print "skipping read_rig as GUI update in progress\n";
+#       print "skipping read_rig as GUI update in progress\n";
        return TRUE;
     }
 
@@ -436,7 +436,6 @@ sub new {
     our $rig_timer =
       Glib::Timeout->add( $poll_interval, \&exec_read_rig );
 
-    my $volume;
     my $self = {
         # variables
         rig           => $rig,

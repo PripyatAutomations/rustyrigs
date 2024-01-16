@@ -293,7 +293,8 @@ sub w_main_show {
        my $gt = $main::gridtools;
        my $gw = $gt->{'window'};
        if (defined $gw) {
-          $gw->set_visible(1);
+          $$gw->deiconify();
+          $$gw->set_visible(1);
        }
     }
 
@@ -543,6 +544,7 @@ sub draw_main_win {
     } else {
        # Show the meters window
 #       $meters->show();
+       print "BUG!!! Undocked meters not yet implemented\n";
     }
 
     #################
@@ -724,7 +726,6 @@ sub draw_main_win {
     );
     $vfo_freq_entry->set_numeric(TRUE);
     $vfo_freq_entry->set_wrap(FALSE);
-    $vfo_freq_entry->set_value( $act_vfo->{'freq'} );
     $vfo_freq_entry->set_tooltip_text("VFO frequency input");
 
     $vfo_freq_entry->signal_connect(
@@ -873,7 +874,6 @@ sub draw_main_win {
             }
         }
     );
-
     my $rf_gain_label =
       Gtk3::Label->new( 'RF Gain / Atten. (' . $cfg->{'key_rf_gain'} . ')' );
     $rf_gain_entry = Gtk3::Scale->new_with_range( 'horizontal', -40, 40, 1 );
@@ -915,7 +915,6 @@ sub draw_main_win {
     $vfo_power_entry->set_digits(0);
     $vfo_power_entry->set_draw_value(TRUE);
     $vfo_power_entry->set_value_pos('right');
-    $vfo_power_entry->set_value( $act_vfo->{'power'} );
     $vfo_power_entry->set_tooltip_text(
         "Please Click and DRAG to change TX power");
 
@@ -1104,6 +1103,32 @@ sub draw_main_win {
     }
 }
 
+######################################
+
+sub update_widgets {
+    my ( $self ) = @_;
+
+    if (!$main::rig_p->is_busy) {
+        my $curr_vfo = $cfg->{active_vfo};
+        if ( $curr_vfo eq '' ) {
+            $curr_vfo = $cfg->{active_vfo} = 'A';
+        }
+        my $act_vfo = $vfos->{$curr_vfo};
+        my $rig_p = $main::rig_p;
+        my $rig = $rig_p->{'rig'};
+        my $vol = $rig_p->{'volume'};
+
+        $rig_vol_entry->set_value($$vol);
+        $vfo_freq_entry->set_value( $act_vfo->{'freq'} );
+        # XXX: set $mode_entry to $act_vfo->{'mode'} (indexed)
+        # XXX: set $width_entry to $act_vfo->{'width'} (indexed)
+        $rf_gain_entry->set_value($act_vfo->{'rf_gain'});
+        $vfo_power_entry->set_value( $act_vfo->{'power'} );
+    }
+}
+
+######################################
+
 # Set the icon on settings window. This is called from rustyrigs_settings::show_settings
 sub set_settings_icon {
     my $win = shift;
@@ -1257,6 +1282,7 @@ sub new {
         set_tray_tooltip         => \&set_tray_tooltip,
         switch_vfo               => \&switch_vfo,
         unload_icons             => \&unload_icons,
+        update_widgets           => \&update_widgets,
         w_main_click             => \&w_main_click,
         w_main_fm_toggle         => \&w_main_fm_toggle,
         w_main_hide              => \&w_main_hide,
