@@ -4,14 +4,26 @@ package rustyrigs_rotator;
 use strict;
 use warnings;
 use Hamlib;
+use Data::Dumper;
+use Glib qw(TRUE FALSE);
 
-sub rotate {
-   my ( $self, $azimuth ) = @_;
+sub query {
+   my ( $self, $azimuth, $elevation ) = @_;
+   my $rot = $self->{'rot'};
 
-   my $rotator = $self->{'rotator'};
-   $main::log->Log("rotate", "info", "Rotating to $azimuth");
-   $rotator->set_postition($azimuth);
+   my $current_bearing = $rot->get_position();
+   $main::log->Log("rotate", "info", "Curent rotator bearing is $current_bearing");
 }
+
+# Call me with azimuth and elevation as arguments
+sub rotate {
+   my ( $self, $azimuth, $elevation ) = @_;
+   my $rot = $self->{'rot'};
+
+   $main::log->Log("rotate", "info", "Rotating to bearing $azimuth at elevation $elevation");
+   $$rot->set_position($azimuth, $elevation);
+}
+
 sub DESTROY {
    my ( $self ) = @_;
    $self->{'rotator'}->close;
@@ -19,20 +31,35 @@ sub DESTROY {
 
 sub new {
    my ( $class ) = @_;
+   # Connect to rotctld on localhost at port 4533
+   my $rot_model = $$main::cfg->{'rotctl_model'};
+   if (!defined $rot_model) {
+      $rot_model = $Hamlib::ROT_MODEL_NETROTCTL;
+   }
 
-   # Define the rotator's parameters
-   # XXX: Put path and baudrate into config
-   my $rotator = new $main::rigRotator(
-#       rot_pathname => '/dev/ttyUSB0',
-#       rot_baudrate => 38400,
-       rot_model => $cfg->{'rotlctl_model'}
-   );
+   my $rot_path = $$main::cfg->{'rotctl_addr'};
+   if (!defined $rot_path) {
+      $rot_path = "rotctld:localhost:4533";
+   }
+
+   my $rot = new Hamlib::Rot($rot_model);
+   print "rot: " . Dumper($rot) . "\n";
+   $rot->set_conf('rot_pathname', $rot_path);
 
    # Initialize the rotator connection
-   $rotator->open || die "Failed to open rotator: $!\n";
+   my $rv = $rot->open;
+   if (undef $rv) {
+      $main::log->Log("rotate", "crit", "Failed to open rotator: $!");
+   }
    my $self = {
-      rotator => $rotator
+      # functions
+      query => \&query,
+      rotate => \&rotate,
+      # variables
+      rot => \$rot,
    };
    bless $self, $class;
    return $self;
 }
+
+1;

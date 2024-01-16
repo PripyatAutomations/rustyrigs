@@ -40,7 +40,7 @@ use rustyrigs_gtk_ui;		# GTK3 user interface
 use rustyrigs_cmdline;		# command line parsing
 use rustyrigs_doc;		# help messages
 use rustyrigs_hamlib;		# hamlib interface
-#use rustyrigs_rotator;
+use rustyrigs_rotator;
 use rustyrigs_settings;		# settings editor window (includes color choser)
 use rustyrigs_fm;		# FM settings sub-box for main window
 use rustyrigs_memory;		# channel memory management
@@ -60,6 +60,7 @@ our $locked       = FALSE;
 our $vfos         = $rustyrigs_hamlib::vfos;
 our $hamlib_riginfo;
 our $rig;
+our $rot;
 our $channels;
 our $gtk_ui;
 our $rig_p;
@@ -223,6 +224,11 @@ $gtk_ui = rustyrigs_gtk_ui->new( $cfg, $log, $vfos );
 # Finish GUI setup
 $gtk_ui->load_icons();
 $gtk_ui->draw_main_win();
+
+# set up the rotator
+if ($$cfg->{'use_rotator'}) {
+   $rot = rustyrigs_rotator->new();
+}
 
 # open the grid tools dialog
 $gridtools = rustyrigs_gridtools->new();

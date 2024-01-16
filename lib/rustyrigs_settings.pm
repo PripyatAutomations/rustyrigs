@@ -13,6 +13,7 @@ use warnings;
 our $config_box;
 our $address_entry;
 our $qth_entry;
+our $elev_entry;
 our $poll_interval_entry;
 our $poll_tray_entry;
 our $core_debug;
@@ -205,7 +206,7 @@ sub new {
     # Rigctl address
     my $address_label = Gtk3::Label->new('Rigctld Address:Port');
     $address_entry = Gtk3::Entry->new();
-    $address_entry->set_text( $cfg->{'rigctl_addr'} );    # Default value
+    $address_entry->set_text( $cfg->{'rigctl_addr'} );
     $address_entry->set_tooltip_text(
         "Address of rigctld server (default localhost:4532)");
     $address_entry->set_can_focus(1);
@@ -216,10 +217,12 @@ sub new {
         }
     );
 
+    # my qth box
+    my $qth_box = Gtk3::Box->new('horizontal', 5);
     # My gridsquare
     my $qth_label = Gtk3::Label->new('My QTH');
     $qth_entry = Gtk3::Entry->new();
-    $qth_entry->set_text( uc($cfg->{'my_qth'}) );    # Default value
+    $qth_entry->set_text( uc($cfg->{'my_qth'}) );
     $qth_entry->set_tooltip_text("Maidenhead gridsquare of the rig");
     $qth_entry->set_can_focus(1);
     $qth_entry->signal_connect(
@@ -228,6 +231,26 @@ sub new {
             $tmp_cfg->{'my_qth'} = $val;
         }
     );
+    $qth_box->pack_start($qth_label, FALSE, FALSE, 0);
+    $qth_box->pack_start($qth_entry, TRUE, TRUE, 0);
+
+    # my elevation
+    my $elev_box = Gtk3::Box->new('horizontal', 5);
+    my $elev_label = Gtk3::Label->new('QTH Elev');
+    my $elev_unit_label = Gtk3::Label->new('M ASL');
+    $elev_entry = Gtk3::Entry->new();
+    $elev_entry->set_text( $cfg->{'my_qth_elev'} );
+    $elev_entry->set_tooltip_text("Elevation of antenna");
+    $elev_entry->set_can_focus(1);
+    $elev_entry->signal_connect(
+        changed => sub {
+            my $val = $elev_entry->get_text();
+            $tmp_cfg->{'my_qth_elev'} = $val;
+        }
+    );
+    $elev_box->pack_start($elev_label, FALSE, FALSE, 0);
+    $elev_box->pack_start($elev_entry, TRUE, TRUE, 0);
+    $elev_box->pack_start($elev_unit_label, FALSE, FALSE, 0);
 
     # poll interval: window visible
     my $poll_interval_label = Gtk3::Label->new('Hamlib poll interval (ms)');
@@ -314,6 +337,23 @@ sub new {
     }
     $hamlib_debug->set_can_focus(1);
     $hamlib_debug->signal_connect( key_release_event => \&combobox_keys );
+
+    my $rotator_toggle = Gtk3::CheckButton->new();
+    $rotator_toggle->set_label('Use rotator?');
+    $rotator_toggle->set_active( $cfg->{'use_rotator'} );
+    $rotator_toggle->signal_connect(
+        'toggled' => sub {
+            my $button = shift;
+
+            if ( $button->get_active() ) {
+                $tmp_cfg->{'use_rotator'} = 1;
+            }
+            else {
+                $tmp_cfg->{'use_rotator'} = 0;
+            }
+        }
+    );
+    $rotator_toggle->set_can_focus(1);
 
     my $metric_toggle = Gtk3::CheckButton->new();
     $metric_toggle->set_label('Use metric?');
@@ -540,8 +580,8 @@ sub new {
     $main_box->pack_start( $box_label, FALSE, FALSE, 0);
     $main_box->pack_start( $address_label,       FALSE, FALSE, 0 );
     $main_box->pack_start( $address_entry,       FALSE, FALSE, 0 );
-    $main_box->pack_start( $qth_label,           FALSE, FALSE, 0 );
-    $main_box->pack_start( $qth_entry,           FALSE, FALSE, 0 );
+    $main_box->pack_start( $qth_box,             FALSE, FALSE, 0 );
+    $main_box->pack_start( $elev_box,           FALSE, FALSE, 0 );
     $main_box->pack_start( $poll_interval_label, FALSE, FALSE, 0 );
     $main_box->pack_start( $poll_interval_entry, FALSE, FALSE, 0 );
     $main_box->pack_start( $poll_tray_label,     FALSE, FALSE, 0 );
@@ -550,6 +590,7 @@ sub new {
     $main_box->pack_start( $core_debug,          FALSE, FALSE, 0 );
     $main_box->pack_start( $hamlib_debug_label,  FALSE, FALSE, 0 );
     $main_box->pack_start( $hamlib_debug,        FALSE, FALSE, 0 );
+    $main_box->pack_start( $rotator_toggle, FALSE, FALSE, 0 );
     $main_box->pack_start( $metric_toggle, FALSE, FALSE, 0 );
     $main_box->pack_start( $start_locked_toggle, FALSE, FALSE, 0 );
     $config_box->pack_start( $main_box, FALSE, FALSE, 0 );

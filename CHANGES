@@ -1,3 +1,8 @@
+2024-01-15
+	* Added support for rotators via hamlib's rotctld
+	  - You can input a grid and optional elev. in gridtools dialog
+            then click the Rotate or Rotate LP buttons to apply it
+
 2024-01-14
 	* Added color/font selector for the meters
 	* Moved meters settings to their own dialog (Meters button in settings)

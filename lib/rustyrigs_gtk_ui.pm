@@ -11,7 +11,7 @@ use Data::Dumper;
 use strict;
 use Glib qw(TRUE FALSE);
 use warnings;
-Gtk3::Settings->get_default->set_property('gtk-tooltip-timeout', 100);
+#Gtk3::Settings->get_default->set_property('gtk-tooltip-timeout', 100);
 
 # These will be initialized by new()
 our $vfos;

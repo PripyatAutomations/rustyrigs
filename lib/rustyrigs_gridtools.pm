@@ -11,6 +11,7 @@ use Hamlib;
 my $log;
 my $cfg;
 our $tmp_cfg;
+our $state;
 
 sub DESTROY {
     ( my $self ) = @_;
@@ -38,7 +39,8 @@ sub update {
     my $d_l = $self->{'dist_label'};
     my $l_l = $self->{'latlon_entry'};
     my $lp_l = $self->{'longpath_label'};
-    my $rb = $self->{'rotate_button'};
+    my $rb = $self->{'rot_button'};
+    my $lprb = $self->{'rot_lp_button'};
 
     # update lat/lon for the gridsquare if it appears valid length
     if ($dx_len >= 4 && ($dx_len % 2 == 0)) {
@@ -58,12 +60,22 @@ sub update {
        ( my $err, $dist, $az ) = Hamlib::qrb($my_lon, $my_lat, $dx_lon, $dx_lat);
        $longpath = Hamlib::distance_long_path($dist);
 
+       my $dist_mi = $dist / 1.60934;
+       my $longpath_mi = $longpath / 1.60934;
+       my $longpath_az = (360 - $az);
        $s_az = sprintf("%.0f deg", $az);
        my $s_dist_km = sprintf("%.0f km", $dist);
-       my $s_dist_mi = sprintf("%.0f mi", $dist / 1.60934);
+       my $s_dist_mi = sprintf("%.0f mi", $dist_mi );
        my $s_longpath_km = sprintf("%.0f km", $longpath);
-       my $s_longpath_mi = sprintf("%.0f mi", $longpath / 1.60934);
-       my $s_longpath_az = sprintf("%.0f deg", (360 - $az));
+       my $s_longpath_mi = sprintf("%.0f mi", $longpath_mi);
+       my $s_longpath_az = sprintf("%.0f deg", $longpath_az);
+
+       $state->{'bearing'} = $az;
+       $state->{'bearing_lp'} = $longpath_az;
+       $state->{'dist_km'} = $dist;
+       $state->{'dist_mi'} = $dist_mi;
+       $state->{'dist_lp_km'} = $longpath;
+       $state->{'dist_lp_mi'} = $longpath_mi;
 
        if ($use_metric) {
           $s_dist = $s_dist_km;
@@ -71,19 +83,21 @@ sub update {
        } else {
           $s_dist = $s_dist_mi; 
           $s_longpath = $s_longpath_mi;
-          sprintf("%.0f mi", $longpath / 1.60934);
        }
        $log->Log("user", "info", "Calculated [$mygrid] $s_my_lat, $s_my_lon to [$dxgrid] $s_dx_lat, $s_dx_lon is ${s_dist_mi} (${s_dist_km}) at ${s_az}, longpath: $s_longpath at ${s_longpath_az}");
        $$b_l->set_text($s_az);
        $$d_l->set_text($s_dist);
        $$lp_l->set_text($s_longpath . " @ " . $s_longpath_az);
        $$rb->set_sensitive(1);
+       $$lprb->set_sensitive(1);
     } else {	# clear results until valid values present
        $$b_l->set_text('----');	# clear bearing label
        $$d_l->set_text('----');	# clear distance label
        $$l_l->set_text('');	# clear lat lon label
        $$lp_l->set_text('----');
        $$rb->set_sensitive(0);
+       $$lprb->set_sensitive(0);
+       undef $state;
     }
  }
 
@@ -202,16 +216,48 @@ sub new {
     $box->pack_start($in_box, FALSE, FALSE, 0);
     $box->pack_start($out_box, FALSE, FALSE, 0);
 
-    my $rot_box = Gtk3::Box->new('vertical', 5);
-    my $rotate_button = Gtk3::Button->new("Rotate _Antenna");
-    $rotate_button->set_tooltip_text("Rotate antenna towards bearing");
-    $rotate_button->set_can_focus(1);
-    $rotate_button->set_sensitive(0);
-    $rotate_button->signal_connect( 'clicked'  => sub { 
+    my $elev_box = Gtk3::Box->new('horizontal', 5);
+    my $elev_label = Gtk3::Label->new("Elev:");
+    our $elev_input = Gtk3::Entry->new();
+    $elev_input->set_editable(1);
+    $elev_input->set_max_length(3);
+    $elev_input->set_text(0);
+    $elev_box->pack_start($elev_label, TRUE, TRUE, 0);
+    $elev_box->pack_start($elev_input, TRUE, TRUE, 0);
+    $box->pack_start($elev_box, TRUE, TRUE, 0);
+
+    my $rot_box = Gtk3::Box->new('horizontal', 5);
+    my $rot_button = Gtk3::Button->new("Rotate _Ant");
+    $rot_button->set_tooltip_text("Rotate antenna towards bearing");
+    $rot_button->set_can_focus(1);
+    $rot_button->set_sensitive(0);
+    $rot_button->signal_connect( 'clicked'  => sub { 
        (my $self) = @_;
-       $main::log->Log("user", "info", "User requested antenna rotation, but that's not yet supported...");
+       my $az = $state->{'bearing'};
+       my $elev = $elev_input->get_text();
+       if (!defined $elev) {
+          $elev = 0;
+       }
+       $main::log->Log("user", "info", "User requested antenna rotation to $az deg / $elev elev...");
+       $main::rot->rotate($az, $elev);
     });
-    $rot_box->pack_start($rotate_button, TRUE, TRUE, 0);
+    $rot_box->pack_start($rot_button, TRUE, TRUE, 0);
+
+    my $rot_lp_button = Gtk3::Button->new("Rotate (_LP)");
+    $rot_lp_button->set_tooltip_text("Rotate antenna towards longpath bearing");
+    $rot_lp_button->set_can_focus(1);
+    $rot_lp_button->set_sensitive(0);
+    $rot_lp_button->signal_connect( 'clicked'  => sub { 
+       (my $self) = @_;
+       my $az  = $state->{'bearing_lp'};
+       my $elev = $elev_input->get_text();
+       if (!defined $elev) {
+          $elev = 0;
+       }
+       $main::log->Log("user", "info", "User requested antenna rotation (longpath) to $az deg / $elev elev...");
+       $main::rot->rotate($az, $elev);
+    });
+    $rot_box->pack_start($rot_lp_button, TRUE, TRUE, 0);
 
     # Buttons
     my $button_box = Gtk3::Box->new('horizontal', 5);
@@ -302,10 +348,12 @@ sub new {
        bear_label => \$o_bear_label,
        dist_label => \$o_dist_label,
        dxgrid => $dxgrid_input,
+       elev_entry => \$elev_input,
        longpath_label => \$o_longpath_label,
        latlon_entry => \$o_latlon_entry,
        mygrid => $mygrid_input,
-       rotate_button => \$rotate_button,
+       rot_button => \$rot_button,
+       rot_lp_button => \$rot_lp_button,
        window => \$window
     };
 
