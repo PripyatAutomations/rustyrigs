@@ -226,6 +226,9 @@ sub render_meterbars {
           $widget->set_threshold($m_thresh_min, $m_thresh_max);
           $meter_box->pack_start( $widget->{'grid'}, TRUE, TRUE, 0 );
        }
+       else {
+          print "skipping disabled meter: $m_name\n";
+       }
     }
 
     my $self = {

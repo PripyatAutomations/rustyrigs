@@ -1,3 +1,7 @@
+2024-01-16
+	* For now, we restart the program when settings in the dialog are changed
+	  - This could be changed, but for now this works pretty well.
+
 2024-01-15
 	* Added support for rotators via hamlib's rotctld
 	  - You can input a grid and optional elev. in gridtools dialog

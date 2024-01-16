@@ -22,6 +22,7 @@ our $default_cfg_file = $ENV{"HOME"} . "/.config/${app_name}.yaml";
 our $cfg_file         = $default_cfg_file;
 our $log_file         = $ENV{"HOME"} . "/${app_name}.log";
 
+# Prefer libraries from the source tree, if we are there, over system-wide
 use lib (-f 'lib/woodpile.pm') ? "$FindBin::Bin/lib" : '/usr/lib/rustyrigs';
 
 use woodpile;			# misc. scraps we dug out of the woodpile
@@ -71,6 +72,11 @@ our $cfg_p;
 
 # Set up logging...
 $log->Log( "core", "info", "$app_name  is starting" );
+
+sub restart {
+  print "restarting!\n";
+  exec $^X, $0, @ARGV;
+}
 
 sub toggle_locked {
     my ( $origin, $lv ) = @_;
@@ -262,13 +268,14 @@ sub hamlib_init {
     else {
         die "setup_hamlib returned undefined?!\n";
     }
-    # set up the amplifier
+
+    # set up the amplifier, if enabled
     if ($$cfg->{'use_amp'}) {
        $amp_p = RustyRigs::Amp->new();
        $amp = $amp_p->{'amp'};
     }
 
-    # set up the rotator
+    # set up the rotator, if enabled
     if ($$cfg->{'use_rotator'}) {
        $rot_p = RustyRigs::Rotator->new();
        $rot = $rot_p->{'rot_p'};

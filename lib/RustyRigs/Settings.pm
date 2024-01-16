@@ -82,6 +82,7 @@ sub save {
         $main::cfg_p->apply($tc);
         apply();
 #        undef $tc;
+        main::restart();
     }
     else {
         print "No changes to apply.\n";
