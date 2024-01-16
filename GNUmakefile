@@ -12,7 +12,7 @@ NEED_PKG += devscripts dh-make-perl
 DOCS := $(wildcard doc/*)
 
 # Libraries (perl modules)
-LIBS := $(wildcard lib/*.pm)
+LIBS := $(wildcard lib/*.pm lib/RustyRigs/*.pm)
 
 # Resources (icons, data files, etc)
 RSRC := $(wildcard res/*)
@@ -75,10 +75,12 @@ endif
 install-res: $(addprefix ${RES_DIR}/,$(notdir ${RSRC}))
 
 install-lib:
+	${SUDO} install -d -m 0755 ${LIB_DIR}
 	${SUDO} install -m 0644 ${LIBS} ${LIB_DIR}
 
 uninstall-lib:
-	${SUDO} ${RM} $(foreach x,$(notdir ${LIBS}),${LIB_DIR}/${x})
+	${SUDO} ${RM} ${LIB_DIR}
+#	${SUDO} ${RM} $(foreach x,$(notdir ${LIBS}),${LIB_DIR}/${x})
 
 ${RES_DIR}/%: res/%
 	@${SUDO} install -m 0644 $< $@
