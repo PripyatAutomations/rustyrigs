@@ -35,5 +35,6 @@
 * Combined meter view for RX/TX in one line
   - Toggle on click with full view
 * Implement ncurses or similar TUI
-* Better icons
 * Add a dialog for configuring key bindings?
+* Add QRZ lookup dialog for basic call info
+  - Button to paste grid into gridtools dialog
