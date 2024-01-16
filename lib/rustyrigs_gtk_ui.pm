@@ -697,9 +697,33 @@ sub draw_main_win {
     $rig_vol_entry->set_digits(0);
     $rig_vol_entry->set_draw_value(TRUE);
     $rig_vol_entry->set_value_pos('right');
-    $rig_vol_entry->set_value( $cfg->{'rig_volume'} );
+    $rig_vol_entry->set_value(0);	# default to 0 until hamlib loaded
     $rig_vol_entry->set_tooltip_text("Please click and drag to set RX volume");
+    $rig_vol_entry->signal_connect(
+        button_press_event => sub {
+            my $rp = $main::rig_p->{'gui_applying_changes'};
+            print "old_rp: $$rp\n";
+            $$rp = TRUE;
+            return FALSE;
+        }
+    );
+    $rig_vol_entry->signal_connect(
+        button_release_event => sub {
+            my $rp = $main::rig_p->{'gui_applying_changes'};
+            undef $rp;
+            return FALSE;
+        }
+    );
+    $rig_vol_entry->signal_connect(
+        value_changed => sub {
+            my ( $widget ) = @_;
+            my $vol = $widget->get_value();
 
+            # Why do we have to do it like this...? Idk.. minimal docs lol
+            $main::rig->set_level($Hamlib::RIG_LEVEL_AF, $vol / 100);
+            return FALSE;
+        }
+    );
     # XXX: ACCEL-Replace these with a global function
     $w_main_accel->connect(
         ord( $cfg->{'key_volume'} ),

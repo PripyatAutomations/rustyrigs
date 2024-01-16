@@ -142,7 +142,6 @@ sub new {
    $window->signal_connect(
        delete_event => sub {
            ( my $class ) = @_;
-#           $class->close();
            $window->iconify();
            return TRUE;    # Suppress default window destruction
        }

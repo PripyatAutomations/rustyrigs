@@ -10,7 +10,6 @@ use Data::Dumper;
 my $cfg;
 my $rig;
 
-# Someday we'll need to make use of if defined on this...
 my $gtk_ui;
 
 # This will become TRUE if read_rig() is running
@@ -19,6 +18,8 @@ my $gtk_ui;
 our $rigctld_applying_changes = FALSE;
 
 # This will be come TRUE if user is changing the GUI
+# - read_rig will be surprised in exec_read_rig while GUI changing
+# - Use is_gui_busy() to check
 our $gui_applying_changes = FALSE;
 
 our @vfo_widths_fm  = ( 25000, 12500 );
@@ -119,7 +120,7 @@ my $pending_changes = {
 ########################################################################
 
 sub hamlib_debug_level {
-    ( my $class ) = @_;
+    ( my $self ) = @_;
     my $new_lvl = $_[0];
 
     if ( exists $hamlib_debug_levels{$new_lvl} ) {
@@ -135,7 +136,7 @@ sub hamlib_debug_level {
 }
 
 sub ptt_off {
-    ( my $class, my $vfo ) = @_;
+    ( my $self, my $vfo ) = @_;
     my $curr_vfo = $$cfg->{active_vfo};
 
     $main::log->Log( "ptt", "info", "Clearing PTT..." );
@@ -143,7 +144,7 @@ sub ptt_off {
 }
 
 sub ptt_on {
-    ( my $class, my $vfo ) = @_;
+    ( my $self, my $vfo ) = @_;
     my $curr_vfo = $$cfg->{active_vfo};
 
     $main::log->Log( "ptt", "info", "Setting PTT..." );
@@ -151,7 +152,7 @@ sub ptt_on {
 }
 
 sub set_freq {
-    ( my $class, my $freq ) = @_;
+    ( my $self, my $freq ) = @_;
     my $curr_vfo = $$cfg->{'active_vfo'};
     $vfos->{$curr_vfo}{'freq'} = $freq;
 #    $rig->set_freq( $curr_vfo, $freq );
@@ -221,7 +222,7 @@ my $last_freq;
 # Read the state of the rig and apply it to the appropriate $vfos entry
 # XXX: This needs to read into $vfos then call $gtk_ui->update()
 sub read_rig {
-    ( my $class ) = @_;
+    ( my $self ) = @_;
 
     $rigctld_applying_changes = TRUE;
     my $curr_hlvfo = $rig->get_vfo();
@@ -257,11 +258,16 @@ sub read_rig {
     }
 
     # Get the RX volume
-    my $volume = $rig->get_level( $curr_hlvfo, $Hamlib::RIG_LEVEL_AF );
+    my $volume = $rig->get_level( $Hamlib::RIG_LEVEL_AF );
+    print "vol: " . Dumper($volume) . "\n" if (defined $volume);
     if (defined $volume) {
-       $$cfg->{'rx_volume'} = $volume;
+       print "setting volume: $volume\n";
+       $self->{'volume'} = $volume;
+       my $rve = $main::gtk_ui->{'rig_vol_entry'};
+       $rve->set_value($volume);
     }
     else {
+#       print "no volume\n";
        $volume = 0;
     }
 
@@ -324,11 +330,12 @@ my $update_needed   = 0;
 
 # Determine if we need to read the rig this iteration...
 sub exec_read_rig {
-    ( my $class ) = @_;
+    ( my $self ) = @_;
 
     # Don't read the rig while GUI is applying changes...
     if ($gui_applying_changes) {
-       return;
+       print "skipping read_rig as GUI update in progress\n";
+       return TRUE;
     }
 
     my $tray_every = $$cfg->{'poll_tray_every'};
@@ -370,6 +377,11 @@ sub is_busy {
    return $rigctld_applying_changes;
 }
 
+sub is_gui_busy {
+   my ( $self ) = @_;
+   return $gui_applying_changes;
+}
+
 sub new {
     ( my $class, my $cfg_ref ) = @_;
     $cfg = $cfg_ref;
@@ -381,7 +393,7 @@ sub new {
 
     # If no model set, use rigctld netrig
     if ( !defined $model || $model eq "" ) {
-        $model = 'RIG_MODEL_RIGCTLD';
+        $model = $Hamlib::RIG_MODEL_NETRIGCTL;
     }
 
     # If no addr set, use localhost
@@ -397,11 +409,10 @@ sub new {
 
 #  XXX: hamlib seems to immediately return success, even before trying to connect...
 #   if ($rig->open() != $Hamlib::RIG_OK) {
-    my $rv = $rig->open();
-
     #      $log->Log("hamlib", "fatal", "failed connecting to hamlib\n");
     #      die "No rig connection\n";
     #   }
+    my $rv = $rig->open();
 
     # enable polling of the rig
     $main::connected = 1;
@@ -425,13 +436,16 @@ sub new {
     our $rig_timer =
       Glib::Timeout->add( $poll_interval, \&exec_read_rig );
 
+    my $volume;
     my $self = {
         # variables
         rig           => $rig,
-        rigctld_applying_changes => $rigctld_applying_changes,
+        gui_applying_changes => \$gui_applying_changes,
+        rigctld_applying_changes => \$rigctld_applying_changes,
         timer         => $rig_timer,
         update_needed => \$update_needed,
         vfos => \$vfos,
+        volume => \$volume,
         %hamlib_debug_levels => \%hamlib_debug_levels,
         @pl_tones => \@pl_tones,
         %vfo_mapping => \%vfo_mapping,
@@ -443,6 +457,7 @@ sub new {
         exec_read_rig => \&exec_read_rig,
         hamlib_debug_level => \&hamlib_debug_level,
         is_busy => \&is_busy,
+        is_gui_busy => \&is_gui_busy,
         next_vfo => \&next_vfo,
         ptt_off => \&ptt_off,
         ptt_on => \&ptt_on,

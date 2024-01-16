@@ -4,6 +4,7 @@
 # Any values set in the configuration will override the defaults.
 # New settings will get combined
 package rustyrigs_defconfig;
+use Hamlib;
 
 # - Default configuration
 our $def_cfg = {
@@ -57,7 +58,6 @@ our $def_cfg = {
     my_qth_elev      => 300,			  # QTH elevation in *METERS*
     poll_interval    => 250,                      # every 1/4 sec
     poll_tray_every  => 20,                       # at 1/20th the rate of normal (every 5 sec)
-    rig_volume       => 0,
     res_dir          => "./res",
     scrollback_lines => 300,		   # number of lines to hold in logview buffer
     shortcut_key        => 'mod1-mask',    # alt (use control-mask for ctrl)

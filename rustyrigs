@@ -151,6 +151,8 @@ if ($cfg_readonly) {
     $cfg->{'read_only'} = 1;
 }
 
+# XXX: Some of these should be configurable such as max wattage (ideally read from rigctl)
+# XXX: and voltages
 our $meters = {
    'alc' => {
       'title' => 'ALC',
@@ -160,6 +162,8 @@ our $meters = {
       'fg' => $$cfg->{'ui_alc_fg'},
       'font' => $$cfg->{'ui_alc_font'},
       'text' => $$cfg->{'ui_alc_text'},
+      'range_min' => 0,
+      'range_max' => 25,
       'thresh_min' => $$cfg->{'thresh_alc_min'},
       'thresh_max' => $$cfg->{'thresh_alc_max'}
    },
@@ -171,6 +175,8 @@ our $meters = {
       'fg' => $$cfg->{'ui_comp_fg'},
       'font' => $$cfg->{'ui_comp_font'},
       'text' => $$cfg->{'ui_comp_text'},
+      'range_min' => 0,
+      'range_max' => 25,
       'thresh_min' => $$cfg->{'thresh_comp_min'},
       'thresh_max' => $$cfg->{'thresh_comp_max'}
    },
@@ -182,6 +188,8 @@ our $meters = {
       'fg' => $$cfg->{'ui_power_fg'},
       'font' => $$cfg->{'ui_power_font'},
       'text' => $$cfg->{'ui_power_text'},
+      'range_min' => 0,
+      'range_max' => 100,
       'thresh_min' => $$cfg->{'thresh_power_min'},
       'thresh_max' => $$cfg->{'thresh_power_max'}
    },
@@ -193,6 +201,8 @@ our $meters = {
       'fg' => $$cfg->{'ui_swr_fg'},
       'font' => $$cfg->{'ui_swr_font'},
       'text' => $$cfg->{'ui_swr_text'},
+      'range_min' => 0,
+      'range_max' => 5,
       'thresh_min' => $$cfg->{'thresh_swr_min'},
       'thresh_max' => $$cfg->{'thresh_swr_max'}
    },
@@ -204,6 +214,8 @@ our $meters = {
       'fg' => $$cfg->{'ui_temp_fg'},
       'font' => $$cfg->{'ui_temp_font'},
       'text' => $$cfg->{'ui_temp_text'},
+      'range_min' => 0,
+      'range_max' => 200,
       'thresh_min' => $$cfg->{'thresh_temp_min'},
       'thresh_max' => $$cfg->{'thresh_temp_max'}
    },
@@ -215,6 +227,8 @@ our $meters = {
       'fg' => $$cfg->{'ui_volt_fg'},
       'font' => $$cfg->{'ui_volt_font'},
       'text' => $$cfg->{'ui_volt_text'},
+      'range_min' => 0,
+      'range_max' => 18,
       'thresh_min' => $$cfg->{'thresh_volt_min'},
       'thresh_max' => $$cfg->{'thresh_volt_max'}
    }

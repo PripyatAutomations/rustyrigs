@@ -14,7 +14,7 @@ sub new {
 
    my $self = {
    };
-   bless $self, $class;
+   bless $self, $class if (defined $self);
    return $self;
 }
 
