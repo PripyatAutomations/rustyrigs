@@ -318,7 +318,7 @@ sub new {
     my $gt_autohide = $$cfg->{'hide_gridtools_at_start'};
 
     my $gt_win_state = $$cfg->{'win_gridtools_state'};
-    print "gt_ws: " . Dumper($gt_win_state) . "\n";
+
     if (defined $gt_win_state) {
        $window->set_state($gt_win_state);
     } elsif ($gt_autohide) {

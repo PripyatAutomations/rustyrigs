@@ -155,7 +155,7 @@ if ($cfg_readonly) {
 our $meters = {
    'alc' => {
       'title' => 'ALC',
-      'enabled' => TRUE,
+      'enabled' => $$cfg->{'show_alc'},
       'alarm_bg' => $$cfg->{'ui_alc_alarm_bg'},
       'bg' => $$cfg->{'ui_alc_bg'},
       'fg' => $$cfg->{'ui_alc_fg'},
@@ -168,7 +168,7 @@ our $meters = {
    },
    'comp' => {
       'title' => 'Comp',
-      'enabled' => TRUE,
+      'enabled' => $$cfg->{'show_comp'},
       'alarm_bg' => $$cfg->{'ui_comp_alarm_bg'},
       'bg' => $$cfg->{'ui_comp_bg'},
       'fg' => $$cfg->{'ui_comp_fg'},
@@ -181,7 +181,7 @@ our $meters = {
    },
    'power' => {
       'title' => 'PWR',
-      'enabled' => TRUE,
+      'enabled' => $$cfg->{'show_power'},
       'alarm_bg' => $$cfg->{'ui_power_alarm_bg'},
       'bg' => $$cfg->{'ui_power_bg'},
       'fg' => $$cfg->{'ui_power_fg'},
@@ -194,7 +194,7 @@ our $meters = {
    },
    'swr' => {
       'title' => 'SWR',
-      'enabled' => TRUE,
+      'enabled' => $$cfg->{'show_swr'},
       'alarm_bg' => $$cfg->{'ui_swr_alarm_bg'},
       'bg' => $$cfg->{'ui_swr_bg'},
       'fg' => $$cfg->{'ui_swr_fg'},
@@ -207,7 +207,7 @@ our $meters = {
    },
    'temp' => {
       'title' => 'Temp',
-      'enabled' => TRUE,
+      'enabled' => $$cfg->{'show_temp'},
       'alarm_bg' => $$cfg->{'ui_temp_alarm_bg'},
       'bg' => $$cfg->{'ui_temp_bg'},
       'fg' => $$cfg->{'ui_temp_fg'},
@@ -220,7 +220,7 @@ our $meters = {
    },
    'volt' => {
       'title' => 'Volt',
-      'enabled' => TRUE,
+      'enabled' => $$cfg->{'show_volt'},
       'alarm_bg' => $$cfg->{'ui_volt_alarm_bg'},
       'bg' => $$cfg->{'ui_volt_bg'},
       'fg' => $$cfg->{'ui_volt_fg'},

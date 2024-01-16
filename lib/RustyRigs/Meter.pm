@@ -251,6 +251,7 @@ use warnings;
 use strict;
 
 my $color_win;
+our $tmp_cfg;
 
 sub cancel {
    my ( $self ) = @_;
@@ -259,15 +260,19 @@ sub cancel {
 }
 
 sub save {
-   my ( $self ) = @_;
+   my ( $self, $us_tmp_cfg ) = @_;
+   my $rv;
 
    if (defined $tmp_cfg) {
-      $main::cfg_p->apply($tmp_cfg);
-      undef $tmp_cfg;
+      print "Applying changes to meter config:\n" . Dumper($tmp_cfg) . "\n";
+      # try to merge it...
+      $us_tmp_cfg = { %$$us_tmp_cfg, %$tmp_cfg };
    } else {
       print "no changes to save (meters)\n";
    }
+
    $color_win->destroy();
+   return $rv;
 }
 
 # Function to handle color selection
@@ -524,7 +529,18 @@ sub new {
       $toggle_button->set_label("Enabled?");
       $toggle_button->set_active($m_enabled);
       $toggle_button->set_can_focus(1);
-      # XXX: add signal handler
+      $toggle_button->signal_connect(
+          'toggled' => sub {
+              my $button = shift;
+
+              if ( $button->get_active() ) {
+                  $tmp_cfg->{'use_' . $m_name} = 1;
+              }
+              else {
+                  $tmp_cfg->{'use_' . $m_name} = 0;
+              }
+          }
+      );
       $m_box->pack_start($toggle_button, TRUE, TRUE, 0);
 
       # add it to our outer box
@@ -541,8 +557,8 @@ sub new {
    my $save_button = Gtk3::Button->new("_Save");
    $save_button->set_tooltip_text("Save settings");
    $save_button->set_can_focus(1);
-   $save_button->signal_connect( 'clicked'  => sub { (my $self) = @_; save($self); } );
-   $accel->connect(ord('S'), $$cfg->{'shortcut_key'}, 'visible', sub { my ( $self ) = @_; save($self); });
+   $save_button->signal_connect( 'clicked'  => sub { (my $self) = @_; save($self, \$tmp_cfg); } );
+   $accel->connect(ord('S'), $$cfg->{'shortcut_key'}, 'visible', sub { my ( $self ) = @_; save($self, \$tmp_cfg); });
    $button_box->pack_start($save_button, TRUE, TRUE, 0);
 
    my $cancel_button = Gtk3::Button->new("_Cancel");
@@ -556,8 +572,11 @@ sub new {
    $color_win->add($box);
    $color_win->show_all();
 
+   my $us_tmp_cfg = $RustyRigs::Settings::tmp_cfg;
+   die "utc: " . Dumper($us_tmp_cfg) . "\n";
    my $self = {
       # functions
+      us_tmp_cfg => $$us_tmp_cfg,
       # variables
       accel => \$accel,
       box => \$box,

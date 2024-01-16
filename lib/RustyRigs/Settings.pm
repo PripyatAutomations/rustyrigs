@@ -20,7 +20,7 @@ our $poll_interval_entry;
 our $poll_tray_entry;
 our $core_debug;
 our $hamlib_debug;
-my $tmp_cfg;
+our $tmp_cfg;
 my $w_main;
 my $cfg;
 our $w_settings;
@@ -672,6 +672,9 @@ sub new {
     $rig_addr_entry->grab_focus();
 
     my $self = {
+        # variables
+        tmp_cfg    => \$tmp_cfg,
+        # functions
         close      => \&close,
         save       => \&save,
         w_settings => \$w_settings
