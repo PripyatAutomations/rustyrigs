@@ -1,6 +1,6 @@
 # Here we talk to rotctld to rotate the antenna as needed...
 # XXX: This is a work in progress and likely is buggy...
-package RustyRigs::rotator;
+package RustyRigs::Rotator;
 use strict;
 use warnings;
 use Hamlib;

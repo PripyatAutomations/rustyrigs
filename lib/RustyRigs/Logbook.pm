@@ -1,4 +1,4 @@
-package RustyRigs::logbook;
+package RustyRigs::Logbook;
 use strict;
 use warnings;
 use Data::Dumper;

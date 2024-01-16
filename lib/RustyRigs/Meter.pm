@@ -1,5 +1,5 @@
 # here we render a meter bar widget
-package RustyRigs::meterbar;
+package RustyRigs::Meterbar;
 use Carp;
 use Data::Dumper;
 use Glib                  qw(TRUE FALSE);
@@ -219,11 +219,13 @@ sub render_meterbars {
        my $m_thresh_min = $meter->{'thresh_min'};
        my $m_thresh_max = $meter->{'thresh_max'};
 
-       my $widget = 
-          RustyRigs::meterbar->new( $cfg, $vfos, $w_main, $m_name, 0, 10 );
+       if ($m_enabled) {
+          my $widget = 
+             RustyRigs::Meterbar->new( $cfg, $vfos, $w_main, $m_name, 0, 10 );
 
-       $widget->set_threshold($m_thresh_min, $m_thresh_max);
-       $meter_box->pack_start( $widget->{'grid'}, TRUE, TRUE, 0 );
+          $widget->set_threshold($m_thresh_min, $m_thresh_max);
+          $meter_box->pack_start( $widget->{'grid'}, TRUE, TRUE, 0 );
+       }
     }
 
     my $self = {
@@ -237,7 +239,7 @@ sub render_meterbars {
     return $self;
 }
 
-package RustyRigs::meterbar::Settings;
+package RustyRigs::Meterbar::Settings;
 use Carp;
 use Data::Dumper;
 use Glib                  qw(TRUE FALSE);

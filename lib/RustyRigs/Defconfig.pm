@@ -3,7 +3,7 @@
 # Eventually config file is loaded, parsed, and merged with this.
 # Any values set in the configuration will override the defaults.
 # New settings will get combined
-package RustyRigs::defconfig;
+package RustyRigs::Defconfig;
 use Hamlib;
 
 # - Default configuration
