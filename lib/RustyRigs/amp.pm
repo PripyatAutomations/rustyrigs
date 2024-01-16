@@ -1,5 +1,5 @@
 # Support for hamlib's ampctld
-package rustyrigs_amp;
+package RustyRigs::amp;
 use strict;
 use warnings;
 use Hamlib;

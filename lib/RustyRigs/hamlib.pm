@@ -1,7 +1,7 @@
 # Here we handle interaction with hamlib to talk to rigctld
 #
 # Try to stay frontend-agnostic here, if possible
-package rustyrigs_hamlib;
+package RustyRigs::hamlib;
 use Carp;
 use Glib qw(TRUE FALSE);
 use strict;
@@ -250,8 +250,8 @@ sub read_rig {
 
     my $vme = $$gtk_ui->{'mode_entry'};
     my $mode_index = 0;
-    for my $i (0 .. $#rustyrigs_hamlib::hamlib_modes) {
-        if ($rustyrigs_hamlib::hamlib_modes[$i] eq $textmode) {
+    for my $i (0 .. $#RustyRigs::hamlib::hamlib_modes) {
+        if ($RustyRigs::hamlib::hamlib_modes[$i] eq $textmode) {
             $mode_index = $i;
             last;
         }

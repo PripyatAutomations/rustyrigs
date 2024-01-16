@@ -13,7 +13,7 @@ use POSIX       qw(strftime);
 use Time::HiRes qw(gettimeofday tv_interval usleep);
 use Gtk3 '-init';
 use Glib qw(TRUE FALSE);
-#use FindBin;
+use FindBin;
 
 # project settings
 our $app_name         = 'rustyrigs';
@@ -22,32 +22,23 @@ our $default_cfg_file = $ENV{"HOME"} . "/.config/${app_name}.yaml";
 our $cfg_file         = $default_cfg_file;
 our $log_file         = $ENV{"HOME"} . "/${app_name}.log";
 
-# override with local bits and pieces if in source directory...
-if ( -f 'lib/rustyrigs_defconfig.pm' ) {
-    #   use lib $FindBin::Bin . '/lib';
-    print "* It appears we're in our source directory, using local libraries in ./lib\n";
-    use lib "./lib";
-}
-else {
-    # XXX: Change this in the installer
-    use lib '/usr/lib/rustyrigs/';
-}
+use lib (-f 'lib/woodpile.pm') ? "$FindBin::Bin/lib" : '/usr/lib/rustyrigs';
 
 use woodpile;			# misc. scraps we dug out of the woodpile
-use rustyrigs_defconfig;	# default configuration settings
-#use rustyrigs_ui;		# someday we'll have a cli interface here
-use rustyrigs_gtk_ui;		# GTK3 user interface
-use rustyrigs_cmdline;		# command line parsing
-use rustyrigs_doc;		# help messages
-use rustyrigs_hamlib;		# hamlib rig control
-use rustyrigs_amp;		# hamlib amplifier control
-use rustyrigs_rotator;		# hamlib rotator control
-use rustyrigs_settings;		# settings editor window (includes color choser)
-use rustyrigs_fm;		# FM settings sub-box for main window
-use rustyrigs_memory;		# channel memory management
-use rustyrigs_meter;		# meter bars and window
-use rustyrigs_logview;		# log viewer window
-use rustyrigs_gridtools;
+use RustyRigs::defconfig;	# default configuration settings
+#use RustyRigs::ui;		# someday we'll have a cli interface here
+use RustyRigs::gtk_ui;		# GTK3 user interface
+use RustyRigs::cmdline;		# command line parsing
+use RustyRigs::doc;		# help messages
+use RustyRigs::hamlib;		# hamlib rig control
+use RustyRigs::amp;		# hamlib amplifier control
+use RustyRigs::rotator;		# hamlib rotator control
+use RustyRigs::settings;		# settings editor window (includes color choser)
+use RustyRigs::fm;		# FM settings sub-box for main window
+use RustyRigs::memory;		# channel memory management
+use RustyRigs::meter;		# meter bars and window
+use RustyRigs::logview;		# log viewer window
+use RustyRigs::gridtools;
 
 # Start logging in debug mode until config is loaded and we quiet down...
 our $log = woodpile::Log->new( $log_file, "debug" );
@@ -58,7 +49,7 @@ our $log = woodpile::Log->new( $log_file, "debug" );
 our $cfg_readonly = FALSE;
 our $connected    = FALSE;
 our $locked       = FALSE;
-our $vfos         = $rustyrigs_hamlib::vfos;
+our $vfos         = $RustyRigs::hamlib::vfos;
 our $hamlib_riginfo;
 our $amp;
 our $amp_p;
@@ -74,7 +65,7 @@ our $gridtools;
 
 #####################################################
 # Set config to defconfig, until we load config...
-our $def_cfg = $rustyrigs_defconfig::def_cfg;
+our $def_cfg = $RustyRigs::defconfig::def_cfg;
 our $cfg     = $def_cfg;
 our $cfg_p;
 
@@ -82,7 +73,7 @@ our $cfg_p;
 $log->Log( "core", "info", "$app_name  is starting" );
 
 sub toggle_locked {
-    our ( $origin, $lv ) = @_;
+    my ( $origin, $lv ) = @_;
 
     if ( defined $lv ) {
         $locked = $lv;
@@ -142,7 +133,7 @@ sub save_config {
 }
 
 # Parse the command line
-rustyrigs_cmdline::parse( \$cfg, \$cfg_file );
+RustyRigs::cmdline::parse( \$cfg, \$cfg_file );
 
 # Load configuration
 $cfg_p = woodpile::Config->new( \$log, \$cfg_file, \$def_cfg );
@@ -237,22 +228,22 @@ our $meters = {
 };
 
 # Initialize the GTK GUI
-$gtk_ui = rustyrigs_gtk_ui->new( $cfg, $log, $vfos );
+$gtk_ui = RustyRigs::gtk_ui->new( $cfg, $log, $vfos );
 $gtk_ui->load_icons();
 $gtk_ui->draw_main_win();
 $gtk_ui->set_icon("connecting");
 
 # open the grid tools dialog
-$gridtools = rustyrigs_gridtools->new();
+$gridtools = RustyRigs::gridtools->new();
 
 # and the log viewer
-$logview = rustyrigs_logview->new($cfg);
+$logview = RustyRigs::logview->new($cfg);
 
 # Open the log window and redirect log output there
 $log->add_handler($logview);
 
 # Load channel memories
-$channels = rustyrigs_memory->new($cfg, $gtk_ui->{'w_main'}, $mem_file);
+$channels = RustyRigs::memory->new($cfg, $gtk_ui->{'w_main'}, $mem_file);
 $channels->load_from_yaml($mem_file);
 #$channels->refresh_ui();
 
@@ -261,7 +252,7 @@ our $hamlib_initialized = 0;
 sub hamlib_init {
     return if $hamlib_initialized;
 
-    $rig_p = rustyrigs_hamlib->new($cfg);
+    $rig_p = RustyRigs::hamlib->new($cfg);
     $rig = $rig_p->{'rig'};
 
     if ( defined($rig) ) {
@@ -273,13 +264,13 @@ sub hamlib_init {
     }
     # set up the amplifier
     if ($$cfg->{'use_amp'}) {
-       $amp_p = rustyrigs_amp->new();
+       $amp_p = RustyRigs::amp->new();
        $amp = $amp_p->{'amp'};
     }
 
     # set up the rotator
     if ($$cfg->{'use_rotator'}) {
-       $rot_p = rustyrigs_rotator->new();
+       $rot_p = RustyRigs::rotator->new();
        $rot = $rot_p->{'rot_p'};
     }
 

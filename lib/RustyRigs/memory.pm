@@ -1,5 +1,5 @@
 # Here we deal with our memory add/edit window
-package rustyrigs_memory;
+package RustyRigs::memory;
 use strict;
 use warnings;
 use Carp;
@@ -166,7 +166,7 @@ sub load_from_yaml {
       $self->load_from_yaml();
    } else {
       # Load default memories
-      $self->load_defaults($rustyrigs_defconfig::default_memories);
+      $self->load_defaults($RustyRigs::defconfig::default_memories);
 
       # Save default memories to memory file
       # XXX: Save memories

@@ -1,6 +1,6 @@
 # grids quare utilities dialog
 # This provides a few simple utilities for measuring distances/bearings
-package rustyrigs_gridtools;
+package RustyRigs::gridtools;
 use Carp;
 use Data::Dumper;
 use strict;

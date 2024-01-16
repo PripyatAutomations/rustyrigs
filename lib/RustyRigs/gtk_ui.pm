@@ -4,7 +4,7 @@
 #	* Icon loading could be more compact
 #	* Split menus off to their own file
 
-package rustyrigs_gtk_ui;
+package RustyRigs::gtk_ui;
 use Carp;
 use Data::Dumper;
 use strict;
@@ -78,7 +78,7 @@ sub main_menu_item_clicked {
     }
     elsif ( $item->get_label() eq 'Show Gridtools' ) {
         if (!defined $main::gridtools) {
-           $main::gridtools = rustyrigs_gridtools->new();
+           $main::gridtools = RustyRigs::gridtools->new();
         }
         my $w = ${$main::gridtools->{'window'}};
         $w->present();
@@ -87,7 +87,7 @@ sub main_menu_item_clicked {
         close_main_win();
     }
     elsif ( $item->get_label() eq 'Settings' ) {
-        $settings = rustyrigs_settings->new( $cfg, \$w_main );
+        $settings = RustyRigs::settings->new( $cfg, \$w_main );
     }
 
     $main_menu_open = 0;
@@ -392,12 +392,12 @@ sub switch_vfo {
 
     $log->Log( "vfo", "info", "Switching to VFO $vfo" );
     $vfo_sel_button->set_label( "VFO: "
-          . rustyrigs_hamlib::next_vfo($vfo) . " ("
+          . RustyRigs::hamlib::next_vfo($vfo) . " ("
           . $cfg->{'key_vfo'}
           . ")" );
     $cfg->{active_vfo} = $vfo;
 
-    rustyrigs_hamlib::read_rig();
+    RustyRigs::hamlib::read_rig();
 }
 
 sub w_main_ontop {
@@ -423,22 +423,22 @@ sub refresh_available_widths {
     }
 
     if ( $vfo->{'mode'} eq "FM" ) {
-        foreach my $value (@rustyrigs_hamlib::vfo_widths_fm) {
+        foreach my $value (@RustyRigs::hamlib::vfo_widths_fm) {
             $width_entry->append_text($value);
         }
-        $rv = woodpile::find_offset( \@rustyrigs_hamlib::vfo_widths_fm, $val );
+        $rv = woodpile::find_offset( \@RustyRigs::hamlib::vfo_widths_fm, $val );
     }
     elsif ( $vfo->{'mode'} =~ m/AM/ ) {
-        foreach my $value (@rustyrigs_hamlib::vfo_widths_am) {
+        foreach my $value (@RustyRigs::hamlib::vfo_widths_am) {
             $width_entry->append_text($value);
         }
-        $rv = woodpile::find_offset( \@rustyrigs_hamlib::vfo_widths_am, $val );
+        $rv = woodpile::find_offset( \@RustyRigs::hamlib::vfo_widths_am, $val );
     }
     elsif ( $vfo->{'mode'} =~ qr/(D-[UL]|USB|LSB)/ ) {
-        foreach my $value (@rustyrigs_hamlib::vfo_widths_ssb) {
+        foreach my $value (@RustyRigs::hamlib::vfo_widths_ssb) {
             $width_entry->append_text($value);
         }
-        $rv = woodpile::find_offset( \@rustyrigs_hamlib::vfo_widths_ssb, $val );
+        $rv = woodpile::find_offset( \@RustyRigs::hamlib::vfo_widths_ssb, $val );
     }
     elsif ( $vfo->{'mode'} =~ m/C4FM/ ) {
         $width_entry->append_text(12500);
@@ -461,7 +461,7 @@ sub open_gridtools {
        $$gt_win->present();
     }
     else {
-       $main::gridtools = rustyrigs_gridtools->new();
+       $main::gridtools = RustyRigs::gridtools->new();
        my $gt_win = $main::gridtools->{'window'};
        $$gt_win->present();
     }
@@ -535,7 +535,7 @@ sub draw_main_win {
     $self->{'meter_dock'} = \$meters_dock_box;
     $box->pack_start( $meters_dock_box, TRUE, TRUE, 0);
 
-    $meters = rustyrigs_meterbar->render_meterbars( \$main::meters, \$cfg, $vfos, $w_main );
+    $meters = RustyRigs::meterbar->render_meterbars( \$main::meters, \$cfg, $vfos, $w_main );
     # Do we render the meters in the main window?
     my $meters_in_main = $cfg->{'meters_in_main'};
     if ($meters_in_main) {
@@ -557,7 +557,7 @@ sub draw_main_win {
 
     # Show the channel choser combobox
     my $chan_combo = Gtk3::ComboBox->new();
-    $chan_combo->set_model( rustyrigs_memory::get_list() );
+    $chan_combo->set_model( RustyRigs::memory::get_list() );
     $chan_combo->set_active(1);
     $chan_combo->set_entry_text_column(1);
     my $render1 = Gtk3::CellRendererText->new();
@@ -656,7 +656,7 @@ sub draw_main_win {
 
     $vfo_sel_button->signal_connect(
         clicked => sub {
-            rustyrigs_hamlib::next_vfo();
+            RustyRigs::hamlib::next_vfo();
         }
     );
     $box->pack_start( $vfo_sel_button, FALSE, FALSE, 0 );
@@ -736,7 +736,7 @@ sub draw_main_win {
                my $freq = $vfo_freq_entry->get_text();
                $log->Log( "vfo", "debug",
                    "Changing freq on VFO $curr_vfo to $freq" );
-               rustyrigs_hamlib->set_freq($freq);
+               RustyRigs::hamlib->set_freq($freq);
             }
             return FALSE;
         }
@@ -809,7 +809,7 @@ sub draw_main_win {
     $mode_entry = Gtk3::ComboBoxText->new();
     $mode_entry->set_tooltip_text(
         "Modulation Mode. Some options my not be supported by your rig.");
-    foreach my $mode (@rustyrigs_hamlib::hamlib_modes) {
+    foreach my $mode (@RustyRigs::hamlib::hamlib_modes) {
         $mode_entry->append_text($mode);
     }
 
@@ -835,7 +835,7 @@ sub draw_main_win {
                my $curr_vfo = $cfg->{'active_vfo'};
                my $mode     = uc( $act_vfo->{'mode'} );
                $vfos->{$curr_vfo}{'mode'} = uc($selected_item);
-   #            rustyrigs_hamlib::set_mode($curr_vfo, $mode);
+   #            RustyRigs::hamlib::set_mode($curr_vfo, $mode);
             }
             w_main_fm_toggle();
             refresh_available_widths();
@@ -992,7 +992,7 @@ sub draw_main_win {
                    $act_vfo->{'power'} = $value;
 
                    # XXX: Send hamlib command for power
-                   # rustyrigs_hamlib::set_power($curr_vfo);
+                   # RustyRigs::hamlib::set_power($curr_vfo);
                }
                else {    # reject change otherwise
                    return FALSE;
@@ -1016,7 +1016,7 @@ sub draw_main_win {
     );
 
     # XXX: This will change soon as _accel will be wrapped in window object
-    my $fm_p = rustyrigs_fm->new( $cfg, $w_main, $w_main_accel );
+    my $fm_p = RustyRigs::fm->new( $cfg, $w_main, $w_main_accel );
     $fm_box = $fm_p->{box};
 
     # Create a toggle button to represent the lock state
@@ -1068,7 +1068,7 @@ sub draw_main_win {
     my $settings_button = Gtk3::Button->new_with_mnemonic('_Settings');
     $settings_button->signal_connect(
         clicked => sub {
-            $settings = rustyrigs_settings->new( $cfg, \$w_main );
+            $settings = RustyRigs::settings->new( $cfg, \$w_main );
         }
     );
     $settings_button->set_tooltip_text("Settings editor");
@@ -1129,7 +1129,7 @@ sub update_widgets {
 
 ######################################
 
-# Set the icon on settings window. This is called from rustyrigs_settings::show_settings
+# Set the icon on settings window. This is called from RustyRigs::settings::show_settings
 sub set_settings_icon {
     my $win = shift;
     $win->set_icon($icon_settings_pix);
@@ -1225,7 +1225,7 @@ sub set_icon {
 
 sub new {
     ( my $class, my $cfg_ref, my $log_ref, my $vfos_ref ) = @_;
-    $vfos     = $rustyrigs_hamlib::vfos;
+    $vfos     = $RustyRigs::hamlib::vfos;
     $cfg      = ${$cfg_ref};
     $cfg_file = $main::cfg_file;
     $log      = $log_ref;

@@ -1,5 +1,5 @@
 # documentation
-package rustyrigs_doc;
+package RustyRigs::doc;
 use warnings;
 use strict;
 

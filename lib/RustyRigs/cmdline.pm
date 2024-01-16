@@ -1,5 +1,5 @@
 # Command line handling
-package rustyrigs_cmdline;
+package RustyRigs::cmdline;
 use strict;
 use warnings;
 use Carp;
@@ -48,7 +48,7 @@ sub parse {
 
     # Show help if requested
     if ($cl_show_help) {
-        rustyrigs_doc::show_help_tty( $main::app_name, $main::app_descr );
+        RustyRigs::doc::show_help_tty( $main::app_name, $main::app_descr );
     }
 
     if ( defined($cl_ontop) ) {

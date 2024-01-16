@@ -3,7 +3,7 @@
 #      which will return exactly 1 object, with the desired properties applied
 # XXX: Make this possible using a list with title, properties, etc for each
 
-package rustyrigs_settings;
+package RustyRigs::settings;
 use Carp;
 use Data::Dumper;
 use strict;
@@ -30,7 +30,7 @@ our $w_settings;
 ######################
 sub set_colors() {
    my ( $class ) = @_;
-   my $dialog = rustyrigs_meterbar::Settings->new(\$w_settings);
+   my $dialog = RustyRigs::meterbar::Settings->new(\$w_settings);
 }
 
 ##############################
@@ -148,7 +148,7 @@ sub new {
     $w_settings->set_keep_above(1);
     $w_settings->set_modal(1);
     $w_settings->set_resizable(0);
-    rustyrigs_gtk_ui::set_settings_icon($w_settings);
+    RustyRigs::gtk_ui::set_settings_icon($w_settings);
 
 # Bind 'Escape' key press to close the settings window with confirmation
 # XXX: Figure out why fallthrough events do not work regardless of returning TRUE or FALSE :\
@@ -358,7 +358,7 @@ sub new {
     $hamlib_debug->set_tooltip_text("Select the logging level of hamlib");
     $i = 0;
     my $cur_hl_dbg = -1;
-    for our $hl_dbg_opt ( keys %rustyrigs_hamlib::hamlib_debug_levels ) {
+    for our $hl_dbg_opt ( keys %RustyRigs::hamlib::hamlib_debug_levels ) {
         if ( $hl_dbg_opt eq $cfg->{'hamlib_loglevel'} ) {
             $cur_hl_dbg = $i;
         }

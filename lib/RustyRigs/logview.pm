@@ -4,7 +4,7 @@
 # * Add save to file (is there a point? we have logfile already...)
 # * Add upload to termbin button
 
-package rustyrigs_logview;
+package RustyRigs::logview;
 use Carp;
 use Data::Dumper;
 use strict;
