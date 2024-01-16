@@ -160,9 +160,21 @@ sub load_defaults {
 }
 
 sub load_from_yaml {
-    ( my $class, my $file ) = @_;
+   my ( $self, $mem_file ) = @_;
+   if (defined $mem_file && -f $mem_file) {
+      $mem_file = $cfg->{'mem_file'};
+      $self->load_from_yaml();
+   } else {
+      # Load default memories
+      $self->load_defaults($rustyrigs_defconfig::default_memories);
+
+      # Save default memories to memory file
+      # XXX: Save memories
+      $self->save($$cfg->{'mem_file'});
+   }
 }
 
+# This needs to be created from the channel memories loaded from yaml....
 sub get_list {
     my $store =
       Gtk3::ListStore->new( 'Glib::String', 'Glib::String', 'Glib::String' );

@@ -13,7 +13,7 @@ use POSIX       qw(strftime);
 use Time::HiRes qw(gettimeofday tv_interval usleep);
 use Gtk3 '-init';
 use Glib qw(TRUE FALSE);
-use FindBin;
+#use FindBin;
 
 # project settings
 our $app_name         = 'rustyrigs';
@@ -113,7 +113,7 @@ sub toggle_locked {
     if ($locked) {
         foreach my $widget (@widgets) {
             my $actual_widget = $$widget;
-            if ($actual_widget->isa('Gtk3::Entry')) { # || $actual_widget->isa('Gtk3::SpinButton')) {
+            if ($actual_widget->isa('Gtk3::Entry')) {
                 $actual_widget->set_editable(0);
             } else
             {
@@ -124,7 +124,7 @@ sub toggle_locked {
     {
         foreach my $widget (@widgets) {
             my $actual_widget = $$widget;
-            if ($actual_widget->isa('Gtk3::Entry')) { #|| $actual_widget->isa('Gtk3::SpinButton')) {
+            if ($actual_widget->isa('Gtk3::Entry')) {
                 $actual_widget->set_editable(1);
             } else
             {
@@ -132,7 +132,7 @@ sub toggle_locked {
             }
         }
     }
-    $log->Log( "ui", "debug", "Toggling \$locked to $locked by $origin" );
+#    $log->Log( "ui", "debug", "Toggling \$locked to $locked by $origin" );
 }
 
 sub save_config {
@@ -262,20 +262,8 @@ $log->add_handler($logview);
 
 $gtk_ui->set_icon("connecting");
 
-# XXX: Sort this mess out soon
 $channels = rustyrigs_memory->new($cfg, $gtk_ui->{'w_main'}, $mem_file);
-
-if (defined $mem_file && -f $mem_file) {
-   $mem_file = $cfg->{'mem_file'};
-   $channels->load_from_yaml();
-} else {
-   # Load default memories
-   $channels->load_defaults($rustyrigs_defconfig::default_memories);
-
-   # Save default memories to memory file
-   # XXX: Save memories
-   $channels->save($$cfg->{'mem_file'});
-}
+$channels->load_from_yaml($mem_file);
 
 # Delay the hamlib init at least a second, for reliability
 our $hamlib_initialized = 0;
@@ -297,7 +285,6 @@ sub hamlib_init {
 Glib::Timeout->add( 1000, \&hamlib_init );
 
 my $w_main = $gtk_ui->{'w_main'};
-$$w_main->present();
 
 # Andd.... go!
 Gtk3->main();

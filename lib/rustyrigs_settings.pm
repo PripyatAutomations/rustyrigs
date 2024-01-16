@@ -241,7 +241,6 @@ sub new {
 
     # rotatctld address
     my $rotctl_box = Gtk3::Box->new('vertical', 5);
-    my $rotctl_box = Gtk3::Box->new('vertical', 5);
     my $rot_addr_label = Gtk3::Label->new('rotctld Address:Port');
     $rot_addr_entry = Gtk3::Entry->new();
     $rot_addr_entry->set_text( $cfg->{'rotctl_addr'} );
