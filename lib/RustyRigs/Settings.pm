@@ -72,7 +72,9 @@ sub apply {
 }
 
 sub save {
-   my ( $tc ) = @_;
+   my ( $self, $tc ) = @_;
+
+   print "self: " . Dumper($self) . " // " . ( caller(1) )[3] . "\n";
    if (defined $tc) {
         $main::log->Log( "config", "info",
             "Merging settings into in-memory config" );
@@ -81,6 +83,7 @@ sub save {
         $main::log->Log( "config", "debug", "Applying config changes:\n\t$tc_dump");
         $main::cfg_p->apply($tc);
         apply();
+        # we need to clear this, normally, so stale stuff doesn't persist
 #        undef $tc;
         main::restart();
     }
@@ -177,6 +180,11 @@ sub new {
        $w_settings->move( $cfg->{'win_settings_x'}, $cfg->{'win_settings_y'} );
     }
 
+    my $w_state = $cfg->{'win_settings_state'};
+    if (defined $w_state) {
+       $w_settings->set_state($w_state);
+    }
+
     $w_settings->signal_connect(
         'configure-event' => sub {
             my ( $widget, $event ) = @_;
@@ -190,6 +198,7 @@ sub new {
             $tmp_cfg->{'win_settings_y'}      = $y;
             $tmp_cfg->{'win_settings_height'} = $height;
             $tmp_cfg->{'win_settings_width'}  = $width;
+            $tmp_cfg->{'win_settings_state'}  = $widget->get_state();
 
             # Return FALSE to allow the event to propagate
             return FALSE;
@@ -615,14 +624,14 @@ sub new {
     $save_button->set_can_focus(1);
     $w_settings_accel->connect(
         ord('S'),  $cfg->{'shortcut_key'},
-        'visible', sub { save($tmp_cfg); }
+        'visible', sub { $class->save($tmp_cfg); }
     );
 
     # Create a Cancel button to discard changes
     my $cancel_button = Gtk3::Button->new('_Cancel');
     $cancel_button->set_tooltip_text("Discard changes");
-    $save_button->signal_connect( 'activate' => sub { save($tmp_cfg); } );
-    $save_button->signal_connect( 'clicked'  => sub { save($tmp_cfg); } );
+    $save_button->signal_connect( 'activate' => sub { $class->save($tmp_cfg); } );
+    $save_button->signal_connect( 'clicked'  => sub { $class->save($tmp_cfg); } );
     $cancel_button->signal_connect( 'activate' => \&close );
     $cancel_button->signal_connect( 'clicked'  => \&close );
     $cancel_button->set_can_focus(1);

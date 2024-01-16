@@ -496,6 +496,11 @@ sub draw_main_win {
     $w_main->set_default_size( $cfg->{'win_width'}, $cfg->{'win_height'} );
     $w_main->move( $cfg->{'win_x'}, $cfg->{'win_y'} );
 
+    my $w_state = $cfg->{'win_state'};
+    if (defined $w_state) {
+       $w_main->set_state($w_state);
+    }
+
     ##############################
     # Capture the window signals #
     ##############################
@@ -515,6 +520,7 @@ sub draw_main_win {
             # Save the data...
             $cfg->{'win_x'}      = $x;
             $cfg->{'win_y'}      = $y;
+            $cfg->{'win_state'}  = $widget->get_state();
             $cfg->{'win_height'} = $height;
             $cfg->{'win_width'}  = $width;
 

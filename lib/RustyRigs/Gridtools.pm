@@ -148,6 +148,15 @@ sub new {
     $window->set_keep_above($on_top);
     $window->set_resizable(0);
 
+    # Set width/height of teh window
+    $window->set_default_size( $$cfg->{'win_gridtools_width'},
+       $$cfg->{'win_gridtools_height'} );
+
+    my $w_state = $$cfg->{'win_gridtools_state'};
+    if (defined $w_state) {
+       $window->set_state($w_state);
+    }
+
     my $icon = $$gtk_ui->{'icon_gridtools_pix'};
 
     if (defined $icon) {
@@ -307,7 +316,12 @@ sub new {
 
     # if configured as such, hide the window automatically
     my $gt_autohide = $$cfg->{'hide_gridtools_at_start'};
-    if ($gt_autohide) {
+
+    my $gt_win_state = $$cfg->{'win_gridtools_state'};
+    print "gt_ws: " . Dumper($gt_win_state) . "\n";
+    if (defined $gt_win_state) {
+       $window->set_state($gt_win_state);
+    } elsif ($gt_autohide) {
        $window->iconify();
     }
 
@@ -337,6 +351,7 @@ sub new {
             $tmp_cfg->{'win_gridtools_y'}      = $y;
             $tmp_cfg->{'win_gridtools_height'} = $height;
             $tmp_cfg->{'win_gridtools_width'}  = $width;
+            $tmp_cfg->{'win_gridtools_state'} = $widget->get_state();
             $main::cfg_p->apply($tmp_cfg);
             undef $tmp_cfg;
 

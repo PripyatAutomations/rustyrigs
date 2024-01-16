@@ -16,6 +16,9 @@ my $mem_edit_accel = Gtk3::AccelGroup->new();
 my $cfg;
 my $w_main;
 
+#
+my $tmp_cfg;
+
 sub save {
     ( my $class, my $channel ) = @_;
     $class->close(TRUE);
@@ -54,6 +57,11 @@ sub show {
         $cfg->{'win_mem_edit_height'} );
     $w_mem_edit->move( $cfg->{'win_mem_edit_x'}, $cfg->{'win_mem_edit_y'} );
 
+    my $w_state = $$cfg->{'win_mem_state'};
+    if (defined $w_state) {
+       $w_mem_edit->set_state($w_state);
+    }
+
     my $save_button = Gtk3::Button->new_with_mnemonic('_Save Memory');
     $save_button->signal_connect( clicked => sub { $class->save(); } );
     $save_button->set_tooltip_text("Save memory");
@@ -80,10 +88,13 @@ sub show {
             my ( $widget, $event ) = @_;
             my ( $width, $height ) = $widget->get_size();
             my ( $x, $y )          = $widget->get_position();
-            $cfg->{'win_mem_edit_x'}      = $x;
-            $cfg->{'win_mem_edit_y'}      = $y;
-            $cfg->{'win_mem_edit_height'} = $height;
-            $cfg->{'win_mem_edit_width'}  = $width;
+            $tmp_cfg->{'win_mem_edit_x'}      = $x;
+            $tmp_cfg->{'win_mem_edit_y'}      = $y;
+            $tmp_cfg->{'win_mem_edit_height'} = $height;
+            $tmp_cfg->{'win_mem_edit_width'}  = $width;
+            $tmp_cfg->{'win_state'}           = $widget->get_state();
+            $main::cfg_p->apply($tmp_cfg);
+            undef $tmp_cfg;
             return FALSE;
         }
     );
