@@ -22,8 +22,9 @@ my @log_buffer;
 
 sub write {
     ( my $self, my $message ) = @_;
-    my $scrollback_lines = $cfg->{'scrollback_lines'};
+    my $scrollback_lines = 300; #$$cfg->{'scrollback_lines'};
     my $buffer = $text_view->get_buffer();
+
     push @log_buffer, "$message";
 
     # get rid of existing mark
@@ -33,8 +34,9 @@ sub write {
     }
 
     # Get rid of a line, if too long
-    if (@log_buffer > 100) {
-        shift @log_buffer; 
+    if (@log_buffer > $scrollback_lines) {
+        shift @log_buffer;
+        print "trimming logview buffer\n";
     }
     
     # Update the text area with the log buffer content
@@ -43,6 +45,7 @@ sub write {
     # Scroll the TextView to the bottom after updating the content
     my $end_iter = $buffer->get_end_iter();
     $end_mark = $buffer->create_mark("end_mark", $end_iter, FALSE);
+    $text_view->scroll_to_iter($end_iter, 0, FALSE, 0, 0);
     $text_view->scroll_mark_onscreen($end_mark);
 }
 

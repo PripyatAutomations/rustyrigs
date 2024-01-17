@@ -191,19 +191,22 @@ sub get_list {
       Gtk3::ListStore->new( 'Glib::String', 'Glib::String', 'Glib::String' );
 
     my $iter = $store->append();
-    $store->set( $iter, 0, '1', 1, ' WWV 5MHz', 2, ' 5,000.000 KHz AM' );
+    $store->set( $iter, 0, '1', 1, ' CHU 3.333MHz', 2, ' 3,333.000 KHz AM' );
 
     $iter = $store->append();
-    $store->set( $iter, 0, '2', 1, ' WWV 10MHz', 2, ' 10,000.000 KHz AM' );
+    $store->set( $iter, 0, '2', 1, ' WWV 5MHz', 2, ' 5,000.000 KHz AM' );
 
     $iter = $store->append();
-    $store->set( $iter, 0, '3', 1, ' WWV 15MHz', 2, ' 15,000.000 KHz AM' );
+    $store->set( $iter, 0, '3', 1, ' WWV 10MHz', 2, ' 10,000.000 KHz AM' );
 
     $iter = $store->append();
-    $store->set( $iter, 0, '4', 1, ' WWV 20MHz', 2, ' 20,000.000 KHz AM' );
+    $store->set( $iter, 0, '4', 1, ' WWV 15MHz', 2, ' 15,000.000 KHz AM' );
 
     $iter = $store->append();
-    $store->set( $iter, 0, '5', 1, ' WWV 25MHz', 2, ' 25,000.000 KHz AM' );
+    $store->set( $iter, 0, '5', 1, ' WWV 20MHz', 2, ' 20,000.000 KHz AM' );
+
+    $iter = $store->append();
+    $store->set( $iter, 0, '6', 1, ' WWV 25MHz', 2, ' 25,000.000 KHz AM' );
     return $store;
 }
 
