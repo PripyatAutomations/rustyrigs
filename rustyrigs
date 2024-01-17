@@ -152,8 +152,6 @@ if ($cfg_readonly) {
     $cfg->{'read_only'} = 1;
 }
 
-# XXX: Some of these should be configurable such as max wattage (ideally read from rigctl)
-# XXX: and voltages
 our $meters = {
    'alc' => {
       'title' => 'ALC',
@@ -189,6 +187,7 @@ our $meters = {
       'fg' => $$cfg->{'ui_power_fg'},
       'font' => $$cfg->{'ui_power_font'},
       'text' => $$cfg->{'ui_power_text'},
+      # XXX: Query this from hamlib
       'range_min' => 0,
       'range_max' => 100,
       'thresh_min' => $$cfg->{'thresh_power_min'},

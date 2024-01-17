@@ -6,6 +6,7 @@ use Glib                  qw(TRUE FALSE);
 use Data::Structure::Util qw/unbless/;
 use warnings;
 use strict;
+
 #####
 our $docked;
 our $tmp_cfg;

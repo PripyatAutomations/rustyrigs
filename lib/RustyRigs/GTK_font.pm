@@ -2,6 +2,8 @@ package RustyRigs::GTK_font;
 use strict;
 use warnings;
 use Data::Dumper;
+use Gtk3;
+use Pango;
 use Glib qw(TRUE FALSE);
 
 our $fonts;
@@ -16,10 +18,11 @@ sub load {
     # Try to use the font if it exists already
     my $font = $fonts->{$font_name};
 
-    if ( undef($font) ) {
+    if ( !defined $font ) {
         # Nope, load it
         $main::log->Log("core", "debug", "Loading new font $font_name");
-        $font = Gtk3::Pango::FontDescription->new();
+        print "loading font $font_name\n";
+        $font = Pango::FontDescription->new();
         $font->set_family($font_name);
         $fonts->{$font_name} = $font;
     } else {

@@ -32,7 +32,9 @@ sub update {
     my ( $dx_lat, $dx_lon, $my_lat, $my_lon, $dist, $az );
     my ( $s_az, $s_dx_lat, $s_dx_lon, $s_my_lat, $s_my_lon );
     my ( $longpath, $s_longpath, $s_dist, $s_ax, $use_metric );
+    my ( $use_rotator );
     $use_metric = $$cfg->{'use_metric'};
+    $use_rotator = $$cfg->{'use_rotator'};
 
     # labels to update
     my $b_l = $self->{'bear_label'};
@@ -88,15 +90,23 @@ sub update {
        $$b_l->set_text($s_az);
        $$d_l->set_text($s_dist);
        $$lp_l->set_text($s_longpath . " @ " . $s_longpath_az);
-       $$rb->set_sensitive(1);
-       $$lprb->set_sensitive(1);
+
+       # if rotator is enabled, enable the rotate buttons
+       if ($use_rotator) {
+          $$rb->set_sensitive(1);
+          $$lprb->set_sensitive(1);
+       }
     } else {	# clear results until valid values present
        $$b_l->set_text('----');	# clear bearing label
        $$d_l->set_text('----');	# clear distance label
        $$l_l->set_text('');	# clear lat lon label
        $$lp_l->set_text('----');
-       $$rb->set_sensitive(0);
-       $$lprb->set_sensitive(0);
+
+       # if rotator is enabled, disable the rotate buttons
+       if ($use_rotator) {
+          $$rb->set_sensitive(0);
+          $$lprb->set_sensitive(0);
+       }
        undef $state;
     }
  }

@@ -483,11 +483,7 @@ sub draw_main_win {
     $w_main->set_border_width( $cfg->{'win_border'} );
     my $resizable = 0;
 
-    if ( defined( $cfg->{'win_resizable'} ) ) {
-        $resizable = $cfg->{'win_resizable'};
-    }
-
-    $w_main->set_resizable($resizable);
+    $w_main->set_resizable(0);
 
     if ( $cfg->{'always_on_top'} ) {
         w_main_ontop(1);

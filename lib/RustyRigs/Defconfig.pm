@@ -117,7 +117,6 @@ our $def_cfg = {
     use_metric              => 0,		   # 1 will use metric (miles, etc)
     win_border              => 10,
     win_height              => 1024,
-    win_resizable           => 1,              # 1 means main window is resizable
     win_width               => 682,
     win_visible             => 0,
     win_x                   => 2252,
