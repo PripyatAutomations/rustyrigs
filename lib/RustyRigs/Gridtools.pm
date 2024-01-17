@@ -248,38 +248,42 @@ sub new {
     $elev_box->pack_start($elev_input, TRUE, TRUE, 0);
     $box->pack_start($elev_box, TRUE, TRUE, 0);
 
-    my $rot_box = Gtk3::Box->new('horizontal', 5);
-    my $rot_button = Gtk3::Button->new("Rotate _Ant");
-    $rot_button->set_tooltip_text("Rotate antenna towards bearing");
-    $rot_button->set_can_focus(1);
-    $rot_button->set_sensitive(0);
-    $rot_button->signal_connect( 'clicked'  => sub { 
-       (my $self) = @_;
-       my $az = $state->{'bearing'};
-       my $elev = $elev_input->get_text();
-       if (!defined $elev) {
-          $elev = 0;
-       }
-       $main::log->Log("user", "info", "User requested antenna rotation to $az deg / $elev elev...");
-       $main::rot->rotate($az, $elev);
-    });
-    $rot_box->pack_start($rot_button, TRUE, TRUE, 0);
+    my ( $rot_button, $rot_lp_button );
+    if ($$cfg->{'use_rotator'}) {
+        my $rot_box = Gtk3::Box->new('horizontal', 5);
+        $rot_button = Gtk3::Button->new("Rotate _Ant");
+        $rot_button->set_tooltip_text("Rotate antenna towards bearing");
+        $rot_button->set_can_focus(1);
+        $rot_button->set_sensitive(0);
+        $rot_button->signal_connect( 'clicked'  => sub { 
+           (my $self) = @_;
+           my $az = $state->{'bearing'};
+           my $elev = $elev_input->get_text();
+           if (!defined $elev) {
+              $elev = 0;
+           }
+           $main::log->Log("user", "info", "User requested antenna rotation to $az deg / $elev elev...");
+           $main::rot->rotate($az, $elev);
+        });
+        $rot_box->pack_start($rot_button, TRUE, TRUE, 0);
 
-    my $rot_lp_button = Gtk3::Button->new("Rotate (_LP)");
-    $rot_lp_button->set_tooltip_text("Rotate antenna towards longpath bearing");
-    $rot_lp_button->set_can_focus(1);
-    $rot_lp_button->set_sensitive(0);
-    $rot_lp_button->signal_connect( 'clicked'  => sub { 
-       (my $self) = @_;
-       my $az  = $state->{'bearing_lp'};
-       my $elev = $elev_input->get_text();
-       if (!defined $elev) {
-          $elev = 0;
-       }
-       $main::log->Log("user", "info", "User requested antenna rotation (longpath) to $az deg / $elev elev...");
-       $main::rot->rotate($az, $elev);
-    });
-    $rot_box->pack_start($rot_lp_button, TRUE, TRUE, 0);
+        $rot_lp_button = Gtk3::Button->new("Rotate (_LP)");
+        $rot_lp_button->set_tooltip_text("Rotate antenna towards longpath bearing");
+        $rot_lp_button->set_can_focus(1);
+        $rot_lp_button->set_sensitive(0);
+        $rot_lp_button->signal_connect( 'clicked'  => sub { 
+           (my $self) = @_;
+           my $az  = $state->{'bearing_lp'};
+           my $elev = $elev_input->get_text();
+           if (!defined $elev) {
+              $elev = 0;
+           }
+           $main::log->Log("user", "info", "User requested antenna rotation (longpath) to $az deg / $elev elev...");
+           $main::rot->rotate($az, $elev);
+        });
+        $rot_box->pack_start($rot_lp_button, TRUE, TRUE, 0);
+        $box->pack_start($rot_box, TRUE, TRUE, 0);
+    }
 
     # Buttons
     my $button_box = Gtk3::Box->new('horizontal', 5);
@@ -304,7 +308,6 @@ sub new {
     });
     $accel->connect(ord('R'), $$cfg->{'shortcut_key'}, 'visible', sub { my ( $self ) = @_; });
     $button_box->pack_start($reset_button, TRUE, TRUE, 0);
-    $box->pack_start($rot_box, TRUE, TRUE, 0);
     $box->pack_end($button_box, FALSE, FALSE, 0);
     $window->add($box);
     $window->show_all();
@@ -335,7 +338,6 @@ sub new {
     if ($wgp =~ m/none/) {
        $window->move( $$cfg->{'win_gridtools_x'}, $$cfg->{'win_gridtools_y'} );
     }
-
 
     # save resizes/moves
     $window->signal_connect(

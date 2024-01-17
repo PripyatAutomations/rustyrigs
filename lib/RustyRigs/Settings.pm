@@ -639,6 +639,8 @@ sub new {
     $button_box->pack_start( $save_button,   TRUE, TRUE, 0 );
     $button_box->pack_start( $cancel_button, TRUE, TRUE, 0 );
 
+    my $restart_note_label = Gtk3::Label->new('* Will restart on save');
+
     # place the widgets
     my $main_box = Gtk3::Box->new('vertical', 5);
     my $box_label = Gtk3::Label->new('General');
@@ -663,7 +665,8 @@ sub new {
     $config_box->pack_start( $main_box, FALSE, FALSE, 0 );
     $config_box->pack_start( $window_options_box,  FALSE, FALSE, 0 );
     $config_box->pack_start( $colors_button,   FALSE, FALSE, 0 );
-    $config_box->pack_end( $button_box, FALSE, FALSE, 0 );
+    $config_box->pack_start( $button_box, FALSE, FALSE, 0 );
+    $config_box->pack_start( $restart_note_label, FALSE, FALSE, 0);
 
     # Add the config box, show the window, and focus first input
     $w_settings->signal_connect( key_release_event => \&combobox_keys );

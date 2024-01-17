@@ -6,9 +6,7 @@ use Glib                  qw(TRUE FALSE);
 use Data::Structure::Util qw/unbless/;
 use warnings;
 use strict;
-
-# Our default font
-our $monospace_font;
+#####
 our $docked;
 our $tmp_cfg;
 my $cfg;
@@ -81,10 +79,9 @@ sub new {
     my $txt_font = $$cfg->{"${s}_font"};
     my $value;
 
-    if ( undef($monospace_font) ) {
-        $monospace_font = Gtk3::Pango::FontDescription->new();
-        $monospace_font->set_family('Monospace');
-    }
+    # Look up the font from the cache
+    my $fonts = \$main::fonts;
+    my $font = $$fonts->load($txt_font);
 
     my $grid = Gtk3::Grid->new();
     $grid->set_column_homogeneous(FALSE);
@@ -94,8 +91,8 @@ sub new {
     my $val_label = Gtk3::Label->new($value);
     $bar_label->set_width_chars(6);
     $val_label->set_width_chars(6);
-    $bar_label->override_font($monospace_font);
-    $val_label->override_font($monospace_font);
+    $bar_label->override_font($font);
+    $val_label->override_font($font);
 
     my $bar_sep = Gtk3::Separator->new('horizontal');
     my $val_sep = Gtk3::Separator->new('horizontal');
@@ -111,8 +108,8 @@ sub new {
     $val_label = Gtk3::Label->new($value);
     $bar_label->set_width_chars(6);
     $val_label->set_width_chars(6);
-    $bar_label->override_font($monospace_font);
-    $val_label->override_font($monospace_font);
+    $bar_label->override_font($font);
+    $val_label->override_font($font);
     $bar_sep->set_size_request( -1, 30 );
     $bar_sep->override_background_color( 'normal', $bg );
     $val_sep->override_background_color( 'normal', $fg );

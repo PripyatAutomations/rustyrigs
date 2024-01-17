@@ -16,6 +16,7 @@ our $window;		# our viewer window
 our $box;
 our $hidden;		# is the window hidden?
 our $text_view;
+our $end_mark;
 
 my @log_buffer;
 
@@ -35,8 +36,12 @@ sub write {
     
     # Scroll the TextView to the bottom after updating the content
     my $end_iter = $buffer->get_end_iter();
-    my $mark = $buffer->create_mark("end_mark", $end_iter, FALSE);
-    $text_view->scroll_mark_onscreen($mark);
+    if (defined $end_mark) {
+       $buffer->delete_mark($end_mark);
+    }
+
+    $end_mark = $buffer->create_mark("end_mark", $end_iter, FALSE);
+    $text_view->scroll_mark_onscreen($end_mark);
 }
 
 sub window_state {

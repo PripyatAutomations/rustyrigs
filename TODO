@@ -4,14 +4,14 @@
 * Add more verification/error checking
   - gridtools - Confirm if grids are valid or not
 * Clean up read_rig to update $vfos->{$curr_vfo} and call gtk_ui->update()
-* Move GTK GUI update code from lib/*_hamlib.pm to update() in lib/*_gtk_ui.pm
+* Move GTK GUI update code from Hamlib.pm to update() in GTK_ui.pm
 * Finish font loading
 * Move anywhere that changes $cfg to use a $tmp_cfg then prompt for confirmation
   - This should go through rr::Settings
 * Maybe make blocks able to be pulled out into the own window or returned to main window?
   - how?
 * Move the meters to a floating window
-* Maybe move the FM stuff to the rig of the rest? or maybe a floating window?
+* Maybe move the FM stuff to the right of the rest? or maybe a floating window?
 * Replace freq slider (gtk3 box with these widgets):
   - numeric entry field
   - up & down buttons
