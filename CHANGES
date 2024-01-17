@@ -3,6 +3,7 @@
 	  - This could be changed, but for now this works pretty well.
 	* hide rotator buttons in gridtools if use_rotator unset
 	* more cleanup
+	* fixed logview scrolling
 
 2024-01-15
 	* Added support for rotators via hamlib's rotctld

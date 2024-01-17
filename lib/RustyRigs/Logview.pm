@@ -26,6 +26,12 @@ sub write {
     my $buffer = $text_view->get_buffer();
     push @log_buffer, "$message";
 
+    # get rid of existing mark
+    if (defined $end_mark) {
+       $buffer->delete_mark($end_mark);
+       undef $end_mark;
+    }
+
     # Get rid of a line, if too long
     if (@log_buffer > 100) {
         shift @log_buffer; 
@@ -36,10 +42,6 @@ sub write {
     
     # Scroll the TextView to the bottom after updating the content
     my $end_iter = $buffer->get_end_iter();
-    if (defined $end_mark) {
-       $buffer->delete_mark($end_mark);
-    }
-
     $end_mark = $buffer->create_mark("end_mark", $end_iter, FALSE);
     $text_view->scroll_mark_onscreen($end_mark);
 }
