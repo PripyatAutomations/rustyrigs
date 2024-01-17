@@ -573,10 +573,11 @@ sub new {
    $color_win->show_all();
 
    my $us_tmp_cfg = $RustyRigs::Settings::tmp_cfg;
-   die "utc: " . Dumper($us_tmp_cfg) . "\n";
+   print "utc: " . Dumper($us_tmp_cfg) . "\n";
+
    my $self = {
       # functions
-      us_tmp_cfg => $$us_tmp_cfg,
+      us_tmp_cfg => \$us_tmp_cfg,
       # variables
       accel => \$accel,
       box => \$box,
