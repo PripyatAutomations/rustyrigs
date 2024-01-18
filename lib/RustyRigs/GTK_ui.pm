@@ -1,12 +1,12 @@
 # This package presents a GTK3 user interface for rustyrigs
 package RustyRigs::GTK_ui;
+use strict;
+use warnings;
 use Carp;
 use Data::Dumper;
-use strict;
 use Glib qw(TRUE FALSE);
-use warnings;
-use RustyRigs::Hamlib;
-use Woodpile;
+#use RustyRigs::Hamlib;
+#use Woodpile;
 
 # Try to make the tooltip's appear faster
 #Gtk3::Settings->get_default->set_property('gtk-tooltip-timeout', 100);
