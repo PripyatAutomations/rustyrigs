@@ -5,6 +5,7 @@ use Data::Dumper;
 use strict;
 use Glib qw(TRUE FALSE);
 use warnings;
+use RustyRigs::Hamlib;
 use Woodpile;
 
 # Try to make the tooltip's appear faster
@@ -926,112 +927,6 @@ sub update_widgets {
 }
 
 ######################################
-
-sub get_state_icon {
-    my ( $state ) = @_;
-
-#    print "get_state_icon: " . Dumper($state) . "\n";
-    # look up the icon, if it's available return it,
-    my $ico = $main::icons->get_icon($state);
-    if (!defined $ico) {
-       # else, return the error icon
-       $ico = $main::icons->get_icon("error");
-    }
-    return $ico;
-}
-
-sub set_tray_tooltip {
-    my ( $self, $icon, $tooltip_text ) = @_;
-
-    if (!defined $icon) {
-       print "\$tray_icon undefined\n";
-       return;
-    }
-
-    $$icon->set_tooltip_text($tooltip_text);
-}
-
-# Set up the tray icon and set a label on it...
-#############
-sub set_tray_icon {
-    my ( $self, $status ) = @_;
-#    print "set_tray_icon: status: " . Dumper($status) . "\n";
-
-    my $tray_icon = $main::icons->{'tray_icon'};
-    $$tray_icon->set_from_pixbuf(get_state_icon($status));
-}
-
-sub set_icon {
-    ( my $self, my $state ) = @_;
-    my $connected_txt = '';
-
-    my $tray_icon = $main::icons->{'tray_icon'};
-
-    if ( $state eq "idle" || $state eq "transmit" ) {
-        $connected_txt = "Connected";
-    }
-    else {
-        $connected_txt = "Connecting";
-    }
-    my $freq        = '';
-    my $status_txt  = '';
-    my $curr_vfo    = $cfg->{'active_vfo'};
-    my $act_vfo     = $vfos->{$curr_vfo};
-    my $atten      = $act_vfo->{'stats'}{'atten'};
-    my $freq_txt   = $act_vfo->{'freq'};
-    my $mode_txt   = $act_vfo->{'mode'};
-    my $width_text = $act_vfo->{'width'};
-    my $power_text = $act_vfo->{'power'};
-    my $rigctl_addr = $cfg->{'rigctl_addr'};
-    my $swr_txt    = $act_vfo->{'stats'}{'swr'};
-    my $sig_txt    = $act_vfo->{'stats'}{'signal'};
-
-    if ( defined($main::rig) ) {
-        if ( $main::rig->get_ptt($Hamlib::RIG_VFO_A) ) {
-            $status_txt = "TRANSMIT";
-        }
-        else {
-            $status_txt = "RECEIVE";
-        }
-    }
-    else {
-        $status_txt = "INITIALIZING";
-    }
-
-    my $state_txt = "unknown";
-
-    if ( $state eq "idle" ) {
-        $state_txt = "Connected to";
-    }
-    elsif ( $state eq "connecting" ) {
-        $state_txt = "Connecting to";
-    }
-    elsif ( $state eq "transmit" ) {
-        $state_txt = "TRANSMIT -";
-    }
-
-    # create and apply the tooltip help for tray icon...
-    my $tray_tooltip =
-      $main::app_name . ": Click to toggle display or right click for menu.\n";
-    $tray_tooltip .= "\t$connected_txt to $rigctl_addr\n";
-    $tray_tooltip .= "\t$status_txt $freq_txt $mode_txt ${width_text} hz\n\n";
-    $tray_tooltip .= "Meters:\n";
-    $tray_tooltip .= "\t\tPower: ${power_text}W\n\t\tSWR: ${swr_txt}:1\n";
-    # update the tooltip
-    $self->set_tray_tooltip( $tray_icon, $tray_tooltip );
-
-    # Update the main window title
-    $w_main->set_title(
-        $main::app_name . ": $state_txt " . $cfg->{'rigctl_addr'} );
-
-    # Find the appropriate icon
-#    print "set_icon: state: " . Dumper($state) . "\n";
-    my $icon = get_state_icon($state);
-
-    # Apply it to main window & system tray icon
-    $w_main->set_icon($icon);
-    $self->set_tray_icon($state);
-}
 
 sub new {
     ( my $class, my $cfg_ref, my $log_ref, my $vfos_ref ) = @_;

@@ -312,12 +312,12 @@ sub read_rig {
        if (!defined $last_ptt_status || $last_ptt_status != $ptt_status) {
           $main::log->Log("hamlib", "info", "PTT off");
        }
-       $main::gtk_ui->set_icon("idle");
+       $main::icons->set_icon("idle");
     } else {
        if (!defined $last_ptt_status || $last_ptt_status != $ptt_status) {
           $main::log->Log("hamlib", "info", "PTT on");
        }
-       $main::gtk_ui->set_icon("transmit");
+       $main::icons->set_icon("transmit");
     }
     $last_ptt_status = $ptt_status;
     $main::gtk_ui->update_widgets();

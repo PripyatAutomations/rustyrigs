@@ -57,9 +57,9 @@ sub write {
     
     # Scroll the TextView to the bottom after updating the content
     my $end_iter = $buffer->get_end_iter();
-    $text_view->scroll_to_iter($end_iter, 0, FALSE, 0, 0);
-#    $end_mark = $buffer->create_mark("end_mark", $end_iter, FALSE);
-#    $text_view->scroll_mark_onscreen($end_mark);
+#    $text_view->scroll_to_iter($end_iter, 0, FALSE, 0, 0);
+    $end_mark = $buffer->create_mark("end_mark", $end_iter, FALSE);
+    $text_view->scroll_mark_onscreen($end_mark);
 }
 
 sub window_state {
