@@ -23,9 +23,8 @@ sub load {
     if ( !defined $font ) {
         # Nope, load it
         $main::log->Log("core", "debug", "Loading new font $font_name");
-        my $new_font = Pango::FontDescription->new ();
-        $new_font->set_family($font_name);
-#        $font = Pango::FontDescription->new();
+        my $font = Pango::FontDescription->new ();
+        $font->set_family($font_name);
 #        $font->set_family($font_name);
         $fonts->{$font_name} = $font;
     } else {

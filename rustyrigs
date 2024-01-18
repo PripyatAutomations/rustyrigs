@@ -23,8 +23,10 @@ our $cfg_file         = $default_cfg_file;
 our $log_file         = $ENV{"HOME"} . "/${app_name}.log";
 
 # Prefer libraries from the source tree, if we are there, over system-wide
-# XXX: This will need adjusted when we work out proper installation
-use lib (-f 'lib/Woodpile.pm') ? "$FindBin::Bin/lib" : '/usr/lib/rustyrigs';
+if (-f 'lib/Woodpile.pm') {
+   use lib "$FindBin::Bin/lib";
+}
+
 use Woodpile;			# misc. scraps we dug out of the woodpile
 use RustyRigs::Defconfig;	# default configuration settings
 #use RustyRigs::Curses_ui;	# someday we'll have a cli interface here

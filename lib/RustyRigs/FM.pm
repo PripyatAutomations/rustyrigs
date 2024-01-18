@@ -8,10 +8,6 @@ use Carp;
 use Data::Dumper;
 use Glib qw(TRUE FALSE);
 
-use lib (-f 'lib/Woodpile.pm') ? "$FindBin::Bin/lib" : '/usr/lib/rustyrigs';
-#use Woodpile;
-#use RustyRigs::Hamlib;
-
 my $cfg;
 our $fm_box;
 my $vfos = $RustyRigs::Hamlib::vfos;

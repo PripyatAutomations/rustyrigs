@@ -290,6 +290,7 @@ sub font_chooser {
     my $font_dialog = Gtk3::FontChooserDialog->new('Choose Font', $parent_window);
     
     if ($default_font) {
+        # XXX: this is incorrect!
         $font_dialog->set_font($default_font);
     }
 

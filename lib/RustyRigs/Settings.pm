@@ -8,8 +8,7 @@ use Data::Dumper;
 use strict;
 use Glib qw(TRUE FALSE);
 use warnings;
-use lib (-f 'lib/Woodpile.pm') ? "$FindBin::Bin/lib" : '/usr/lib/rustyrigs';
-use Woodpile;
+
 our $config_box;
 our $amp_addr_entry;
 our $rig_addr_entry;
@@ -494,6 +493,24 @@ sub new {
         }
     );
     $window_options_box->pack_start( $hide_gridtools_button,    FALSE, FALSE, 0 );
+
+    my $hide_logview_button = Gtk3::CheckButton->new();
+    $hide_logview_button->set_label('Hide logview with main window?');
+    $hide_logview_button->set_active( $cfg->{'hide_logview_too'} );
+    $hide_logview_button->set_can_focus(1);
+    $hide_logview_button->signal_connect(
+        'toggled' => sub {
+            my $button = shift;
+
+            if ( $button->get_active() ) {
+                $tmp_cfg->{'hide_logview_too'} = 1;
+            }
+            else {
+                $tmp_cfg->{'hide_logview_too'} = 0;
+            }
+        }
+    );
+    $window_options_box->pack_start( $hide_logview_button,    FALSE, FALSE, 0 );
 
     my $hide_gridtools_def_button = Gtk3::CheckButton->new();
     $hide_gridtools_def_button->set_label('Hide gridtools by default?');

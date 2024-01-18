@@ -108,11 +108,19 @@ sub w_main_hide {
 
     $cfg->{'win_visible'} = 0;
     $w_main->set_visible(0);
-    my $lv = $main::logview;
-    my $w = ${$lv->{'window'}};
 
-    if (defined $w) {
-       $w->set_visible(0);
+    my $hide_too = $cfg->{'hide_logview_too'};
+
+    if ($hide_too) {
+       my $lv = $main::logview;
+       my $w = ${$lv->{'window'}};
+
+       if (defined $w) {
+          print "hide logview\n";
+          $w->set_visible(0);
+       } else {
+          print "No logview\n";
+       }
     }
 
     my $hide_gt_too = $cfg->{'hide_gridtools_too'};
@@ -130,13 +138,24 @@ sub w_main_show {
     $cfg->{'win_visible'} = 1;
     $w_main->deiconify();
     $w_main->set_visible(1);
-    my $lv = $main::logview;
 
-    # Raise logview with main window, if configured to do so
-    if (defined $lv) {
-       my $w = ${$lv->{'window'}};
-       if (defined $w) {
-          $w->set_visible(1);
+    my $hide_too = $cfg->{'hide_logview_too'};
+
+    if ($hide_too) {
+       my $lv = $main::logview;
+
+       print "showing logview too!\n";
+       # Raise logview with main window, if configured to do so
+       if (defined $lv) {
+          my $w = ${$lv->{'window'}};
+          if (defined $w) {
+             $w->set_visible(1);
+             $w->deiconify();
+          } else {
+             print "No logview window\n";
+          }
+       } else {
+          print "No logview\n";
        }
     }
     $w_main->show_all();
@@ -147,7 +166,7 @@ sub w_main_show {
        my $gt = $main::gridtools;
        my $gw = $gt->{'window'};
        if (defined $gw) {
-          $$gw->deiconify();
+#          $$gw->deiconify();
           $$gw->set_visible(1);
        }
     }
