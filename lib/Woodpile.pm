@@ -1,5 +1,5 @@
-# woodpile.pm contains an assortment of junk i commonly use
-package woodpile;
+# Woodpile.pm contains an assortment of junk i commonly use
+package Woodpile;
 use strict;
 use warnings;
 use Scalar::Util qw(looks_like_number);
@@ -66,7 +66,21 @@ sub find_offset {
     return $index;
 }
 
-package woodpile::Log;
+# Function to resize window height based on visible boxes
+# Call this when widgets in a window are hidden or shown, to calculate needed dimensions
+sub autosize_height {
+    my ( $window, $box ) = @_;
+    my ( $width, $height ) = $window->get_size();
+
+    # Get preferred height for the current width
+    my ( $min_height, $nat_height ) =
+       $box->get_preferred_height_for_width($width);
+
+    # Set window height based on the preferred height of visible boxes
+    $window->resize( $window->get_allocated_width(), $min_height );
+}
+
+package Woodpile::Log;
 use strict;
 use warnings;
 use Sys::Hostname;
@@ -176,12 +190,11 @@ sub DESTROY {
     close $self->{log_fh} if $self->{log_fh};
 }
 
-package woodpile::Config;
+package Woodpile::Config;
 use strict;
 use warnings;
 use YAML::XS;
 use Data::Dumper;
-use Data::Structure::Util qw/unbless/;
 my $cfg_readonly = 0;    # if 1, config won't be written out
 my $cfg_file;
 
@@ -256,11 +269,6 @@ sub new {
     my ( $class, $log, $cfg_file, $def_cfg ) = @_;
 
     my $self = {
-        # Functions we export
-        apply => \&apply,
-        load => \&load,
-        save => \&save,
-
         # Data
         cfg_file => $cfg_file,
         def_cfg  => $def_cfg,

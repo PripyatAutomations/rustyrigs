@@ -22,10 +22,19 @@ my @log_buffer;
 
 sub write {
     ( my $self, my $message ) = @_;
-    my $scrollback_lines = 300; #$$cfg->{'scrollback_lines'};
+    my $sb = $$cfg->{'scrollback_lines'};
+
+    if (!defined $sb) {
+       # XXX: we should try to estimate the available lines
+       # XXX: using dpi/font size/window size but that's for another
+       # XXX: day in the distant future...
+       $sb = 50;
+       print "Defaulting to $sb lines of scrollback - to override set scrollback_lines in cfg\n";
+    }
+
+    my $scrollback_lines = $sb;
     my $buffer = $text_view->get_buffer();
 
-    push @log_buffer, "$message";
 
     # get rid of existing mark
     if (defined $end_mark) {
@@ -35,18 +44,22 @@ sub write {
 
     # Get rid of a line, if too long
     if (@log_buffer > $scrollback_lines) {
+        # shift a line off the top
         shift @log_buffer;
         print "trimming logview buffer\n";
     }
+
+    # push it onto the tail of the message
+    push @log_buffer, "$message";
     
     # Update the text area with the log buffer content
     $buffer->set_text(join("", @log_buffer));
     
     # Scroll the TextView to the bottom after updating the content
     my $end_iter = $buffer->get_end_iter();
-    $end_mark = $buffer->create_mark("end_mark", $end_iter, FALSE);
     $text_view->scroll_to_iter($end_iter, 0, FALSE, 0, 0);
-    $text_view->scroll_mark_onscreen($end_mark);
+#    $end_mark = $buffer->create_mark("end_mark", $end_iter, FALSE);
+#    $text_view->scroll_mark_onscreen($end_mark);
 }
 
 sub window_state {
@@ -56,11 +69,11 @@ sub window_state {
 
     # Only allow the window to be hidden with the main window
     if ( $event->new_window_state =~ m/\bwithdrawn\b/ ) {
-       my $visible = $cfg->{'win_visible'};
+       my $visible = $$cfg->{'win_visible'};
 
        if ($visible) {
           # Instead, iconify it
-          $widget->unhide();
+          $widget->set_visible(1);
           $widget->iconify();
        }
        return FALSE;
@@ -82,7 +95,7 @@ sub DESTROY {
 }
 
 sub new {
-   ( my $class, my $cfg ) = @_;
+   ( my $class, $cfg ) = @_;
 
    my $lvp = $$cfg->{'win_logview_placement'};
    my $tmp_cfg;		# hold changed configuration values until apply()'d
@@ -107,10 +120,10 @@ sub new {
    $window->set_keep_above($keep_above);
    $window->set_modal(0);
    $window->set_resizable(1);
-   my $icon = $$gtk_ui->{'icon_logview_pix'};
+   my $icon = $main::icons->get_icon('logview');
 
    if (defined $icon) {
-      $window->set_icon($$icon);
+      $window->set_icon($icon);
    } else {
       $main::log->Log("core", "warn", "We appear to be missing logview icon!");
    }

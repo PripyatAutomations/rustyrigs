@@ -5,6 +5,8 @@ use Data::Dumper;
 use Gtk3;
 use Pango;
 use Glib qw(TRUE FALSE);
+use Glib::Object::Introspection;
+use Glib::Object::Subclass;
 
 our $fonts;
 

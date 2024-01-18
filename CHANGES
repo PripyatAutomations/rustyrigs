@@ -4,6 +4,9 @@
 	* hide rotator buttons in gridtools if use_rotator unset
 	* more cleanup
 	* fixed logview scrolling
+	* Implemented power control
+	* moved icon stuff to it's own file and now preload and cache all icons from config
+	* moved font stuff to it's own file
 
 2024-01-15
 	* Added support for rotators via hamlib's rotctld

@@ -163,10 +163,10 @@ sub new {
        $window->set_state($w_state);
     }
 
-    my $icon = $$gtk_ui->{'icon_gridtools_pix'};
+    my $icon = $main::icons->get_icon('gridtools');
 
     if (defined $icon) {
-       $window->set_icon($$icon);
+       $window->set_icon($icon);
     } else {
        $main::log->Log("core", "warn", "We appear to be missing gridtools icon!");
     }

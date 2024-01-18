@@ -2,14 +2,14 @@
 # XXX: De-duplicate widget creation by moving them out to functions
 #      which will return exactly 1 object, with the desired properties applied
 # XXX: Make this possible using a list with title, properties, etc for each
-
 package RustyRigs::Settings;
 use Carp;
 use Data::Dumper;
 use strict;
 use Glib qw(TRUE FALSE);
 use warnings;
-
+use lib (-f 'lib/Woodpile.pm') ? "$FindBin::Bin/lib" : '/usr/lib/rustyrigs';
+use Woodpile;
 our $config_box;
 our $amp_addr_entry;
 our $rig_addr_entry;
@@ -56,7 +56,7 @@ sub print_signal_info {
 }
 
 # XXX: We need to make a list of cfg val => function
-# XXX: Then we can call this at startup, after woodpile::Config is loaded, instead of dealing with settings scattered
+# XXX: Then we can call this at startup, after Woodpile::Config is loaded, instead of dealing with settings scattered
 # XXX: about the initialization code. This should be a lot more compact...
 sub apply {
     ( my $class ) = @_;
@@ -152,7 +152,8 @@ sub new {
     $w_settings->set_keep_above(1);
     $w_settings->set_modal(1);
     $w_settings->set_resizable(0);
-    RustyRigs::GTK_ui::set_settings_icon($w_settings);
+    my $icon = $main::icons->get_icon('settings');
+    $w_settings->set_icon($icon);
 
 # Bind 'Escape' key press to close the settings window with confirmation
 # XXX: Figure out why fallthrough events do not work regardless of returning TRUE or FALSE :\
@@ -344,7 +345,7 @@ sub new {
     $core_debug->set_tooltip_text("Select the core log level");
     my $curr_cl_dbg = -1;
     my $i           = 0;
-    for our $cl_dbg_opt ( keys %woodpile::Log::log_levels ) {
+    for our $cl_dbg_opt ( keys %Woodpile::Log::log_levels ) {
         if ( $cl_dbg_opt eq $cfg->{'log_level'} ) {
             $curr_cl_dbg = $i;
         }

@@ -1,22 +1,18 @@
-* Add a WSJT-X listener for displaying the messages from WSJT-X
-  - Add support to re-sending them to other addresses?
 * Fix bug where gridtools is shown when main is hidden/show even when hide_gridtools_too is false
 * Add more verification/error checking
   - gridtools - Confirm if grids are valid or not
 * Clean up read_rig to update $vfos->{$curr_vfo} and call gtk_ui->update()
 * Move GTK GUI update code from Hamlib.pm to update() in GTK_ui.pm
-* Finish font loading
 * Move anywhere that changes $cfg to use a $tmp_cfg then prompt for confirmation
   - This should go through rr::Settings
 * Maybe make blocks able to be pulled out into the own window or returned to main window?
   - how?
-* Move the meters to a floating window
+* Add option to move the meters to a floating window
 * Maybe move the FM stuff to the right of the rest? or maybe a floating window?
 * Replace freq slider (gtk3 box with these widgets):
   - numeric entry field
   - up & down buttons
   - step slider
-* Fix crash when toggling locked via systray menu
 * While transmitting, make the power meter show the RFPOWER meter instead of commanded power
   if possible.
 * Add a squelch control
@@ -27,16 +23,20 @@
 * Add signal bar to SWR widget
   - implement multiple bars (ugh!)
 * Add a widget (scale/slider?) under the freq selector to allow chosing the step size
+  - drop down with step values is probably the best
 * More keyboard controls! make it so you can type to search the boxes
 * When user starts typing in the frequency field, suspend actions on the field and allow typing normally
 * Replace freq entry with a normal text box, tune up/down buttons, and a step combo
-* Add some holdoff before actually sending commands to the rig
+* Add some holdoff before actually sending commands to the rig, in case of further changes
+  - This should (re)start a timer that must elapse before write_rig() is called
 * Add speech for blind users
 * Tune button (ON/OFF/AUTO)
 * Support for multiple VFOs is not yet usable
 * Combined meter view for RX/TX in one line
   - Toggle on click with full view
-* Implement ncurses or similar TUI
-* Add a dialog for configuring key bindings?
+* Add a settings dialog for configuring key bindings?
 * Add QRZ lookup dialog for basic call info
   - Button to paste grid into gridtools dialog
+* Implement ncurses or similar TUI
+* Add a WSJT-X listener for displaying the messages from WSJT-X
+  - Add support to re-sending them to other addresses?

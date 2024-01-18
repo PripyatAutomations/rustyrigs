@@ -3,7 +3,6 @@ package RustyRigs::Meterbar;
 use Carp;
 use Data::Dumper;
 use Glib                  qw(TRUE FALSE);
-use Data::Structure::Util qw/unbless/;
 use warnings;
 use strict;
 
@@ -73,16 +72,16 @@ sub new {
     my $s        = "ui_${lc_label}";
     my $l        = $main::meters->{$lc_label}{'title'};
 
-    my $bg       = woodpile::hex_to_gdk_rgba( $$cfg->{"${s}_bg"} );
-    my $alarm_bg = woodpile::hex_to_gdk_rgba( $$cfg->{"${s}_alarm_bg"} );
-    my $fg       = woodpile::hex_to_gdk_rgba( $$cfg->{"${s}_fg"} );
-    my $txt_fg   = woodpile::hex_to_gdk_rgba( $$cfg->{"${s}_text"} );
+    my $bg       = Woodpile::hex_to_gdk_rgba( $$cfg->{"${s}_bg"} );
+    my $alarm_bg = Woodpile::hex_to_gdk_rgba( $$cfg->{"${s}_alarm_bg"} );
+    my $fg       = Woodpile::hex_to_gdk_rgba( $$cfg->{"${s}_fg"} );
+    my $txt_fg   = Woodpile::hex_to_gdk_rgba( $$cfg->{"${s}_text"} );
     my $txt_font = $$cfg->{"${s}_font"};
     my $value;
 
     # Look up the font from the cache
-    my $fonts = \$main::fonts;
-    my $font = $$fonts->load($txt_font);
+#    my $fonts = \$main::fonts;
+#    my $font = $$fonts->load($txt_font);
 
     my $grid = Gtk3::Grid->new();
     $grid->set_column_homogeneous(FALSE);
@@ -92,30 +91,18 @@ sub new {
     my $val_label = Gtk3::Label->new($value);
     $bar_label->set_width_chars(6);
     $val_label->set_width_chars(6);
-    $bar_label->override_font($font);
-    $val_label->override_font($font);
-
-    my $bar_sep = Gtk3::Separator->new('horizontal');
-    my $val_sep = Gtk3::Separator->new('horizontal');
-    $bar_sep->set_size_request( 30, 30 );
-    $val_sep->set_size_request( 30, 30 );
-    $bar_sep->override_background_color( 'normal', $bg );
-    $val_sep->override_background_color( 'normal', $fg );
+#    if (defined $font) {
+#       $bar_label->override_font($font);
+#       $val_label->override_font($font);
+#    }
 
     my $bar = Gtk3::Box->new( 'horizontal', 0 );
-    $bar_sep   = Gtk3::Separator->new('horizontal');
-    $val_sep   = Gtk3::Separator->new('horizontal');
-    $bar_label = Gtk3::Label->new($l);
-    $val_label = Gtk3::Label->new($value);
-    $bar_label->set_width_chars(6);
-    $val_label->set_width_chars(6);
-    $bar_label->override_font($font);
-    $val_label->override_font($font);
-    $bar_sep->set_size_request( -1, 30 );
+    my $bar_sep = Gtk3::Separator->new('horizontal');
+    my $val_sep = Gtk3::Separator->new('horizontal');
+    $val_sep->set_size_request( 30, 30 );
+    $bar_sep->set_size_request( 30, 30 );
     $bar_sep->override_background_color( 'normal', $bg );
     $val_sep->override_background_color( 'normal', $fg );
-    $bar_sep->set_size_request( 30, 30 );
-
     $grid->attach( $bar_label, 0, 0, 1, 1 );
     $grid->attach( $bar_sep,   1, 0, 1, 1 );
     $grid->attach( $val_sep,   1, 0, 1, 1 );
@@ -244,7 +231,6 @@ package RustyRigs::Meterbar::Settings;
 use Carp;
 use Data::Dumper;
 use Glib                  qw(TRUE FALSE);
-use Data::Structure::Util qw/unbless/;
 use warnings;
 use strict;
 
@@ -350,7 +336,7 @@ sub new {
    $color_win->set_modal(1);
    $color_win->set_resizable(0);
 
-   my $icon = ${$gtk_ui->{'icon_settings_pix'}};
+   my $icon = $main::icons->get_icon('meters');
    $color_win->set_icon($icon);
 
    my $accel = Gtk3::AccelGroup->new();
@@ -405,11 +391,11 @@ sub new {
          button_press_event => sub {
             my ($self, $event) = @_;
             if ($event->type eq 'button-press') {
-               my $def_color = woodpile::hex_to_gdk_rgba($m_bg);
+               my $def_color = Woodpile::hex_to_gdk_rgba($m_bg);
                my $color = color_picker($color_win, $def_color);
                if ($color) {
                   $self->set_text($color->to_string());
-                  $tmp_cfg->{'ui_' . $m_name . '_bg'} = woodpile::gdk_rgb_to_hex($color);
+                  $tmp_cfg->{'ui_' . $m_name . '_bg'} = Woodpile::gdk_rgb_to_hex($color);
                }
             }
          }
@@ -436,11 +422,11 @@ sub new {
          button_press_event => sub {
             my ($self, $event) = @_;
             if ($event->type eq 'button-press') {
-               my $def_color = woodpile::hex_to_gdk_rgba($m_bg);
+               my $def_color = Woodpile::hex_to_gdk_rgba($m_bg);
                my $color = color_picker($color_win, $def_color);
                if ($color) {
                   $self->set_text($color->to_string());
-                  $tmp_cfg->{'ui_' . $m_name . '_alarm_bg'} = woodpile::gdk_rgb_to_hex($color);;
+                  $tmp_cfg->{'ui_' . $m_name . '_alarm_bg'} = Woodpile::gdk_rgb_to_hex($color);;
                }
             }
          }
@@ -467,11 +453,11 @@ sub new {
          button_press_event => sub {
             my ($self, $event) = @_;
             if ($event->type eq 'button-press') {
-               my $def_color = woodpile::hex_to_gdk_rgba($m_bg);
+               my $def_color = Woodpile::hex_to_gdk_rgba($m_bg);
                my $color = color_picker($color_win, $def_color);
                if ($color) {
                   $self->set_text($color->to_string());
-                  $tmp_cfg->{'ui_' . $m_name . '_fg'} = woodpile::gdk_rgb_to_hex($color);
+                  $tmp_cfg->{'ui_' . $m_name . '_fg'} = Woodpile::gdk_rgb_to_hex($color);
                }
             }
          }
@@ -498,11 +484,11 @@ sub new {
          button_press_event => sub {
             my ($self, $event) = @_;
             if ($event->type eq 'button-press') {
-               my $def_color = woodpile::hex_to_gdk_rgba($m_bg);
+               my $def_color = Woodpile::hex_to_gdk_rgba($m_bg);
                my $color = color_picker($color_win, $def_color);
                if ($color) {
                   $self->set_text($color->to_string());
-                  $tmp_cfg->{'ui_' . $m_name . '_text'} = woodpile::gdk_rgb_to_hex($color);
+                  $tmp_cfg->{'ui_' . $m_name . '_text'} = Woodpile::gdk_rgb_to_hex($color);
                }
             }
          }

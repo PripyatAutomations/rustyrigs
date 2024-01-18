@@ -1,15 +1,11 @@
 # This package presents a GTK3 user interface for rustyrigs
-#
-# Cleanup targets:
-#	* Icon loading could be more compact
-#	* Split menus off to their own file
-
 package RustyRigs::GTK_ui;
 use Carp;
 use Data::Dumper;
 use strict;
 use Glib qw(TRUE FALSE);
 use warnings;
+use Woodpile;
 
 # Try to make the tooltip's appear faster
 #Gtk3::Settings->get_default->set_property('gtk-tooltip-timeout', 100);
@@ -20,20 +16,8 @@ our $cfg;
 our $log;
 our $cfg_file;
 
-# shared resources
-our $icon_error_pix;
-our $icon_idle_pix;
-our $icon_gridtools_pix;
-our $icon_logview_pix;
-our $icon_main_pix;
-our $icon_meters_pix;
-our $icon_settings_pix;
-our $icon_transmit_pix;
-
 # gui widgets
-our $tray_icon;
 our $w_main;
-our $main_menu;
 our $mem_edit_button;
 our $mem_load_button;
 our $mem_write_button;
@@ -53,137 +37,6 @@ our $lock_item;
 our $settings;
 our $meters;
 
-# status flags
-our $main_menu_open = 0;
-
-# Function to resize window height based on visible boxes
-# Call this when widgets in a window are hidden or shown, to calculate needed dimensions
-sub autosize_height {
-    my ($window) = @_;
-
-    # Get preferred height for the current width
-    my ( $min_height, $nat_height ) =
-      $box->get_preferred_height_for_width( $cfg->{'win_x'} );
-
-    # Set window height based on the preferred height of visible boxes
-    $window->resize( $window->get_allocated_width(), $min_height );
-}
-
-# main menu
-sub main_menu_item_clicked {
-    my ( $item, $window, $menu ) = @_;
-
-    if ( $item->get_label() eq 'Toggle Window' ) {
-        $window->set_visible( !$window->get_visible() );
-    }
-    elsif ( $item->get_label() eq 'Show Gridtools' ) {
-        if (!defined $main::gridtools) {
-           $main::gridtools = RustyRigs::Gridtools->new();
-        }
-        my $w = ${$main::gridtools->{'window'}};
-        $w->present();
-    }
-    elsif ( $item->get_label() eq 'Quit' ) {
-        close_main_win();
-    }
-    elsif ( $item->get_label() eq 'Settings' ) {
-        $settings = RustyRigs::Settings->new( $cfg, \$w_main );
-    }
-
-    $main_menu_open = 0;
-    $menu->destroy();    # Hide the menu after the choice is made
-}
-
-sub main_menu_state {
-    my ( $widget, $event ) = @_;
-    my $on_top  = 0;
-    my $focused = 0;
-
-    # keep menu from being iconified/maximized
-    if ( $event->new_window_state =~ m/\biconified\b/ ) {
-        $w_main->deiconify();
-    }
-
-    if ( $event->new_window_state =~ m/\bmaximized\b/ ) {
-        $w_main->unmaximize();
-    }
-
-    if ( $event->new_window_state =~ m/\babove\b/ ) {
-        $on_top = 1;
-    }
-
-    if ( $event->new_window_state =~ m/\bfocused\b/ ) {
-        $focused = 1;
-    }
-
-    # If menu becomes unfocused, destroy it...
-    if ( !$focused ) {
-        $widget->destroy();
-    }
-    return FALSE;
-}
-
-sub main_menu {
-    my ( $status_icon, $button, $time ) = @_;
-
-    # destroy old menu, if it exists
-    if ($main_menu_open) {
-        $main_menu->destroy();
-    }
-
-    $main_menu_open = 1;
-    $main_menu      = Gtk3::Menu->new();
-    my $sep1        = Gtk3::SeparatorMenuItem->new();
-    my $sep2        = Gtk3::SeparatorMenuItem->new();
-    my $sep3        = Gtk3::SeparatorMenuItem->new();
-    my $toggle_item = Gtk3::MenuItem->new("Toggle Window");
-    $toggle_item->signal_connect( activate =>
-          sub { main_menu_item_clicked( $toggle_item, $w_main, $main_menu ) } );
-    $main_menu->append($toggle_item);
-    $main_menu->append($sep1);
-
-    #   $main_menu->signal_connect(destroy => sub { undef $lock_item; });
-
-    my $settings_item = Gtk3::MenuItem->new("Settings");
-    $settings_item->signal_connect( activate =>
-          sub { main_menu_item_clicked( $settings_item, $w_main, $main_menu ) }
-    );
-    $main_menu->append($settings_item);
-    $main_menu->append($sep2);
-
-    my $gridtools_item = Gtk3::MenuItem->new("Show Gridtools");
-    $gridtools_item->signal_connect(
-        activate =>
-          sub { main_menu_item_clicked( $gridtools_item, $w_main, $main_menu ) }
-    );
-    $main_menu->append($gridtools_item);
-    $main_menu->append($sep3);
-
-    $lock_item = Gtk3::CheckMenuItem->new("Locked");
-    $lock_item->signal_connect(
-        toggled => sub {
-            my $widget = shift;
-            main::toggle_locked("menu");
-            $main_menu_open = 0;
-            $main_menu->destroy();    # Hide the menu after the choice is made
-            return FALSE;
-        }
-    );
-    $lock_item->set_active($main::locked);
-    $main_menu->append($lock_item);
-
-    my $quit_item = Gtk3::MenuItem->new("Quit");
-    $quit_item->signal_connect( activate =>
-          sub { main_menu_item_clicked( $quit_item, $w_main, $main_menu ) } );
-    $main_menu->append($quit_item);
-
-    $main_menu->show_all();
-    $main_menu->popup( undef, undef, undef, undef, $button, $time );
-
-    # XXX: We need to add an event to destroy the menu if it loses focus
-    $main_menu->signal_connect( window_state_event => \&main_menu_state );
-}
-
 sub close_main_win {
     my ( $widget, $event ) = @_;
 
@@ -197,9 +50,8 @@ sub w_main_state {
     my $on_top  = 0;
     my $focused = 0;
 
-  # instead of minimizing, hide the window to tray so it doesnt clutter app tray
+    # instead of minimizing, hide the window to tray so it doesnt clutter app tray
     if ( $event->new_window_state =~ m/\biconified\b/ ) {
-
         # Prevent the window from being iconified
         $widget->deiconify();
 
@@ -227,6 +79,8 @@ sub w_main_state {
 sub w_main_click {
     my ( $widget, $event ) = @_;
 
+    my $tray_icon = $main::icons->{'tray_icon'};
+
     # Right mouse click (display menu)
     if ( $event->type eq 'button-press' && $event->button == 3 ) {
 #        main_menu( $tray_icon, 3, $event->time );
@@ -234,22 +88,19 @@ sub w_main_click {
 }
 
 sub w_main_fm_toggle {
-
-    # hide the FM box, unless in FM mode
     my $curr_vfo = $cfg->{'active_vfo'};
     my $vfo      = $vfos->{$curr_vfo};
     my $mode     = uc( $vfo->{'mode'} );
 
+    # hide the FM box, unless in FM mode
     if ( $mode eq "FM" ) {
         $fm_box->show_all();
-        autosize_height($w_main);
     }
     else {
         $fm_box->hide();
-        autosize_height($w_main);
     }
+    Woodpile::autosize_height($w_main, $box);
 }
-
 
 sub w_main_hide {
     my ( $self ) = @_;
@@ -258,9 +109,11 @@ sub w_main_hide {
     $w_main->set_visible(0);
     my $lv = $main::logview;
     my $w = ${$lv->{'window'}};
+
     if (defined $w) {
        $w->set_visible(0);
     }
+
     my $hide_gt_too = $cfg->{'hide_gridtools_too'};
     if ($hide_gt_too) {
        my $gt = $main::gridtools;
@@ -303,6 +156,7 @@ sub w_main_show {
 
 sub w_main_toggle {
     my ( $self ) = @_;
+
     if ( $cfg->{'win_visible'} ) {
         $self->w_main_hide();
     }
@@ -320,71 +174,6 @@ sub w_main_keypress {
         w_main_hide();
     }
     return;
-}
-
-sub load_icon {
-    my ($icon_filename) = @_;
-    my $pixbuf;
-
-    if ( -f $icon_filename ) {
-        $log->Log( "ui", "debug", "loading icon $icon_filename" );
-        $pixbuf = Gtk3::Gdk::Pixbuf->new_from_file($icon_filename)
-          or die "Failed loading icon $icon_filename\n";
-    }
-    else {
-        die "Missing icon file $icon_filename - can't continue!\n";
-    }
-    return $pixbuf;
-}
-
-# XXX: make this
-sub unload_icons {
-}
-
-sub load_icons {
-    my ($self) = @_;
-
-    my $res           = $cfg->{'res_dir'};
-    my $icon_error    = $res . "/" . $cfg->{'icon_error'};
-    my $icon_idle     = $res . "/" . $cfg->{'icon_idle'};
-    my $icon_gridtools = $res . "/" . $cfg->{'icon_gridtools'};
-    my $icon_logview  = $res . "/" . $cfg->{'icon_logview'};
-    my $icon_meters   = $res . "/" . $cfg->{'icon_meters'};
-    my $icon_settings = $res . "/" . $cfg->{'icon_settings'};
-    my $icon_transmit = $res . "/" . $cfg->{'icon_transmit'};
-
-    # Load images, if not already loaded
-    if ( !defined($icon_error_pix) ) {
-        $icon_error_pix = load_icon($icon_error);
-    }
-    if ( !defined($icon_gridtools_pix) ) {
-        $icon_gridtools_pix = load_icon($icon_gridtools);
-    }
-    if ( !defined($icon_idle_pix) ) {
-        $icon_idle_pix = load_icon($icon_idle);
-    }
-    if ( !defined($icon_logview_pix) ) {
-        $icon_logview_pix = load_icon($icon_logview);
-    }
-    if ( !defined($icon_meters_pix) ) {
-        $icon_meters_pix = load_icon($icon_meters);
-    }
-    if ( !defined($icon_settings_pix) ) {
-        $icon_settings_pix = load_icon($icon_settings);
-    }
-    if ( !defined($icon_transmit_pix) ) {
-        $icon_transmit_pix = load_icon($icon_transmit);
-    }
-
-    # initialize the tray icon
-    if ( !defined($tray_icon) ) {
-        $log->Log( "ui", "debug", "creating tray icon" );
-        $tray_icon = Gtk3::StatusIcon->new();
-
-        # Create a system tray icon with the loaded icon
-        $tray_icon->signal_connect( 'activate'   => sub { $self->w_main_toggle(); });
-#        $tray_icon->signal_connect( 'popup-menu' => \&main_menu );
-    }
 }
 
 sub switch_vfo {
@@ -426,19 +215,19 @@ sub refresh_available_widths {
         foreach my $value (@RustyRigs::Hamlib::vfo_widths_fm) {
             $width_entry->append_text($value);
         }
-        $rv = woodpile::find_offset( \@RustyRigs::Hamlib::vfo_widths_fm, $val );
+        $rv = Woodpile::find_offset( \@RustyRigs::Hamlib::vfo_widths_fm, $val );
     }
     elsif ( $vfo->{'mode'} =~ m/AM/ ) {
         foreach my $value (@RustyRigs::Hamlib::vfo_widths_am) {
             $width_entry->append_text($value);
         }
-        $rv = woodpile::find_offset( \@RustyRigs::Hamlib::vfo_widths_am, $val );
+        $rv = Woodpile::find_offset( \@RustyRigs::Hamlib::vfo_widths_am, $val );
     }
     elsif ( $vfo->{'mode'} =~ qr/(D-[UL]|USB|LSB)/ ) {
         foreach my $value (@RustyRigs::Hamlib::vfo_widths_ssb) {
             $width_entry->append_text($value);
         }
-        $rv = woodpile::find_offset( \@RustyRigs::Hamlib::vfo_widths_ssb, $val );
+        $rv = Woodpile::find_offset( \@RustyRigs::Hamlib::vfo_widths_ssb, $val );
     }
     elsif ( $vfo->{'mode'} =~ m/C4FM/ ) {
         $width_entry->append_text(12500);
@@ -936,6 +725,8 @@ sub draw_main_win {
         'button-press-event' => sub {
             $dragging = 1;    # Set dragging flag when the slider is clicked
             my ( $widget, $event ) = @_;
+            my $rp = $main::rig_p->{'gui_applying_changes'};
+            $$rp = TRUE;
             # reset the value to our stored state to discard this change
             return FALSE;     # Prevent the default behavior
         }
@@ -945,6 +736,7 @@ sub draw_main_win {
     $vfo_power_entry->signal_connect(
         'button-release-event' => sub {
             $dragging = 0;    # Reset dragging flag on button release
+            my $rp = $main::rig_p->{'gui_applying_changes'};
             if ( !defined( $act_vfo->{'power'} ) || $act_vfo->{'power'} eq "" )
             {
             # XXX: wut?
@@ -953,6 +745,7 @@ sub draw_main_win {
 
             # reset it
             $vfo_power_entry->set_value( $act_vfo->{'power'} );
+            $$rp = FALSE;
             return FALSE;
         }
     );
@@ -983,20 +776,23 @@ sub draw_main_win {
                    $change = $oldval - $value;
                }
 
-   #      $log->Log("ui", "debug", "change power: dragging: $dragging - change: $change. val $value oldval: $oldval");
+               $main::log->Log("ui", "debug", "change power: dragging: $dragging - change: $change. val $value oldval: $oldval");
 
                if ( $dragging < 2 ) {
+                   print "rig_power widget dragging: $dragging < 2, not changing value\n";
                    return FALSE;
                }
 
                # Ensure no abrupt changes occurred
                if ( $change <= $max_change ) {
                    $act_vfo->{'power'} = $value;
+                   print "applying power: $value (change: $change)\n";
 
-                   # XXX: Send hamlib command for power
-                   # RustyRigs::Hamlib::set_power($curr_vfo);
+                   my $rig = $main::rig;
+                   $rig->set_power($curr_vfo);
                }
                else {    # reject change otherwise
+                   print "rig_power widget: rejecting power change $change in excess of limit $max_change\n";
                    return FALSE;
                }
                return TRUE;
@@ -1131,48 +927,64 @@ sub update_widgets {
 
 ######################################
 
-# Set the icon on settings window. This is called from RustyRigs::Settings::show_settings
-sub set_settings_icon {
-    my $win = shift;
-    $win->set_icon($icon_settings_pix);
-}
-
 sub get_state_icon {
-    ( my $state ) = @_;
+    my ( $state ) = @_;
 
-    if ( $state eq "idle" ) {
-        return $icon_idle_pix;
+#    print "get_state_icon: " . Dumper($state) . "\n";
+    # look up the icon, if it's available return it,
+    my $ico = $main::icons->get_icon($state);
+    if (!defined $ico) {
+       # else, return the error icon
+       $ico = $main::icons->get_icon("error");
     }
-    elsif ( $state eq "transmit" ) {
-        return $icon_transmit_pix;
-    }
-    else {
-        return $icon_error_pix;
-    }
+    return $ico;
 }
 
 sub set_tray_tooltip {
     my ( $self, $icon, $tooltip_text ) = @_;
-    $icon->set_tooltip_text($tooltip_text);
+
+    if (!defined $icon) {
+       print "\$tray_icon undefined\n";
+       return;
+    }
+
+    $$icon->set_tooltip_text($tooltip_text);
 }
 
 # Set up the tray icon and set a label on it...
 #############
 sub set_tray_icon {
     my ( $self, $status ) = @_;
+#    print "set_tray_icon: status: " . Dumper($status) . "\n";
+
+    my $tray_icon = $main::icons->{'tray_icon'};
+    $$tray_icon->set_from_pixbuf(get_state_icon($status));
+}
+
+sub set_icon {
+    ( my $self, my $state ) = @_;
     my $connected_txt = '';
 
-    if ( $status eq "idle" || $status eq "transmit" ) {
+    my $tray_icon = $main::icons->{'tray_icon'};
+
+    if ( $state eq "idle" || $state eq "transmit" ) {
         $connected_txt = "Connected";
     }
     else {
         $connected_txt = "Connecting";
     }
     my $freq        = '';
-    my $rigctl_addr = $cfg->{'rigctl_addr'};
     my $status_txt  = '';
     my $curr_vfo    = $cfg->{'active_vfo'};
     my $act_vfo     = $vfos->{$curr_vfo};
+    my $atten      = $act_vfo->{'stats'}{'atten'};
+    my $freq_txt   = $act_vfo->{'freq'};
+    my $mode_txt   = $act_vfo->{'mode'};
+    my $width_text = $act_vfo->{'width'};
+    my $power_text = $act_vfo->{'power'};
+    my $rigctl_addr = $cfg->{'rigctl_addr'};
+    my $swr_txt    = $act_vfo->{'stats'}{'swr'};
+    my $sig_txt    = $act_vfo->{'stats'}{'signal'};
 
     if ( defined($main::rig) ) {
         if ( $main::rig->get_ptt($Hamlib::RIG_VFO_A) ) {
@@ -1186,27 +998,6 @@ sub set_tray_icon {
         $status_txt = "INITIALIZING";
     }
 
-    my $freq_txt   = $act_vfo->{'freq'};
-    my $mode_txt   = $act_vfo->{'mode'};
-    my $width_text = $act_vfo->{'width'};
-    my $power_text = $act_vfo->{'power'};
-    my $swr_txt    = $act_vfo->{'stats'}{'swr'};
-    my $sig_txt    = $act_vfo->{'stats'}{'signal'};
-    my $atten      = $act_vfo->{'stats'}{'atten'};
-
-    # create and apply the tooltip help for tray icon...
-    my $tray_tooltip =
-      $main::app_name . ": Click to toggle display or right click for menu.\n";
-    $tray_tooltip .= "\t$connected_txt to $rigctl_addr\n";
-    $tray_tooltip .= "\t$status_txt $freq_txt $mode_txt ${width_text} hz\n\n";
-    $tray_tooltip .= "Meters:\n";
-    $tray_tooltip .= "\t\tPower: ${power_text}W\n\t\tSWR: ${swr_txt}:1\n";
-    $self->set_tray_tooltip( $tray_icon, $tray_tooltip );
-    $tray_icon->set_from_pixbuf( get_state_icon($status) );
-}
-
-sub set_icon {
-    ( my $class, my $state ) = @_;
     my $state_txt = "unknown";
 
     if ( $state eq "idle" ) {
@@ -1218,11 +1009,28 @@ sub set_icon {
     elsif ( $state eq "transmit" ) {
         $state_txt = "TRANSMIT -";
     }
+
+    # create and apply the tooltip help for tray icon...
+    my $tray_tooltip =
+      $main::app_name . ": Click to toggle display or right click for menu.\n";
+    $tray_tooltip .= "\t$connected_txt to $rigctl_addr\n";
+    $tray_tooltip .= "\t$status_txt $freq_txt $mode_txt ${width_text} hz\n\n";
+    $tray_tooltip .= "Meters:\n";
+    $tray_tooltip .= "\t\tPower: ${power_text}W\n\t\tSWR: ${swr_txt}:1\n";
+    # update the tooltip
+    $self->set_tray_tooltip( $tray_icon, $tray_tooltip );
+
+    # Update the main window title
     $w_main->set_title(
         $main::app_name . ": $state_txt " . $cfg->{'rigctl_addr'} );
+
+    # Find the appropriate icon
+#    print "set_icon: state: " . Dumper($state) . "\n";
     my $icon = get_state_icon($state);
+
+    # Apply it to main window & system tray icon
     $w_main->set_icon($icon);
-    $class->set_tray_icon($state);
+    $self->set_tray_icon($state);
 }
 
 sub new {
@@ -1234,23 +1042,11 @@ sub new {
     $vfos     = ${vfos_ref};
 
     my $self = {
-        # Variables
-        icon_error_pix    => \$icon_error_pix,
-        icon_idle_pix     => \$icon_idle_pix,
-        icon_gridtools_pix => \$icon_gridtools_pix,
-        icon_logview_pix  => \$icon_logview_pix,
-        icon_main_pix     => \$icon_main_pix,
-        icon_settings_pix => \$icon_settings_pix,
-        icon_transmit_pix => \$icon_transmit_pix,
-        tray_icon         => \$tray_icon,
-
         # GUI widgets
         box               => \$box,
         fm_box            => \$fm_box,
         lock_button       => \$lock_button,
         lock_item         => \$lock_item,
-#        main_menu         => \$main_menu,
-        main_menu_open    => \$main_menu_open,
         mem_add_button    => \$mem_load_button,
         mem_edit_button   => \$mem_edit_button,
         mem_load_button   => \$mem_load_button,
@@ -1264,35 +1060,6 @@ sub new {
 
         # Windows
         w_main            => \$w_main,
-
-        # Functions
-        autosize_height          => \&autosize_height,
-        channel_list             => \&channel_list,
-        close_main_win           => \&close_main_win,
-        draw_main_win            => \&draw_main_win,
-        get_state_icon           => \&get_state_icon,
-        load_icon                => \&load_icon,
-        load_icons               => \&load_icons,
-#        main_menu                => \&main_menu,
-#        main_menu_item_clicked   => \&main_menu_item_clicked,
-#        main_menu_state          => \&main_menu_state,
-        refresh_available_widths => \&refresh_available_widths,
-        save_config              => \&save_config,
-        set_icon                 => \&set_icon,
-        set_settings_icon        => \&set_settings_icon,
-        set_tray_icon            => \&set_tray_icon,
-        set_tray_tooltip         => \&set_tray_tooltip,
-        switch_vfo               => \&switch_vfo,
-        unload_icons             => \&unload_icons,
-        update_widgets           => \&update_widgets,
-        w_main_click             => \&w_main_click,
-        w_main_fm_toggle         => \&w_main_fm_toggle,
-        w_main_hide              => \&w_main_hide,
-        w_main_keypress          => \&w_main_keypress,
-        w_main_ontop             => \&w_main_ontop,
-        w_main_show              => \&w_main_show,
-        w_main_state             => \&w_main_state,
-        w_main_toggle            => \&w_main_toggle
     };
     bless $self, $class;
 

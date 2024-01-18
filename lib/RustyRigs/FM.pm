@@ -8,10 +8,9 @@ use Carp;
 use Data::Dumper;
 use Glib qw(TRUE FALSE);
 
-use lib (-f 'lib/woodpile.pm') ? "$FindBin::Bin/lib" : '/usr/lib/rustyrigs';
-
-use woodpile;
-use RustyRigs::Hamlib;
+use lib (-f 'lib/Woodpile.pm') ? "$FindBin::Bin/lib" : '/usr/lib/rustyrigs';
+#use Woodpile;
+#use RustyRigs::Hamlib;
 
 my $cfg;
 our $fm_box;
@@ -43,12 +42,12 @@ sub refresh_tone_freqs {
    }
 
    if (defined($vfo->{'fm'}{'tone_freq_rx'})) {
-      my $rx_tone = woodpile::find_offset(\@RustyRigs::Hamlib::pl_tones, $vfo->{'fm'}{'tone_freq_rx'});
+      my $rx_tone = Woodpile::find_offset(\@RustyRigs::Hamlib::pl_tones, $vfo->{'fm'}{'tone_freq_rx'});
       $tone_freq_rx_entry->set_active($rx_tone);
    }
 
    if (defined($vfo->{'fm'}{'tone_freq_tx'})) {
-      my $tx_tone = woodpile::find_offset(\@RustyRigs::Hamlib::pl_tones, $vfo->{'fm'}{'tone_freq_tx'});
+      my $tx_tone = Woodpile::find_offset(\@RustyRigs::Hamlib::pl_tones, $vfo->{'fm'}{'tone_freq_tx'});
       $tone_freq_tx_entry->set_active($tx_tone);
    }
 }
@@ -146,13 +145,13 @@ sub new {
       $vfo->{'fm'}{'tone_freq_rx'} = $rrv;
 
       # If the TX PL is empty, set it to the RX tone
-      my $rro = woodpile::find_offset(\@RustyRigs::Hamlib::pl_tones, $rrv);
+      my $rro = Woodpile::find_offset(\@RustyRigs::Hamlib::pl_tones, $rrv);
       my $trv = $tone_freq_tx_entry->get_active_text();
-      my $tro = woodpile::find_offset(\@RustyRigs::Hamlib::pl_tones, $trv);
+      my $tro = Woodpile::find_offset(\@RustyRigs::Hamlib::pl_tones, $trv);
 
       # If PL is empty or both boxes are the same, change it along
       if (!defined($trv) || ($rro - 1) == $tro || ($tro - 1) == $rro) {
-         $tone_freq_tx_entry->set_active(woodpile::find_offset(\@RustyRigs::Hamlib::pl_tones, $rrv));
+         $tone_freq_tx_entry->set_active(Woodpile::find_offset(\@RustyRigs::Hamlib::pl_tones, $rrv));
       }
    });
 

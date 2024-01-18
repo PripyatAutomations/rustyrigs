@@ -3,11 +3,11 @@
 # You need to run rigctld with -o such as in ./run-dummy-rigctld
 use strict;
 use warnings;
+#use diagnostics;
 use Hamlib;
 use Scalar::Util qw(looks_like_number);
 use Sys::Hostname;
 use Data::Dumper;
-use Data::Structure::Util qw/unbless/;
 use YAML::XS;
 use POSIX       qw(strftime);
 use Time::HiRes qw(gettimeofday tv_interval usleep);
@@ -23,13 +23,16 @@ our $cfg_file         = $default_cfg_file;
 our $log_file         = $ENV{"HOME"} . "/${app_name}.log";
 
 # Prefer libraries from the source tree, if we are there, over system-wide
-use lib (-f 'lib/woodpile.pm') ? "$FindBin::Bin/lib" : '/usr/lib/rustyrigs';
-
-use woodpile;			# misc. scraps we dug out of the woodpile
+# XXX: This will need adjusted when we work out proper installation
+use lib (-f 'lib/Woodpile.pm') ? "$FindBin::Bin/lib" : '/usr/lib/rustyrigs';
+use Woodpile;			# misc. scraps we dug out of the woodpile
 use RustyRigs::Defconfig;	# default configuration settings
-#use RustyRigs::curses_ui;	# someday we'll have a cli interface here
+#use RustyRigs::Curses_ui;	# someday we'll have a cli interface here
+# Eventually these will be merged into RustyRigs::GtkUi(::*) someday...
 use RustyRigs::GTK_ui;		# GTK3 user interface
-use RustyRigs::GTK_font;	# GTK3 font stuff
+#use RustyRigs::GTK_font;	# GTK3 font stuff
+use RustyRigs::GTK_icon;	# GTK3 icon stuff
+use RustyRigs::GTK_menu;	# main menu for GTK3
 use RustyRigs::Cmdline;		# command line parsing
 use RustyRigs::Doc;		# help messages
 use RustyRigs::Hamlib;		# hamlib rig control
@@ -43,7 +46,7 @@ use RustyRigs::Logview;		# log viewer window
 use RustyRigs::Gridtools;
 
 # Start logging in debug mode until config is loaded and we quiet down...
-our $log = woodpile::Log->new( $log_file, "debug" );
+our $log = Woodpile::Log->new( $log_file, "debug" );
 
 ##################
 # Run time state #
@@ -51,7 +54,11 @@ our $log = woodpile::Log->new( $log_file, "debug" );
 our $cfg_readonly = FALSE;
 our $connected    = FALSE;
 our $locked       = FALSE;
-our $vfos         = $RustyRigs::Hamlib::vfos;
+
+# Channel memories
+our $channels;
+
+# Hamlib stuff
 our $hamlib_riginfo;
 our $amp;
 our $amp_p;
@@ -59,12 +66,13 @@ our $rig;
 our $rig_p;
 our $rot;
 our $rot_p;
-our $channels;
+our $vfos         = $RustyRigs::Hamlib::vfos;
 our $gtk_ui;
 our $logview;
 our $mem_file;
 our $gridtools;
-our $fonts;
+#our $fonts;
+our $icons;
 
 #####################################################
 # Set config to defconfig, until we load config...
@@ -144,7 +152,7 @@ sub save_config {
 RustyRigs::Cmdline::parse( \$cfg, \$cfg_file );
 
 # Load configuration
-$cfg_p = woodpile::Config->new( \$log, \$cfg_file, \$def_cfg );
+$cfg_p = Woodpile::Config->new( \$log, \$cfg_file, \$def_cfg );
 $cfg   = \$cfg_p->{cfg};
 
 if ($cfg_readonly) {
@@ -187,8 +195,8 @@ our $meters = {
       'fg' => $$cfg->{'ui_power_fg'},
       'font' => $$cfg->{'ui_power_font'},
       'text' => $$cfg->{'ui_power_text'},
-      # XXX: Query this from hamlib
       'range_min' => 0,
+      # XXX: Query this from hamlib
       'range_max' => 100,
       'thresh_min' => $$cfg->{'thresh_power_min'},
       'thresh_max' => $$cfg->{'thresh_power_max'}
@@ -235,9 +243,10 @@ our $meters = {
 };
 
 # Initialize the GTK GUI
-$fonts = RustyRigs::GTK_font->new();
+#$fonts = RustyRigs::GTK_font->new();
+$icons = RustyRigs::GTK_icon->new();
+$icons->load_all();
 $gtk_ui = RustyRigs::GTK_ui->new( $cfg, $log, $vfos );
-$gtk_ui->load_icons();
 $gtk_ui->draw_main_win();
 $gtk_ui->set_icon("connecting");
 
