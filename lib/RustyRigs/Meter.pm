@@ -80,8 +80,8 @@ sub new {
     my $value;
 
     # Look up the font from the cache
-#    my $fonts = \$main::fonts;
-#    my $font = $$fonts->load($txt_font);
+    my $fonts = \$main::fonts;
+    my $font = $$fonts->load($txt_font);
 
     my $grid = Gtk3::Grid->new();
     $grid->set_column_homogeneous(FALSE);
@@ -91,10 +91,10 @@ sub new {
     my $val_label = Gtk3::Label->new($value);
     $bar_label->set_width_chars(6);
     $val_label->set_width_chars(6);
-#    if (defined $font) {
-#       $bar_label->override_font($font);
-#       $val_label->override_font($font);
-#    }
+    if (defined $font) {
+       $bar_label->override_font($font);
+       $val_label->override_font($font);
+    }
 
     my $bar = Gtk3::Box->new( 'horizontal', 0 );
     my $bar_sep = Gtk3::Separator->new('horizontal');
@@ -560,9 +560,8 @@ sub new {
    print "utc: " . Dumper($us_tmp_cfg) . "\n";
 
    my $self = {
-      # functions
-      us_tmp_cfg => \$us_tmp_cfg,
       # variables
+      us_tmp_cfg => \$us_tmp_cfg,
       accel => \$accel,
       box => \$box,
       window => \$color_win

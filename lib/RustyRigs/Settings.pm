@@ -678,10 +678,6 @@ sub new {
     my $self = {
         # variables
         tmp_cfg    => \$tmp_cfg,
-        # functions
-        close      => \&close,
-        save       => \&save,
-        w_settings => \$w_settings
     };
     bless $self, $class;
     return $self;

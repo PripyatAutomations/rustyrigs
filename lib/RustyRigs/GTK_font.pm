@@ -3,10 +3,10 @@ use strict;
 use warnings;
 use Data::Dumper;
 use Gtk3;
-use Pango;
 use Glib qw(TRUE FALSE);
 use Glib::Object::Introspection;
 use Glib::Object::Subclass;
+Glib::Object::Introspection->setup( basename => 'Pango', version => '1.0', package => 'Pango' );
 
 our $fonts;
 
@@ -23,9 +23,10 @@ sub load {
     if ( !defined $font ) {
         # Nope, load it
         $main::log->Log("core", "debug", "Loading new font $font_name");
-        print "loading font $font_name\n";
-        $font = Pango::FontDescription->new();
-        $font->set_family($font_name);
+        my $new_font = Pango::FontDescription->new ();
+        $new_font->set_family($font_name);
+#        $font = Pango::FontDescription->new();
+#        $font->set_family($font_name);
         $fonts->{$font_name} = $font;
     } else {
         print "using cached font $font_name\n";

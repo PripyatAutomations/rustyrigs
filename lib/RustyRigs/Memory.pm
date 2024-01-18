@@ -215,12 +215,12 @@ sub new {
 
     my $self = {
         file           => $mem_file,
-        close          => \&close,
-        get_list       => \&get_list,
-        load_defaults  => \&load_defaults,
-        load_from_yaml => \&load_from_yaml,
-        save           => \&save,
-        show           => \&show
+#        close          => \&close,
+#        get_list       => \&get_list,
+#        load_defaults  => \&load_defaults,
+#        load_from_yaml => \&load_from_yaml,
+#        save           => \&save,
+#        show           => \&show
     };
 
     bless $self, $class;

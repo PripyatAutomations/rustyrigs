@@ -453,18 +453,18 @@ sub new {
         @vfo_widths_ssb => \@vfo_widths_ssb,
 
         # functions
-        exec_read_rig => \&exec_read_rig,
-        hamlib_debug_level => \&hamlib_debug_level,
-        is_busy => \&is_busy,
-        is_gui_busy => \&is_gui_busy,
-        next_vfo => \&next_vfo,
-        ptt_off => \&ptt_off,
-        ptt_on => \&ptt_on,
-        read_rig => \&read_rig,
-        set_freq => \&set_freq,
-        vfo_from_name => \&vfo_from_name,
-        vfo_name => \&vfo_name,
-        write_rig => \&write_rig
+#        exec_read_rig => \&exec_read_rig,
+#        hamlib_debug_level => \&hamlib_debug_level,
+#        is_busy => \&is_busy,
+#        is_gui_busy => \&is_gui_busy,
+#        next_vfo => \&next_vfo,
+#        ptt_off => \&ptt_off,
+#        ptt_on => \&ptt_on,
+#        read_rig => \&read_rig,
+#        set_freq => \&set_freq,
+#        vfo_from_name => \&vfo_from_name,
+#        vfo_name => \&vfo_name,
+#        write_rig => \&write_rig
     };
     bless $self, $class;
 

@@ -30,7 +30,7 @@ use RustyRigs::Defconfig;	# default configuration settings
 #use RustyRigs::Curses_ui;	# someday we'll have a cli interface here
 # Eventually these will be merged into RustyRigs::GtkUi(::*) someday...
 use RustyRigs::GTK_ui;		# GTK3 user interface
-#use RustyRigs::GTK_font;	# GTK3 font stuff
+use RustyRigs::GTK_font;	# GTK3 font stuff
 use RustyRigs::GTK_icon;	# GTK3 icon stuff
 use RustyRigs::GTK_menu;	# main menu for GTK3
 use RustyRigs::Cmdline;		# command line parsing
@@ -71,7 +71,7 @@ our $gtk_ui;
 our $logview;
 our $mem_file;
 our $gridtools;
-#our $fonts;
+our $fonts;
 our $icons;
 
 #####################################################
@@ -243,7 +243,7 @@ our $meters = {
 };
 
 # Initialize the GTK GUI
-#$fonts = RustyRigs::GTK_font->new();
+$fonts = RustyRigs::GTK_font->new();
 $icons = RustyRigs::GTK_icon->new();
 $icons->load_all();
 $gtk_ui = RustyRigs::GTK_ui->new( $cfg, $log, $vfos );

@@ -33,6 +33,7 @@ sub new {
    # Connect to rotctld on localhost at port 4533
    my $rot_model = $$main::cfg->{'rotctl_model'};
 
+#   XXX:  we need to work this out
 #   Hamlib::rig_set_debug( hamlib_debug_level( $$cfg->{'hamlib_loglevel'} ) );
 
    if (!defined $rot_model) {
@@ -54,8 +55,8 @@ sub new {
    }
    my $self = {
       # functions
-      query => \&query,
-      rotate => \&rotate,
+#      query => \&query,
+#      rotate => \&rotate,
       # variables
       rot => \$rot,
    };

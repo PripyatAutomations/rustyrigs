@@ -374,8 +374,6 @@ sub new {
     });
 
     my $self = {
-       # functions
-       update => \&update,
        # variables
        accel => \$accel,
        box => \$box,

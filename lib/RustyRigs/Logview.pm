@@ -3,7 +3,6 @@
 # * Fix autoscrolling bug
 # * Add save to file (is there a point? we have logfile already...)
 # * Add upload to termbin button
-
 package RustyRigs::Logview;
 use Carp;
 use Data::Dumper;
@@ -36,7 +35,7 @@ sub write {
     my $buffer = $text_view->get_buffer();
 
 
-    # get rid of existing mark
+    # get rid of existing mark, if exists
     if (defined $end_mark) {
        $buffer->delete_mark($end_mark);
        undef $end_mark;
@@ -46,7 +45,7 @@ sub write {
     if (@log_buffer > $scrollback_lines) {
         # shift a line off the top
         shift @log_buffer;
-        print "trimming logview buffer\n";
+#        print "trimming logview buffer\n";
     }
 
     # push it onto the tail of the message
@@ -201,8 +200,6 @@ sub new {
    }
 
    my $self = {
-      # functions
-      write => \&write,
       # variables
       accel => \$accel,
       box => \$box,
