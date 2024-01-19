@@ -122,6 +122,8 @@ sub set_icon {
     my $status_txt  = '';
     my $curr_vfo    = $$cfg->{'active_vfo'};
     my $act_vfo     = $vfos->{$curr_vfo};
+
+#    $main::log->Log("gtkui", "debug", "act_vfo: " . Dumper($act_vfo));
     my $atten      = $act_vfo->{'stats'}{'atten'};
     my $freq_txt   = $act_vfo->{'freq'};
     my $mode_txt   = $act_vfo->{'mode'};

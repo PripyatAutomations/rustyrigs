@@ -93,7 +93,7 @@ sub show {
             $tmp_cfg->{'win_mem_edit_height'} = $height;
             $tmp_cfg->{'win_mem_edit_width'}  = $width;
             $tmp_cfg->{'win_state'}           = $widget->get_state();
-            $main::cfg_p->apply($tmp_cfg);
+            $main::cfg_p->apply($tmp_cfg, FALSE);
             undef $tmp_cfg;
             return FALSE;
         }

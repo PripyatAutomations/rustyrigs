@@ -22,7 +22,7 @@ Configuration file defaults to ~/.config/rustyrigs.yaml
 
 This can be changed with -f newfile.yaml
 
-Most settings can be changed in the dialog, but will need a restart to apply.
+Most settings can be changed in the dialog, but for now it must restart to apply.
 
 You'll probably want to quiet down the debug level in the settings.
 

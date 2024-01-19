@@ -80,11 +80,13 @@ sub save {
         my $tc_dump = Dumper($tc);
         print "Changes to be applied:\n$tc_dump\n";
         $main::log->Log( "config", "debug", "Applying config changes:\n\t$tc_dump");
-        $main::cfg_p->apply($tc);
-        apply();
+        # apply temporary settings to main
+        $main::cfg_p->apply($tc, FALSE);
+        apply($tc, TRUE);
         # we need to clear this, normally, so stale stuff doesn't persist
 #        undef $tc;
-        main::restart();
+        print "Please restart!\n";
+#        main::restart();
     }
     else {
         print "No changes to apply.\n";

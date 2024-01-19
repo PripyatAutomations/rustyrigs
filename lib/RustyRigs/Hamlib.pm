@@ -230,7 +230,6 @@ sub read_rig {
 
     # XXX: Update the VFO select button if needed
 
-
     # Get the frequency for current VFO
     my $freq = $rig->get_freq($curr_hlvfo);
     $vfos->{$curr_vfo}{'freq'} = $freq;
@@ -239,10 +238,13 @@ sub read_rig {
     }
     $last_freq = $freq;
 
-    my ($mode, $width) = $rig->get_mode();
-    my $textmode = Hamlib::rig_strrmode($mode);
+    my ( $mode, $width ) = $rig->get_mode();
+    my ( $textmode, @rest ) = split( //xms, Hamlib::rig_strrmode($mode) );
     $textmode =~ s/PKTUSB/D-U/g;
     $textmode =~ s/PKTLSB/D-L/g;
+#   $width = $rig->passband_normal(Hamlib::rig_parse_mode($mode));
+#    print "-- passband_normal: $width\n";
+
     if (!defined $last_mode || !($last_mode eq $textmode)) {
        $main::log->Log("hamlib", "info", "Mode of VFO $curr_hlvfo: $mode ($textmode) at width $width");
     }
@@ -258,16 +260,15 @@ sub read_rig {
     }
 
     # Get the RX volume
-    $volume = $rig->get_level( $Hamlib::RIG_LEVEL_AF );
-    print "vol: " . Dumper($volume) . "\n" if (defined $volume);
+    $volume = int($rig->get_level_f( $Hamlib::RIG_LEVEL_AF ) * 100);
     if (defined $volume) {
-       print "setting volume: $volume\n";
+#       print "setting volume: $volume\n";
        $self->{'volume'} = $volume;
        my $rve = $main::gtk_ui->{'rig_vol_entry'};
-       $rve->set_value($volume);
+       $$rve->set_value($volume);
     }
     else {
-#       print "no volume\n";
+       print "no volume\n";
        $volume = 0;
     }
 
@@ -298,8 +299,6 @@ sub read_rig {
     ####################
     # Apply the values #
     ####################
-#    my $rve = $$gtk_ui->{'rig_vol_entry'};
-#    $$rve->set_value($volume);
     my $vfe = $$gtk_ui->{'vfo_freq_entry'};
     $$vfe->set_value( $vfos->{$curr_vfo}{'freq'} );
     $vfos->{$curr_vfo}{'mode'} = $textmode;
@@ -320,6 +319,7 @@ sub read_rig {
        $main::icons->set_icon("transmit");
     }
     $last_ptt_status = $ptt_status;
+    $main::gtk_ui->refresh_available_widths($width);
     $main::gtk_ui->update_widgets();
     $rigctld_applying_changes = FALSE;
 }
@@ -334,7 +334,7 @@ sub exec_read_rig {
 
     # Don't read the rig while GUI is applying changes...
     if ($gui_applying_changes) {
-#       print "skipping read_rig as GUI update in progress\n";
+       print "skipping read_rig as GUI update in progress\n";
        return TRUE;
     }
 
@@ -444,7 +444,6 @@ sub new {
         timer         => $rig_timer,
         update_needed => \$update_needed,
         vfos => \$vfos,
-        volume => \$volume,
         %hamlib_debug_levels => \%hamlib_debug_levels,
         @pl_tones => \@pl_tones,
         %vfo_mapping => \%vfo_mapping,

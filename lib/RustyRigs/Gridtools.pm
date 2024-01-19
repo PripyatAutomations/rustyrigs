@@ -358,7 +358,7 @@ sub new {
             $tmp_cfg->{'win_gridtools_x'}      = $x;
             $tmp_cfg->{'win_gridtools_y'}      = $y;
             $tmp_cfg->{'win_gridtools_state'} = $widget->get_state();
-            $main::cfg_p->apply($tmp_cfg);
+            $main::cfg_p->apply($tmp_cfg, FALSE);
             undef $tmp_cfg;
 
             # Return FALSE to allow the event to propagate

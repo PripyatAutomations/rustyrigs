@@ -1,3 +1,11 @@
+2024-01-19
+	* Fixed volume knob
+	* Broke config saving while clean that mess up... Edit the .yaml
+
+2024-01-18
+	* Broke some stuff while cleaning up the code, report bugs?! :)
+	* Implemented more knobs
+
 2024-01-16
 	* For now, we restart the program when settings in the dialog are changed
 	  - This could be changed, but for now this works pretty well.

@@ -5,6 +5,7 @@ use warnings;
 use Carp;
 use Data::Dumper;
 use Glib qw(TRUE FALSE);
+use Hamlib;
 #use RustyRigs::Hamlib;
 #use Woodpile;
 
@@ -37,11 +38,12 @@ our $lock_item;
 # objects
 our $settings;
 our $meters;
+our $tmp_cfg;
 
 sub close_main_win {
     my ( $widget, $event ) = @_;
 
-    #   main::save_config();
+    main::save_config();
     Gtk3->main_quit();
     return TRUE;
 }
@@ -109,15 +111,15 @@ sub w_main_hide {
     $cfg->{'win_visible'} = 0;
     $w_main->set_visible(0);
 
-    my $hide_too = $cfg->{'hide_logview_too'};
+    my $hide_lv_too = $cfg->{'hide_logview_too'};
 
-    if ($hide_too) {
+    if ($hide_lv_too) {
        my $lv = $main::logview;
-       my $w = ${$lv->{'window'}};
+       my $lw = $lv->{'window'};
 
-       if (defined $w) {
-          print "hide logview\n";
-          $w->set_visible(0);
+       if (defined $lw) {
+          print "hide logview: " . Dumper($lw)  . "\n";
+          $lw->set_visible(0);
        } else {
           print "No logview\n";
        }
@@ -126,7 +128,7 @@ sub w_main_hide {
     my $hide_gt_too = $cfg->{'hide_gridtools_too'};
     if ($hide_gt_too) {
        my $gt = $main::gridtools;
-       my $gw = ${$gt->{'window'}};
+       my $gw = $$gt->{'window'};
        $gw->set_visible(0);
     }
     return FALSE;
@@ -139,12 +141,12 @@ sub w_main_show {
     $w_main->deiconify();
     $w_main->set_visible(1);
 
-    my $hide_too = $cfg->{'hide_logview_too'};
+    my $hide_lv_too = $cfg->{'hide_logview_too'};
 
-    if ($hide_too) {
+    if ($hide_lv_too) {
        my $lv = $main::logview;
 
-       print "showing logview too!\n";
+       print "showing logview too\n";
        # Raise logview with main window, if configured to do so
        if (defined $lv) {
           my $w = ${$lv->{'window'}};
@@ -219,6 +221,7 @@ sub w_main_ontop {
 }
 
 sub refresh_available_widths {
+    my ( $self, $new_width ) = @_;
     my $curr_vfo = $cfg->{'active_vfo'};
     my $vfo      = $vfos->{$curr_vfo};
     my $val      = $vfo->{'width'};
@@ -227,8 +230,17 @@ sub refresh_available_widths {
     # empty the list
     $width_entry->remove_all();
 
+    if ( defined $new_width ) {
+       $val = $new_width;
+    }
+
     if ( !defined($val) ) {
-        $vfo->{'width'} = $val = 3000;
+        print "defaulting to 3000\n";
+        $val = 3000;
+    }
+
+    if ( $val == 0 ) {
+       print "0? " . ( caller(1) )[3] . "\n";
     }
 
     if ( $vfo->{'mode'} eq "FM" ) {
@@ -256,10 +268,7 @@ sub refresh_available_widths {
     if ( $rv == -1 ) {
         $rv = 0;
     }
-    $log->Log( "ui", "debug",
-          "refresh avail widths: VFO $curr_vfo, mode "
-          . $vfo->{'mode'}
-          . " val: $val (rv: $rv)" );
+#    $log->Log( "ui", "debug", "refresh avail widths: VFO $curr_vfo, mode " . $vfo->{'mode'} . " val: $val (rv: $rv)" );
     $width_entry->set_active($rv);
 }
 
@@ -275,6 +284,8 @@ sub open_gridtools {
        $$gt_win->present();
     }
 }
+
+our $main_win_initialized = 0;
 
 sub draw_main_win {
     my ( $self ) = @_;
@@ -314,25 +325,6 @@ sub draw_main_win {
     $w_main->signal_connect( window_state_event   => \&w_main_state );
     $w_main->signal_connect( 'key-press-event'    => \&w_main_keypress );
 
-    $w_main->signal_connect(
-        'configure-event' => sub {
-            my ( $widget, $event ) = @_;
-
-            # Retrieve the size and position information
-            my ( $width, $height ) = $widget->get_size();
-            my ( $x,     $y )      = $widget->get_position();
-
-            # Save the data...
-            $cfg->{'win_x'}      = $x;
-            $cfg->{'win_y'}      = $y;
-            $cfg->{'win_state'}  = $widget->get_state();
-            $cfg->{'win_height'} = $height;
-            $cfg->{'win_width'}  = $width;
-
-            # Return FALSE to allow the event to propagate
-            return FALSE;
-        }
-    );
 
     #####################
     # Layout the window #
@@ -509,10 +501,18 @@ sub draw_main_win {
     $rig_vol_entry->signal_connect(
         value_changed => sub {
             my ( $widget ) = @_;
+            my $rig_p = $main::rig_p;
+            my $rig = $rig_p->{'rig'};
+            my $rp = $main::rig_p->{'gui_applying_changes'};
+            $$rp = TRUE;
             my $vol = $widget->get_value();
 
-            # XXX: Why do we have to do it like this...? Idk.. minimal docs lol
-            $main::rig->set_level($Hamlib::RIG_LEVEL_AF, $vol / 100);
+            $rig_p->{'volume'} = $vol;
+            $rig->set_level($Hamlib::RIG_LEVEL_AF, $vol / 100);
+#            $main::rig->set_level($Hamlib::RIG_LEVEL_AF, $vol / 100);
+
+            $$rp = FALSE;
+
             return FALSE;
         }
     );
@@ -910,6 +910,33 @@ sub draw_main_win {
     $box->pack_start( $quit_button,     FALSE, FALSE, 0 );
     $w_main->add($box);
 
+    $w_main->signal_connect(
+        'configure-event' => sub {
+            my ( $widget, $event ) = @_;
+
+            # Retrieve the size and position information
+            my ( $width, $height ) = $widget->get_size();
+            my ( $x,     $y )      = $widget->get_position();
+
+            # Save the data...
+            $tmp_cfg->{'win_x'}      = $x;
+            $tmp_cfg->{'win_y'}      = $y;
+            $tmp_cfg->{'win_state'}  = $widget->get_state();
+            $tmp_cfg->{'win_height'} = $height;
+            $tmp_cfg->{'win_width'}  = $width;
+
+            if ($main_win_initialized) {
+               print "mwi: $main_win_initialized\n";
+               $main::cfg_p->apply($tmp_cfg, TRUE);
+            } else {
+               $main::cfg_p->apply($tmp_cfg, FALSE);
+               $main_win_initialized++;
+            }
+            # Return FALSE to allow the event to propagate
+            return FALSE;
+        }
+    );
+
     # Draw it and hide the FM box
     w_main_show();
 
@@ -942,6 +969,8 @@ sub update_widgets {
         # XXX: set $width_entry to $act_vfo->{'width'} (indexed)
         $rf_gain_entry->set_value($act_vfo->{'rf_gain'});
         $vfo_power_entry->set_value( $act_vfo->{'power'} );
+    } else {
+#        print "skipping GUI update as read_rig() is running!\n";
     }
 }
 

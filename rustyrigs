@@ -143,7 +143,7 @@ sub toggle_locked {
             }
         }
     }
-#    $log->Log( "ui", "debug", "Toggling \$locked to $locked by $origin" );
+    $log->Log( "ui", "debug", "Toggling \$locked to " . ($locked ? 'on' : 'off') . " by $origin" );
 }
 
 sub save_config {
@@ -162,6 +162,7 @@ if ($cfg_readonly) {
     $cfg->{'read_only'} = 1;
 }
 
+# We need config loaded to define the meters...
 our $meters = {
    'alc' => {
       'title' => 'ALC',
@@ -177,7 +178,7 @@ our $meters = {
       'thresh_max' => $$cfg->{'thresh_alc_max'}
    },
    'comp' => {
-      'title' => 'Comp',
+      'title' => 'CMP',
       'enabled' => $$cfg->{'show_comp'},
       'alarm_bg' => $$cfg->{'ui_comp_alarm_bg'},
       'bg' => $$cfg->{'ui_comp_bg'},
@@ -217,7 +218,7 @@ our $meters = {
       'thresh_max' => $$cfg->{'thresh_swr_max'}
    },
    'temp' => {
-      'title' => 'Temp',
+      'title' => 'TEMP',
       'enabled' => $$cfg->{'show_temp'},
       'alarm_bg' => $$cfg->{'ui_temp_alarm_bg'},
       'bg' => $$cfg->{'ui_temp_bg'},
@@ -230,7 +231,7 @@ our $meters = {
       'thresh_max' => $$cfg->{'thresh_temp_max'}
    },
    'volt' => {
-      'title' => 'Volt',
+      'title' => 'VOLT',
       'enabled' => $$cfg->{'show_volt'},
       'alarm_bg' => $$cfg->{'ui_volt_alarm_bg'},
       'bg' => $$cfg->{'ui_volt_bg'},
