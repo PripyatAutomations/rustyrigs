@@ -915,16 +915,9 @@ sub draw_main_win {
         'visible',
         sub {
             my ( $self ) = @_;
+            
             my $val = $ptt_button->get_active();
-            $main::log->Log("hamlib", "info", "PTT set to $val");
-            $main::rig->set_ptt($Hamlib::RIG_VFO_A, $val);
-            if ( $val ) {
-                $ptt_button->override_background_color('normal', Gtk3::Gdk::RGBA->new(1.0, 0.0, 0.0, 1.0));
-                print "ptt on\n";
-            } else {
-                $ptt_button->override_background_color('normal', $initial_bg_color);
-                print "ptt off\n";
-            }
+            $ptt_button->set_active(!$val);
         }
     );
 
