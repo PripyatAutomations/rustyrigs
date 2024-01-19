@@ -37,6 +37,7 @@ our $box;
 our $fm_box;
 our $lock_button;
 our $lock_item;
+our $power_changing;
 
 # objects
 our $settings;
@@ -642,7 +643,30 @@ sub draw_main_win {
                my $curr_vfo = $cfg->{'active_vfo'};
                my $mode     = uc( $act_vfo->{'mode'} );
                $vfos->{$curr_vfo}{'mode'} = uc($selected_item);
-   #            RustyRigs::Hamlib::set_mode($curr_vfo, $mode);
+               # Figure out which mode was picked
+               my $hl_mode;
+               if ($selected_item eq 'CW') {
+                  $hl_mode = $Hamlib::RIG_MODE_CW;
+               } elsif ($selected_item eq 'LSB') {
+                  $hl_mode = $Hamlib::RIG_MODE_LSB;
+               } elsif ($selected_item eq 'USB') {
+                  $hl_mode = $Hamlib::RIG_MODE_USB;
+               } elsif ($selected_item eq 'AM') {
+                  $hl_mode = $Hamlib::RIG_MODE_AM;
+               } elsif ($selected_item eq 'FM') {
+                  $hl_mode = $Hamlib::RIG_MODE_FM;
+               } elsif ($selected_item eq 'C4FM') {
+                  $hl_mode = $Hamlib::RIG_MODE_C4FM;
+               } elsif ($selected_item eq 'D-L') {
+                  $hl_mode = $Hamlib::RIG_MODE_PKTLSB;
+               } elsif ($selected_item eq 'D-U') {
+                  $hl_mode = $Hamlib::RIG_MODE_PKTUSB;
+               } else {
+                 $main::log->Log("gtkui", "err", "Unknown mode: $selected_item");
+               }
+               my $vfo = $vfos->{$curr_vfo};
+               print "mode: " . Dumper($hl_mode) . "\n";
+               $main::rig->set_mode($hl_mode, $vfo->{'width'});
             }
             w_main_fm_toggle();
             refresh_available_widths();
@@ -825,7 +849,7 @@ sub draw_main_win {
 
                $main::log->Log("ui", "debug", "change power: dragging: $dragging - change: $change. val $value oldval: $oldval hlval: $hlval");
 
-               if ( $dragging < 2 ) {
+               if ( !$power_changing && $dragging < 2 ) {
                    print "rig_power widget dragging: $dragging < 2, not changing value\n";
                    return FALSE;
                }
@@ -844,6 +868,7 @@ sub draw_main_win {
                    print "rig_power widget: rejecting power change $change in excess of limit $max_change\n";
                    return FALSE;
                }
+               $power_changing = FALSE;
                return TRUE;
            }
         }
@@ -1016,7 +1041,6 @@ sub draw_main_win {
 }
 
 ######################################
-
 sub update_widgets {
     my ( $self ) = @_;
 
@@ -1030,14 +1054,19 @@ sub update_widgets {
         my $rig = $rig_p->{'rig'};
         my $stats = $vfo->{'stats'};
         my $vol = $rig_p->{'volume'};
+        if (!defined $vol) {
+           $vol = 0;
+        }
         my $ptt = $rig->get_ptt();
         $ptt_button->set_active($ptt);
-        $rig_vol_entry->set_value($$vol);
+        $rig_vol_entry->set_value($vol);
         $vfo_freq_entry->set_value( $vfo->{'freq'} );
         # XXX: set $mode_entry to $vfo->{'mode'} (indexed)
         # XXX: set $width_entry to $vfo->{'width'} (indexed)
         $rf_gain_entry->set_value($vfo->{'rf_gain'});
+        $power_changing = TRUE;        
         $vfo_power_entry->set_value( $vfo->{'power'} );
+        $power_changing = FALSE;
     } else {
 #        print "skipping GUI update as read_rig() is running!\n";
     }
