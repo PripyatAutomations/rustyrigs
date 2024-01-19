@@ -886,7 +886,10 @@ sub draw_main_win {
         $cfg->{'shortcut_key'},
         'visible',
         sub {
-            main::toggle_locked("hotkey", $lock_button->get_active());
+            my ( $self ) = @_;
+            my $val = $lock_button->get_active();
+            main::toggle_locked("hotkey", !$main::locked);
+            $lock_button->set_active(!$val);
         }
     );
 
