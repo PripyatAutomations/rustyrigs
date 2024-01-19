@@ -16,7 +16,6 @@ our $box;
 our $hidden;		# is the window hidden?
 our $text_view;
 our $end_mark;
-our $logview_initialized = 0;
 
 my @log_buffer;
 
@@ -161,13 +160,7 @@ sub new {
            $tmp_cfg->{'win_logview_height'} = $height;
            $tmp_cfg->{'win_logview_width'}  = $width;
            $tmp_cfg->{'win_logview_state'} = $widget->get_state();
-           if ($logview_initialized) {
-              print "lvi: $logview_initialized\n";
-              $main::cfg_p->apply($tmp_cfg, TRUE);
-           } else {
-              $main::cfg_p->apply($tmp_cfg, FALSE);
-              $logview_initialized++;
-           }
+           $main::cfg_p->apply($tmp_cfg, FALSE);
            undef $tmp_cfg;
 
            # Return FALSE to allow the event to propagate

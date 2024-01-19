@@ -285,8 +285,6 @@ sub open_gridtools {
     }
 }
 
-our $main_win_initialized = 0;
-
 sub draw_main_win {
     my ( $self ) = @_;
 
@@ -925,13 +923,7 @@ sub draw_main_win {
             $tmp_cfg->{'win_height'} = $height;
             $tmp_cfg->{'win_width'}  = $width;
 
-            if ($main_win_initialized) {
-               print "mwi: $main_win_initialized\n";
-               $main::cfg_p->apply($tmp_cfg, TRUE);
-            } else {
-               $main::cfg_p->apply($tmp_cfg, FALSE);
-               $main_win_initialized++;
-            }
+            $main::cfg_p->apply($tmp_cfg, FALSE);
             # Return FALSE to allow the event to propagate
             return FALSE;
         }

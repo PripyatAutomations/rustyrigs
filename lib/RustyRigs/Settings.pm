@@ -54,22 +54,6 @@ sub print_signal_info {
     $main::log->Log( "ui", "debug", "Signal emitted by $widget: $signal_name" );
 }
 
-# XXX: We need to make a list of cfg val => function
-# XXX: Then we can call this at startup, after Woodpile::Config is loaded, instead of dealing with settings scattered
-# XXX: about the initialization code. This should be a lot more compact...
-sub apply {
-    ( my $class ) = @_;
-
-    if ( defined $cfg ) {
-        if ( $cfg->{'always_on_top'} ) {
-            $main::gtk_ui->w_main_ontop(1);
-        }
-        else {
-            $main::gtk_ui->w_main_ontop(0);
-        }
-    }
-}
-
 sub save {
    my ( $self, $tc ) = @_;
 
@@ -82,7 +66,6 @@ sub save {
         $main::log->Log( "config", "debug", "Applying config changes:\n\t$tc_dump");
         # apply temporary settings to main
         $main::cfg_p->apply($tc, FALSE);
-        apply($tc, TRUE);
         # we need to clear this, normally, so stale stuff doesn't persist
 #        undef $tc;
         print "Please restart!\n";
