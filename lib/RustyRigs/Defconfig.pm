@@ -36,6 +36,7 @@ our $def_cfg = {
     icon_settings       => "settings.png",
     icon_transmit       => "transmit.png",
     key_chan            => 'C',                      # open channel dropbown
+    key_dnr             => 'J',			     # DSP Noise Reduction
     key_freq            => 'F',
     key_lock            => 'L',
     key_mem_edit        => 'E',

@@ -1,7 +1,7 @@
 # Here we provide a window to display log messages
 # This needs some improvements --
 # * Fix autoscrolling bug
-# * Add save to file (is there a point? we have logfile already...)
+# * Add button save to file (is there a point? we have logfile already...)
 # * Add upload to termbin button
 package RustyRigs::Logview;
 use Carp;
@@ -195,7 +195,6 @@ sub new {
    $window->show_all();
 
    my $auto_hide = $$cfg->{'hide_logview_at_start'};
-   print "autohide: " . Dumper($auto_hide) . "\n";
    if ($auto_hide) {
       $window->set_visible(0);
       $window->iconify();

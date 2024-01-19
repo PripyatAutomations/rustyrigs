@@ -64,7 +64,12 @@ sub update {
 
        my $dist_mi = $dist / 1.60934;
        my $longpath_mi = $longpath / 1.60934;
-       my $longpath_az = (360 - $az);
+       my $longpath_az;
+       if ($az > 180) {
+          $longpath_az = $az - 180;
+       } else {
+          $longpath_az = $az + 180;
+       }
        $s_az = sprintf("%.0f deg", $az);
        my $s_dist_km = sprintf("%.0f km", $dist);
        my $s_dist_mi = sprintf("%.0f mi", $dist_mi );

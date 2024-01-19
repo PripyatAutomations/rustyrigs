@@ -25,6 +25,7 @@ our $mem_load_button;
 our $mem_write_button;
 our $mode_entry;
 our $rf_gain_entry;
+our $dnr_entry;
 our $squelch_entry;
 our $rig_vol_entry;
 our $vfo_freq_entry;
@@ -128,7 +129,6 @@ sub w_main_hide {
     if ($hide_gt_too) {
        my $gt = $main::gridtools;
        my $gw = $gt->{'window'};
-       print "gw: " . Dumper($gw) . "\n";
        $$gw->set_visible(0);
        $$gw->iconify();
     }
@@ -204,12 +204,10 @@ sub switch_vfo {
 
     $log->Log( "vfo", "info", "Switching to VFO $vfo" );
     $vfo_sel_button->set_label( "VFO: "
-          . RustyRigs::Hamlib::next_vfo($vfo) . " ("
+          . $main::rig_p->next_vfo($vfo) . " ("
           . $cfg->{'key_vfo'}
           . ")" );
     $cfg->{active_vfo} = $vfo;
-
-    RustyRigs::Hamlib::read_rig();
 }
 
 sub w_main_ontop {
@@ -321,7 +319,6 @@ sub draw_main_win {
     $w_main->signal_connect( window_state_event   => \&w_main_state );
     $w_main->signal_connect( 'key-press-event'    => \&w_main_keypress );
 
-
     #####################
     # Layout the window #
     #####################
@@ -368,6 +365,7 @@ sub draw_main_win {
     my $render3 = Gtk3::CellRendererText->new();
     $chan_combo->pack_start( $render3, FALSE );
     $chan_combo->add_attribute( $render3, text => 2 );
+    $chan_combo->set_sensitive(0);
 
     $chan_box->pack_start( $chan_combo, FALSE, FALSE, 0 );
 
@@ -386,6 +384,7 @@ sub draw_main_win {
     $mem_load_button =
       Gtk3::Button->new( "Load Chan (" . $cfg->{'key_mem_load'} . ")" );
     $mem_load_button->set_tooltip_text("(re)load the channel memory");
+    $mem_load_button->set_sensitive(0);
 
     $mem_load_button->signal_connect(
         clicked => sub {
@@ -401,6 +400,7 @@ sub draw_main_win {
     $mem_write_button =
       Gtk3::Button->new( "Save Chan (" . $cfg->{'key_mem_write'} . ")" );
     $mem_write_button->set_tooltip_text("write the channel memory");
+    $mem_write_button->set_sensitive(0);
 
     $mem_write_button->signal_connect(
         clicked => sub {
@@ -425,6 +425,7 @@ sub draw_main_win {
     $mem_edit_button =
       Gtk3::Button->new( "Edit Chan (" . $cfg->{'key_mem_edit'} . ")" );
     $mem_edit_button->set_tooltip_text("Add or Edit Memory slot");
+    $mem_edit_button->set_sensitive(0);
 
     $mem_edit_button->signal_connect(
         clicked => sub {
@@ -452,10 +453,11 @@ sub draw_main_win {
     $vfo_sel_button =
       Gtk3::Button->new( "VFO: " . $curr_vfo . " (" . $cfg->{'key_vfo'} . ")" );
     $vfo_sel_button->set_tooltip_text("Toggle active VFO");
+    $vfo_sel_button->set_sensitive(0);
 
     $vfo_sel_button->signal_connect(
         clicked => sub {
-            RustyRigs::Hamlib::next_vfo();
+            $main::rig_p->next_vfo();
         }
     );
     $box->pack_start( $vfo_sel_button, FALSE, FALSE, 0 );
@@ -467,7 +469,7 @@ sub draw_main_win {
         'visible',
         sub {
             $vfo_sel_button->grab_focus();
-            next_vfo();
+            $main::rig_p->next_vfo();
         }
     );
 
@@ -479,7 +481,7 @@ sub draw_main_win {
     $rig_vol_entry->set_draw_value(TRUE);
     $rig_vol_entry->set_value_pos('right');
     $rig_vol_entry->set_value(0);	# default to 0 until hamlib loaded
-    $rig_vol_entry->set_tooltip_text("Please click and drag to set RX volume");
+    $rig_vol_entry->set_tooltip_text("Set RX volume");
     $rig_vol_entry->signal_connect(
         button_press_event => sub {
             my $rp = $main::rig_p->{'gui_applying_changes'};
@@ -543,7 +545,8 @@ sub draw_main_win {
                my $freq = $vfo_freq_entry->get_text();
                $log->Log( "vfo", "debug",
                    "Changing freq on VFO $curr_vfo to $freq" );
-               RustyRigs::Hamlib->set_freq($freq);
+               print "Setting VFO " . $curr_vfo . " to freq $freq\n";
+               $main::rig->set_freq($Hamlib::RIG_VFO_A, $freq);
             }
             return FALSE;
         }
@@ -559,57 +562,56 @@ sub draw_main_win {
         }
     );
 
-    $vfo_freq_entry->signal_connect(
-        'button-press-event' => sub {
-            my ( $widget, $event ) = @_;
+    # Eventually we should implement a menu for copy/paste/etc
+#    $vfo_freq_entry->signal_connect(
+#        'button-press-event' => sub {
+#            my ( $widget, $event ) = @_;
+#
+#            my $freq = $vfo_freq_entry->get_text();
+#            if ( $event->button() == 3 ) {    # Right-click
+#                my $menu = Gtk3::Menu->new();
+##                #           my $clipboard = Gtk3::Clipboard->get();
+#                my $menu_item_copy = Gtk3::MenuItem->new_with_label('Copy');
 
-            $log->Log( "vfo btn", "debug", Dumper($event) . "\n" );
+##           $menu_item_copy->signal_connect('activate' => sub {
+##              $log->Log("ui", "debug", "Copy to clipboard");
+##              # Get the text from the SpinButton and copy it to the clipboard
+##              my $text = $vfo_freq_entry->get_text();
+##              $clipboard->set_text($text, -1); # Use -1 to indicate automatic length detection
+##           });
+#                $menu->append($menu_item_copy);
+#
+#                my $menu_item_paste = Gtk3::MenuItem->new_with_label('Paste');
+#
+##           $menu_item_paste->signal_connect('activate' => sub {
+##              # Perform paste operation (insert value from clipboard if available)
+##              my $text = $clipboard->wait_for_text();
+##              if (defined $text && is_numeric($text)) {
+##                 $vfo_freq_entry->set_text($text);
+##              } else {
+##                 $log->Log("ui", "info", "no clipboard text to paste");
+##              }
+##           });
+#                $menu->append($menu_item_paste);
 
-            if ( $event->button() == 3 ) {    # Right-click
-                my $menu = Gtk3::Menu->new();
+#                # Create menu items
+#                my $menu_item_step = Gtk3::MenuItem->new_with_label('Set step');
+#                $menu_item_step->signal_connect(
+#                    'activate' => sub {
+#                        $log->Log( "ui", "debug", "show freq step menu!" );
+#                    }
+#                );
+#                $menu->append($menu_item_step);
 
-                #           my $clipboard = Gtk3::Clipboard->get();
-                my $menu_item_copy = Gtk3::MenuItem->new_with_label('Copy');
-
-#           $menu_item_copy->signal_connect('activate' => sub {
-#              $log->Log("ui", "debug", "Copy to clipboard");
-#              # Get the text from the SpinButton and copy it to the clipboard
-#              my $text = $vfo_freq_entry->get_text();
-#              $clipboard->set_text($text, -1); # Use -1 to indicate automatic length detection
-#           });
-                $menu->append($menu_item_copy);
-
-                my $menu_item_paste = Gtk3::MenuItem->new_with_label('Paste');
-
-#           $menu_item_paste->signal_connect('activate' => sub {
-#              # Perform paste operation (insert value from clipboard if available)
-#              my $text = $clipboard->wait_for_text();
-#              if (defined $text && is_numeric($text)) {
-#                 $vfo_freq_entry->set_text($text);
-#              } else {
-#                 $log->Log("ui", "info", "no clipboard text to paste");
-#              }
-#           });
-                $menu->append($menu_item_paste);
-
-                # Create menu items
-                my $menu_item_step = Gtk3::MenuItem->new_with_label('Set step');
-                $menu_item_step->signal_connect(
-                    'activate' => sub {
-                        $log->Log( "ui", "debug", "show freq step menu!" );
-                    }
-                );
-                $menu->append($menu_item_step);
-
-                # Show the menu
-                $menu->show_all();
-                $menu->popup( undef, undef, undef, undef, $event->button(),
-                    $event->time() );
-                return TRUE;
-            }
-            return FALSE;
-        }
-    );
+#                # Show the menu
+#                $menu->show_all();
+#                $menu->popup( undef, undef, undef, undef, $event->button(),
+#                    $event->time() );
+#                return TRUE;
+#            }
+#            return FALSE;
+#        }
+#    );
 
   # XXX: we need to TAB key presses in the drop downs and move to next widget...
     my $mode_label = Gtk3::Label->new( 'Mode (' . $cfg->{'key_mode'} . ')' );
@@ -681,6 +683,7 @@ sub draw_main_win {
             }
         }
     );
+
     my $rf_gain_label =
       Gtk3::Label->new( 'RF Gain / Atten. (' . $cfg->{'key_rf_gain'} . ')' );
     $rf_gain_entry = Gtk3::Scale->new_with_range( 'horizontal', -40, 40, 1 );
@@ -689,6 +692,7 @@ sub draw_main_win {
     $rf_gain_entry->set_value_pos('right');
     $rf_gain_entry->set_value( $act_vfo->{'rf_gain'} );
     $rf_gain_entry->set_tooltip_text("Please Click and DRAG to change RF gain");
+    $rf_gain_entry->set_sensitive(0);
 
     # XXX: ACCEL-Replace these with a global function
     $w_main_accel->connect(
@@ -710,6 +714,36 @@ sub draw_main_win {
         }
     );
 
+    my $dnr_label =
+      Gtk3::Label->new( 'DSP NR (' . $cfg->{'key_dnr'} . ')' );
+    $dnr_entry = Gtk3::Scale->new_with_range( 'horizontal', 0, 15, 1 );
+    $dnr_entry->set_digits(0);
+    $dnr_entry->set_draw_value(TRUE);
+    $dnr_entry->set_value_pos('right');
+    $dnr_entry->set_value( $act_vfo->{'dnr'} );
+    $dnr_entry->set_tooltip_text("DSP Noise Reduction");
+    $dnr_entry->set_sensitive(1);
+
+    # XXX: ACCEL-Replace these with a global function
+    $w_main_accel->connect(
+        ord( $cfg->{'key_dnr'} ),
+        $cfg->{'shortcut_key'},
+        'visible',
+        sub {
+            $dnr_entry->grab_focus();
+        }
+    );
+    $dnr_entry->signal_connect(
+        value_changed => sub {
+            my ( $class ) = @_;
+            if (!$main::rig_p->is_busy()) {
+               my $curr_vfo = $cfg->{'active_vfo'};
+               my $value    = $dnr_entry->get_value();
+               $act_vfo->{'dnr'} = $value;
+            }
+        }
+    );
+
     my $squelch_label =
       Gtk3::Label->new( 'Squelch (' . $cfg->{'key_squelch'} . ')' );
     $squelch_entry = Gtk3::Scale->new_with_range( 'horizontal', 0, 20, 1 );
@@ -718,6 +752,7 @@ sub draw_main_win {
     $squelch_entry->set_value_pos('right');
     $squelch_entry->set_value( $act_vfo->{'squelch'} );
     $squelch_entry->set_tooltip_text("Please Click and DRAG to change RF gain");
+    $squelch_entry->set_sensitive(0);
 
     # XXX: ACCEL-Replace these with a global function
     $w_main_accel->connect(
@@ -866,6 +901,8 @@ sub draw_main_win {
     $box->pack_start( $squelch_entry,   FALSE, FALSE, 0 );
     $box->pack_start( $rf_gain_label,   FALSE, FALSE, 0 );
     $box->pack_start( $rf_gain_entry,   FALSE, FALSE, 0 );
+    $box->pack_start( $dnr_label,       FALSE, FALSE, 0 );
+    $box->pack_start( $dnr_entry,       FALSE, FALSE, 0 );
     $box->pack_start( $vfo_power_label, FALSE, FALSE, 0 );
     $box->pack_start( $vfo_power_entry, FALSE, FALSE, 0 );
     $box->pack_start( $mode_label,      FALSE, FALSE, 0 );
