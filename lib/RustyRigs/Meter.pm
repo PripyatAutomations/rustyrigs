@@ -561,7 +561,6 @@ sub new {
    print "utc: " . Dumper($us_tmp_cfg) . "\n";
 
    my $self = {
-      # variables
       us_tmp_cfg => \$us_tmp_cfg,
       accel => \$accel,
       box => \$box,

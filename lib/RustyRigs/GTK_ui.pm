@@ -25,6 +25,7 @@ our $mem_load_button;
 our $mem_write_button;
 our $mode_entry;
 our $rf_gain_entry;
+our $squelch_entry;
 our $rig_vol_entry;
 our $vfo_freq_entry;
 our $vfo_power_entry;
@@ -116,20 +117,20 @@ sub w_main_hide {
     if ($hide_lv_too) {
        my $lv = $main::logview;
        my $lw = $lv->{'window'};
-
+       # If logview exists, hide it
        if (defined $lw) {
-          print "hide logview: " . Dumper($lw)  . "\n";
-          $lw->set_visible(0);
-       } else {
-          print "No logview\n";
+          $$lw->set_visible(0);
+          $$lw->iconify();
        }
     }
 
     my $hide_gt_too = $cfg->{'hide_gridtools_too'};
     if ($hide_gt_too) {
        my $gt = $main::gridtools;
-       my $gw = $$gt->{'window'};
-       $gw->set_visible(0);
+       my $gw = $gt->{'window'};
+       print "gw: " . Dumper($gw) . "\n";
+       $$gw->set_visible(0);
+       $$gw->iconify();
     }
     return FALSE;
 }
@@ -149,10 +150,10 @@ sub w_main_show {
        print "showing logview too\n";
        # Raise logview with main window, if configured to do so
        if (defined $lv) {
-          my $w = ${$lv->{'window'}};
+          my $w = $lv->{'window'};
           if (defined $w) {
-             $w->set_visible(1);
-             $w->deiconify();
+             $$w->set_visible(1);
+             $$w->deiconify();
           } else {
              print "No logview window\n";
           }
@@ -168,7 +169,7 @@ sub w_main_show {
        my $gt = $main::gridtools;
        my $gw = $gt->{'window'};
        if (defined $gw) {
-#          $$gw->deiconify();
+          $$gw->deiconify();
           $$gw->set_visible(1);
        }
     }
@@ -232,15 +233,12 @@ sub refresh_available_widths {
 
     if ( defined $new_width ) {
        $val = $new_width;
-    }
-
-    if ( !defined($val) ) {
-        print "defaulting to 3000\n";
-        $val = 3000;
+    } else {
+       $val = $vfo->{'width'};
     }
 
     if ( $val == 0 ) {
-       print "0? " . ( caller(1) )[3] . "\n";
+       print "width == 0, caller: " . ( caller(1) )[3] . "\n";
     }
 
     if ( $vfo->{'mode'} eq "FM" ) {
@@ -712,6 +710,35 @@ sub draw_main_win {
         }
     );
 
+    my $squelch_label =
+      Gtk3::Label->new( 'Squelch (' . $cfg->{'key_squelch'} . ')' );
+    $squelch_entry = Gtk3::Scale->new_with_range( 'horizontal', 0, 20, 1 );
+    $squelch_entry->set_digits(0);
+    $squelch_entry->set_draw_value(TRUE);
+    $squelch_entry->set_value_pos('right');
+    $squelch_entry->set_value( $act_vfo->{'squelch'} );
+    $squelch_entry->set_tooltip_text("Please Click and DRAG to change RF gain");
+
+    # XXX: ACCEL-Replace these with a global function
+    $w_main_accel->connect(
+        ord( $cfg->{'key_squelch'} ),
+        $cfg->{'shortcut_key'},
+        'visible',
+        sub {
+            $squelch_entry->grab_focus();
+        }
+    );
+    $squelch_entry->signal_connect(
+        value_changed => sub {
+            my ( $class ) = @_;
+            if (!$main::rig_p->is_busy()) {
+               my $curr_vfo = $cfg->{'active_vfo'};
+               my $value    = $squelch_entry->get_value();
+               $act_vfo->{'squelch'} = $value;
+            }
+        }
+    );
+
     # Variable to track if the scale is being dragged
     my $dragging = 0;
 
@@ -734,34 +761,6 @@ sub draw_main_win {
         'visible',
         sub {
             $vfo_power_entry->grab_focus();
-        }
-    );
-
-    #### Here we do some ugly stuff to try and prevent sudden jumps in power ####
-    # Connect a signal to track button press
-    $vfo_power_entry->signal_connect(
-        'button-press-event' => sub {
-            $dragging = 1;    # Set dragging flag when the slider is clicked
-            my ( $widget, $event ) = @_;
-            my $rp = $main::rig_p->{'gui_applying_changes'};
-            $$rp = TRUE;
-            $main::log->Log("gtkui", "debug", "RF Power drag start");
-            # reset the value to our stored state to discard this change
-            return FALSE;     # Prevent the default behavior
-        }
-    );
-
-    # Connect a signal to track button release
-    $vfo_power_entry->signal_connect(
-        'button-release-event' => sub {
-            $dragging = 0;    # Reset dragging flag on button release
-            my $rp = $main::rig_p->{'gui_applying_changes'};
-
-            $main::log->Log("gtkui", "debug", "RF power drag end");
-            # reset it
-            $vfo_power_entry->set_value( $act_vfo->{'power'} );
-            $$rp = FALSE;
-            return FALSE;
         }
     );
 
@@ -800,11 +799,10 @@ sub draw_main_win {
 
                # Ensure no abrupt changes occurred
                if ( $change <= $max_change ) {
-                   $act_vfo->{'power'} = $value;
-                   print "applying power: $value (change: $change, hlval: $hlval)\n";
-
                    my $rp = $main::rig_p->{'gui_applying_changes'};
                    $$rp = TRUE;
+                   $act_vfo->{'power'} = $value;
+                   print "applying power: $value (change: $change, hlval: $hlval)\n";
                    my $rig = $main::rig;
                    $rig->set_level($Hamlib::RIG_LEVEL_RFPOWER, $hlval);
                    $$rp = FALSE;
@@ -824,7 +822,7 @@ sub draw_main_win {
             if (defined $rig_p && !$rig_p->is_busy()) {
                my ( $widget, $event ) = @_;
                $dragging = 2;
-               return FALSE;    # Propagate the event further
+               return FALSE;
             } else {
                return TRUE;
             }
@@ -864,6 +862,8 @@ sub draw_main_win {
     $box->pack_start( $vfo_freq_entry,  FALSE, FALSE, 0 );
     $box->pack_start( $rig_vol_label,   FALSE, FALSE, 0 );
     $box->pack_start( $rig_vol_entry,   FALSE, FALSE, 0 );
+    $box->pack_start( $squelch_label,   FALSE, FALSE, 0 );
+    $box->pack_start( $squelch_entry,   FALSE, FALSE, 0 );
     $box->pack_start( $rf_gain_label,   FALSE, FALSE, 0 );
     $box->pack_start( $rf_gain_entry,   FALSE, FALSE, 0 );
     $box->pack_start( $vfo_power_label, FALSE, FALSE, 0 );
@@ -988,6 +988,7 @@ sub new {
         mode_entry        => \$mode_entry,
         rf_gain_entry     => \$rf_gain_entry,
         rig_vol_entry     => \$rig_vol_entry,
+        squelch_entry     => \$squelch_entry,
         vfo_freq_entry    => \$vfo_freq_entry,
         vfo_power_entry   => \$vfo_power_entry,
         vfo_sel_button    => \$vfo_sel_button,

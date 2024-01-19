@@ -195,12 +195,13 @@ sub new {
    $window->show_all();
 
    my $auto_hide = $$cfg->{'hide_logview_at_start'};
-   if (defined $auto_hide && $auto_hide) {
+   print "autohide: " . Dumper($auto_hide) . "\n";
+   if ($auto_hide) {
+      $window->set_visible(0);
       $window->iconify();
    }
 
    my $self = {
-      # variables
       accel => \$accel,
       box => \$box,
       hidden => \$hidden,

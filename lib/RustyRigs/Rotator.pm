@@ -54,10 +54,6 @@ sub new {
       $main::log->Log("rotate", "crit", "Failed to open rotator: $!");
    }
    my $self = {
-      # functions
-#      query => \&query,
-#      rotate => \&rotate,
-      # variables
       rot => \$rot,
    };
    bless $self, $class;

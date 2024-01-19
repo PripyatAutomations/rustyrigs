@@ -22,6 +22,9 @@ our $rigctld_applying_changes = FALSE;
 # - Use is_gui_busy() to check
 our $gui_applying_changes = FALSE;
 
+# Are there changes pending for write_rig()?
+our $rig_update_pending;
+
 our @vfo_widths_fm  = ( 25000, 12500 );
 our @vfo_widths_am  = ( 6000,  5000, 3800, 3200, 3000, 2800 );
 our @vfo_widths_ssb = ( 3800,  3000, 3200, 2800, 2700, 2500 );
@@ -61,6 +64,7 @@ our $vfos = {
         power_step => 5,
         min_freq   => 3000,
         max_freq   => 56000000,
+        squelch    => 0,
         rf_gain    => 0,
         vfo_step   => 1000,
         stats      => {
@@ -87,6 +91,7 @@ our $vfos = {
         min_freq   => 3000,
         max_freq   => 56000000,
         rf_gain    => 0,
+        squelch    => 0,
         vfo_step   => 1000,
         stats      => {
             attn   => 0,
@@ -239,7 +244,8 @@ sub read_rig {
     $last_freq = $freq;
 
     my ( $mode, $width ) = $rig->get_mode();
-    my ( $textmode, @rest ) = split( //xms, Hamlib::rig_strrmode($mode) );
+#   my ( $textmode, @rest ) = split( //xms, Hamlib::rig_strrmode($mode) );
+    my $textmode = Hamlib::rig_strrmode($mode);
     $textmode =~ s/PKTUSB/D-U/g;
     $textmode =~ s/PKTLSB/D-L/g;
 #   $width = $rig->passband_normal(Hamlib::rig_parse_mode($mode));
@@ -279,8 +285,7 @@ sub read_rig {
     # XXX: This needs to use MaxWatts instead of 100...
     my $raw_power = $rig->get_level_f($Hamlib::RIG_LEVEL_RFPOWER);
     $power = int($raw_power * 100 + 0.5);
-#    print "raw_power: $raw_power = power: $power\n";
-    $sig = $rig->get_level_i($Hamlib::RIG_LEVEL_STRENGTH);
+    $sig = $rig->get_level_f($Hamlib::RIG_LEVEL_STRENGTH);
     $swr = $rig->get_level_f($Hamlib::RIG_LEVEL_SWR);
 #    $temp = $rig->get_level($Hamlib::RIG_LEVEL_TEMP);
 #    $vdd = $rig->get_level($Hamlib::RIG_LEVEL_VDD);
@@ -291,7 +296,7 @@ sub read_rig {
 #    $vfos->{$curr_vfo}{'vdd'} = $vdd;
     my $stats = $vfos->{$curr_vfo}{'stats'};
     $stats->{'signal'} = $rig->get_level_i( $curr_hlvfo, $Hamlib::RIG_LEVEL_STRENGTH );
-#    $main::log->Log( "hamlib", "debug", "power:\t\t $power\n mode: \t\t$mode\nstrength:\t\t" . $stats->{'signal'} . "\tswr$swr");
+#    print "[read_rig] power: $power\t mode: $textmode ($mode)\tstrength: " . $stats->{'signal'} . "\tswr: $swr\tvolume: $volume\talc $alc\tcomp: $comp\n";
 
     #    my $atten = $rig->{caps}->{attenuator};
     #    $stats->{'atten'} = $atten;
@@ -321,6 +326,7 @@ sub read_rig {
        $main::icons->set_icon("transmit");
     }
     $last_ptt_status = $ptt_status;
+    # XXX: Update the width widget, this probably belongs in update() instead
     $main::gtk_ui->refresh_available_widths($width);
     $main::gtk_ui->update_widgets();
     $rigctld_applying_changes = FALSE;
@@ -370,6 +376,8 @@ sub exec_read_rig {
 }
 
 # Write vfo{}s
+# XXX: We should move all the rig configuring to here
+# XXX: and have a $rig_write_pending variable
 sub write_rig {
     my ( $self ) = @_;
 }
@@ -439,33 +447,18 @@ sub new {
       Glib::Timeout->add( $poll_interval, \&exec_read_rig );
 
     my $self = {
-        # variables
-        rig           => $rig,
-        gui_applying_changes => \$gui_applying_changes,
+        rig                      => $rig,
+        gui_applying_changes     => \$gui_applying_changes,
         rigctld_applying_changes => \$rigctld_applying_changes,
-        timer         => $rig_timer,
-        update_needed => \$update_needed,
-        vfos => \$vfos,
-        %hamlib_debug_levels => \%hamlib_debug_levels,
-        @pl_tones => \@pl_tones,
-        %vfo_mapping => \%vfo_mapping,
-        @vfo_widths_am => \@vfo_widths_am,
-        @vfo_widths_fm => \@vfo_widths_fm,
-        @vfo_widths_ssb => \@vfo_widths_ssb,
-
-        # functions
-#        exec_read_rig => \&exec_read_rig,
-#        hamlib_debug_level => \&hamlib_debug_level,
-#        is_busy => \&is_busy,
-#        is_gui_busy => \&is_gui_busy,
-#        next_vfo => \&next_vfo,
-#        ptt_off => \&ptt_off,
-#        ptt_on => \&ptt_on,
-#        read_rig => \&read_rig,
-#        set_freq => \&set_freq,
-#        vfo_from_name => \&vfo_from_name,
-#        vfo_name => \&vfo_name,
-#        write_rig => \&write_rig
+        timer                    => $rig_timer,
+        update_needed            => \$update_needed,
+        vfos                     => \$vfos,
+        %hamlib_debug_levels     => \%hamlib_debug_levels,
+        @pl_tones                => \@pl_tones,
+        %vfo_mapping             => \%vfo_mapping,
+        @vfo_widths_am           => \@vfo_widths_am,
+        @vfo_widths_fm           => \@vfo_widths_fm,
+        @vfo_widths_ssb          => \@vfo_widths_ssb,
     };
     bless $self, $class;
 
