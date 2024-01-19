@@ -231,6 +231,7 @@ sub read_rig {
     $rigctld_applying_changes = TRUE;
     my $curr_hlvfo = $rig->get_vfo();
     my $curr_vfo   = $$cfg->{active_vfo} = vfo_name($curr_hlvfo);
+    my $vfo = $vfos->{$curr_vfo};
 
     # XXX: Update the VFO select button if needed
 
@@ -278,27 +279,33 @@ sub read_rig {
     }
 
     # XXX: Figure out which width table applies and find the appropriate width index then select it...
-    my ( $alc, $comp, $power, $sig, $swr, $temp, $vdd, $squelch, $rfgain );
-    $alc = $rig->get_level($Hamlib::RIG_LEVEL_ALC);
-    $comp = $rig->get_level($Hamlib::RIG_LEVEL_COMP);
-    # XXX: This needs to use MaxWatts instead of 100...
-    my $raw_power = $rig->get_level_f($Hamlib::RIG_LEVEL_RFPOWER);
-    $power = int($raw_power * 100 + 0.5);
+    my ( $alc, $comp, $power, $sig, $swr, $temp, $vdd, $squelch, $rfgain, $dnr, $rfpower );
+    $alc = $rig->get_level_f($Hamlib::RIG_LEVEL_ALC);
+    $comp = $rig->get_level_f($Hamlib::RIG_LEVEL_COMP);
+    $dnr = $rig->get_level_f($Hamlib::RIG_LEVEL_NR);
+    my $tmp_power = $rig->get_level_f($Hamlib::RIG_LEVEL_RFPOWER);
+    $power = int($tmp_power * 100 + 0.5);
+    $rfpower = $rig->get_level_f($Hamlib::RIG_LEVEL_RFPOWER_METER_WATTS);
 #    $rfgain = $rig->get_level_f($Hamlib::RIG_LEVEL_xxx);
     $sig = $rig->get_level_f($Hamlib::RIG_LEVEL_STRENGTH);
     $swr = $rig->get_level_f($Hamlib::RIG_LEVEL_SWR);
     $squelch = $rig->get_level_i($Hamlib::RIG_LEVEL_SQL);
 #    $temp = $rig->get_level($Hamlib::RIG_LEVEL_TEMP);
 #    $vdd = $rig->get_level($Hamlib::RIG_LEVEL_VDD);
-    $vfos->{$curr_vfo}{'power'} = $power;
-    $vfos->{$curr_vfo}{'sig'} = $sig;
-    $vfos->{$curr_vfo}{'swr'} = $swr;
-    $vfos->{$curr_vfo}{'squelch'} = $squelch;
-#    $vfos->{$curr_vfo}{'temp'} = $temp;
-#    $vfos->{$curr_vfo}{'vdd'} = $vdd;
+    $vfo->{'stats'}{'alc'} = $alc;
+    $vfo->{'stats'}{'comp'} = $comp;
+    $vfo->{'stats'}{'dnr'} = $dnr;
+    $vfo->{'stats'}{'power'} = $power;
+    $vfo->{'stats'}{'rfpower'} = $rfpower;
+    $vfo->{'stats'}{'rfgain'} = $rfgain;
+    $vfo->{'stats'}{'sig'} = $sig;
+    $vfo->{'stats'}{'swr'} = $swr;
+    $vfo->{'stats'}{'squelch'} = $squelch;
+    $vfo->{'stats'}{'temp'} = $temp;
+    $vfo->{'stats'}{'vdd'} = $vdd;
     my $stats = $vfos->{$curr_vfo}{'stats'};
     $stats->{'signal'} = $rig->get_level_f( $curr_hlvfo, $Hamlib::RIG_LEVEL_STRENGTH );
-#    print "[read_rig] power: $power\t mode: $textmode ($mode)\tstrength: " . $stats->{'signal'} . "\tswr: $swr\tvolume: $volume\talc $alc\tcomp: $comp\tsquelch: $squelch\n";
+    print "[read_rig] power: $power\trfpower: $rfpower\tmode: $textmode ($mode)\tstrength: " . $stats->{'signal'} . "\tswr: $swr\tvolume: $volume\talc $alc\tcomp: $comp\tsquelch: $squelch\tdnr: $dnr\n";
 
     #    my $atten = $rig->{caps}->{attenuator};
     #    $stats->{'atten'} = $atten;

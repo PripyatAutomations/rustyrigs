@@ -964,7 +964,7 @@ sub draw_main_win {
     );
     $settings_button->set_tooltip_text("Settings editor");
 
-    my $gridtools_button = Gtk3::Button->new_with_mnemonic('_Gridsquare Tools');
+    my $gridtools_button = Gtk3::Button->new('Gridsquare Tools');
     $gridtools_button->signal_connect(
         clicked => sub {
             open_gridtools();
