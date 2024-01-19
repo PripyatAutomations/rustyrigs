@@ -219,7 +219,7 @@ sub next_vfo {
 
 # These let us only show messages when a state has changed, regardless
 # of how many times we poll the rig... Don't export these...
-my $last_ptt_status;
+my $last_ptt;
 my $last_mode;
 my $last_freq;
 
@@ -279,10 +279,12 @@ sub read_rig {
     }
 
     # XXX: Figure out which width table applies and find the appropriate width index then select it...
-    my ( $alc, $comp, $power, $sig, $swr, $temp, $vdd, $squelch, $rfgain, $dnr, $rfpower );
+    my ( $alc, $comp, $power, $sig, $swr, $temp, $vdd, $squelch, $rfgain );
+    my ( $rfpower, $ptt, $dnr );
     $alc = $rig->get_level_f($Hamlib::RIG_LEVEL_ALC);
     $comp = $rig->get_level_f($Hamlib::RIG_LEVEL_COMP);
     $dnr = $rig->get_level_f($Hamlib::RIG_LEVEL_NR);
+    $ptt = $rig->get_ptt();
     my $tmp_power = $rig->get_level_f($Hamlib::RIG_LEVEL_RFPOWER);
     $power = int($tmp_power * 100 + 0.5);
     $rfpower = $rig->get_level_f($Hamlib::RIG_LEVEL_RFPOWER_METER_WATTS);
@@ -292,25 +294,25 @@ sub read_rig {
     $squelch = $rig->get_level_i($Hamlib::RIG_LEVEL_SQL);
 #    $temp = $rig->get_level($Hamlib::RIG_LEVEL_TEMP);
 #    $vdd = $rig->get_level($Hamlib::RIG_LEVEL_VDD);
-    $vfo->{'stats'}{'alc'} = $alc;
-    $vfo->{'stats'}{'comp'} = $comp;
-    $vfo->{'stats'}{'dnr'} = $dnr;
-    $vfo->{'stats'}{'power'} = $power;
-    $vfo->{'stats'}{'rfpower'} = $rfpower;
-    $vfo->{'stats'}{'rfgain'} = $rfgain;
-    $vfo->{'stats'}{'sig'} = $sig;
-    $vfo->{'stats'}{'swr'} = $swr;
-    $vfo->{'stats'}{'squelch'} = $squelch;
-    $vfo->{'stats'}{'temp'} = $temp;
-    $vfo->{'stats'}{'vdd'} = $vdd;
-    my $stats = $vfos->{$curr_vfo}{'stats'};
+    my $stats = $vfos->{'stats'};
+    $stats->{'alc'} = $alc;
+    $stats->{'comp'} = $comp;
+    $stats->{'dnr'} = $dnr;
+    $stats->{'power'} = $power;
+    $stats->{'ptt'} = $ptt;
+    $stats->{'rfpower'} = $rfpower;
+    $stats->{'rfgain'} = $rfgain;
+    $stats->{'sig'} = $sig;
+    $stats->{'swr'} = $swr;
+    $stats->{'squelch'} = $squelch;
+    $stats->{'temp'} = $temp;
+    $stats->{'vdd'} = $vdd;
     $stats->{'signal'} = $rig->get_level_f( $curr_hlvfo, $Hamlib::RIG_LEVEL_STRENGTH );
-    print "[read_rig] power: $power\trfpower: $rfpower\tmode: $textmode ($mode)\tstrength: " . $stats->{'signal'} . "\tswr: $swr\tvolume: $volume\talc $alc\tcomp: $comp\tsquelch: $squelch\tdnr: $dnr\n";
+#    print "[read_rig] power: $power\trfpower: $rfpower\tmode: $textmode ($mode)\tstrength: " . $stats->{'signal'} . "\tswr: $swr\tvolume: $volume\talc $alc\tcomp: $comp\tsquelch: $squelch\tdnr: $dnr\n";
 
     #    my $atten = $rig->{caps}->{attenuator};
     #    $stats->{'atten'} = $atten;
     #    $main::log->Log("hamlib", "debug", "Attenuators:\t\t@$atten");
-    my $ptt_status = $rig->get_ptt($curr_hlvfo);
 
     ####################
     # Apply the values #
@@ -323,18 +325,19 @@ sub read_rig {
     $$vpe->set_value( $power );
 
     # Set the icons appropriately & update the tooltip
-    if (!$ptt_status) {
-       if (!defined $last_ptt_status || $last_ptt_status != $ptt_status) {
+    if (!$ptt) {
+       if (!defined $last_ptt || $last_ptt != $ptt) {
           $main::log->Log("hamlib", "info", "PTT off");
        }
        $main::icons->set_icon("idle");
     } else {
-       if (!defined $last_ptt_status || $last_ptt_status != $ptt_status) {
+       if (!defined $last_ptt || $last_ptt != $ptt) {
           $main::log->Log("hamlib", "info", "PTT on");
        }
        $main::icons->set_icon("transmit");
     }
-    $last_ptt_status = $ptt_status;
+    $last_ptt = $ptt;
+
     # XXX: Update the width widget, this probably belongs in update() instead
     $main::gtk_ui->refresh_available_widths($width);
     $main::gtk_ui->update_widgets();
@@ -354,6 +357,7 @@ sub exec_read_rig {
        print "skipping read_rig as GUI update in progress\n";
        return TRUE;
     }
+    $main::gtk_ui->update_widgets();
 
     my $tray_every = $$cfg->{'poll_tray_every'};
 

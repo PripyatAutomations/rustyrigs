@@ -720,7 +720,7 @@ sub draw_main_win {
     $dnr_entry->set_value_pos('right');
     $dnr_entry->set_value( $act_vfo->{'dnr'} );
     $dnr_entry->set_tooltip_text("DSP Noise Reduction");
-    $dnr_entry->set_sensitive(1);
+    $dnr_entry->set_sensitive(0);
 
     # XXX: ACCEL-Replace these with a global function
     $w_main_accel->connect(
@@ -1025,17 +1025,19 @@ sub update_widgets {
         if ( $curr_vfo eq '' ) {
             $curr_vfo = $cfg->{active_vfo} = 'A';
         }
-        my $act_vfo = $vfos->{$curr_vfo};
+        my $vfo = $vfos->{$curr_vfo};
         my $rig_p = $main::rig_p;
         my $rig = $rig_p->{'rig'};
+        my $stats = $vfo->{'stats'};
         my $vol = $rig_p->{'volume'};
-
+        my $ptt = $rig->get_ptt();
+        $ptt_button->set_active($ptt);
         $rig_vol_entry->set_value($$vol);
-        $vfo_freq_entry->set_value( $act_vfo->{'freq'} );
-        # XXX: set $mode_entry to $act_vfo->{'mode'} (indexed)
-        # XXX: set $width_entry to $act_vfo->{'width'} (indexed)
-        $rf_gain_entry->set_value($act_vfo->{'rf_gain'});
-        $vfo_power_entry->set_value( $act_vfo->{'power'} );
+        $vfo_freq_entry->set_value( $vfo->{'freq'} );
+        # XXX: set $mode_entry to $vfo->{'mode'} (indexed)
+        # XXX: set $width_entry to $vfo->{'width'} (indexed)
+        $rf_gain_entry->set_value($vfo->{'rf_gain'});
+        $vfo_power_entry->set_value( $vfo->{'power'} );
     } else {
 #        print "skipping GUI update as read_rig() is running!\n";
     }
