@@ -111,7 +111,9 @@ sub toggle_locked {
     }
 
     my @widgets = (
+       $gtk_ui->{'dnr_entry'},
        $gtk_ui->{'mem_load_button'},
+       $gtk_ui->{'ptt_button'},
        $gtk_ui->{'mode_entry'},
        $gtk_ui->{'rf_gain_entry'},
        $gtk_ui->{'rig_vol_entry'},
@@ -124,22 +126,22 @@ sub toggle_locked {
     if ($locked) {
         foreach my $widget (@widgets) {
             my $actual_widget = $$widget;
-            if ($actual_widget->isa('Gtk3::Entry')) {
-                $actual_widget->set_editable(0);
-            } else
-            {
-                $actual_widget->set_sensitive(0);
+            if ($actual_widget->can('set_editable')) {
+               $actual_widget->set_editable(0);
+            }
+            if ($actual_widget->can('set_sensitive')) {
+               $actual_widget->set_sensitive(0);
             }
         }
     } else
     {
         foreach my $widget (@widgets) {
             my $actual_widget = $$widget;
-            if ($actual_widget->isa('Gtk3::Entry')) {
-                $actual_widget->set_editable(1);
-            } else
-            {
-                $actual_widget->set_sensitive(1);
+            if ($actual_widget->can('set_editable')) {
+               $actual_widget->set_editable(1);
+            }
+            if ($actual_widget->can('set_sensitive')) {
+               $actual_widget->set_sensitive(1);
             }
         }
     }

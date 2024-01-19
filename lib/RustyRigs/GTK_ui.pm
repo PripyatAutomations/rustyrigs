@@ -23,6 +23,7 @@ our $w_main;
 our $mem_edit_button;
 our $mem_load_button;
 our $mem_write_button;
+our $ptt_button;
 our $mode_entry;
 our $rf_gain_entry;
 our $dnr_entry;
@@ -281,6 +282,7 @@ sub open_gridtools {
     }
 }
 
+our $initial_bg_color;
 sub draw_main_win {
     my ( $self ) = @_;
 
@@ -329,7 +331,6 @@ sub draw_main_win {
     # add a placeholder box we can insert/edit easily
     my $meters_dock_box = Gtk3::Box->new('vertical', 5);
     $self->{'meter_dock'} = \$meters_dock_box;
-    $box->pack_start( $meters_dock_box, TRUE, TRUE, 0);
 
     $meters = RustyRigs::Meterbar->render_meterbars( \$main::meters, \$cfg, $vfos, $w_main );
     # Do we render the meters in the main window?
@@ -446,8 +447,6 @@ sub draw_main_win {
     );
     $chan_box->pack_start( $mem_btn_box, FALSE, FALSE, 0 );
 
-    # add to the main window
-    $box->pack_start( $chan_box, FALSE, FALSE, 0 );
 
     # VFO choser:
     $vfo_sel_button =
@@ -460,7 +459,6 @@ sub draw_main_win {
             $main::rig_p->next_vfo();
         }
     );
-    $box->pack_start( $vfo_sel_button, FALSE, FALSE, 0 );
 
     # XXX: ACCEL-Replace these with a global function
     $w_main_accel->connect(
@@ -892,7 +890,49 @@ sub draw_main_win {
         }
     );
 
+    # Create a toggle button to represent the lock state
+    my $key_ptt = $cfg->{'key_ptt'};
+    $ptt_button = Gtk3::ToggleButton->new_with_label("PTT ($key_ptt)");
+    $initial_bg_color = $ptt_button->get_style_context->get_background_color('normal');
+    $ptt_button->signal_connect(
+        toggled => sub {
+            my ( $self ) = @_;
+            my $val = $ptt_button->get_active();
+            $main::log->Log("hamlib", "info", "PTT set to $val");
+            $main::rig->set_ptt($Hamlib::RIG_VFO_A, $val);
+            if ( $val ) {
+                $ptt_button->override_background_color('normal', Gtk3::Gdk::RGBA->new(1.0, 0.0, 0.0, 1.0));
+                print "ptt on\n";
+            } else {
+                $ptt_button->override_background_color('normal', $initial_bg_color);
+                print "ptt off\n";
+            }
+        }
+    );
+    $w_main_accel->connect(
+        ord( $cfg->{'key_ptt'} ),
+        $cfg->{'shortcut_key'},
+        'visible',
+        sub {
+            my ( $self ) = @_;
+            my $val = $ptt_button->get_active();
+            $main::log->Log("hamlib", "info", "PTT set to $val");
+            $main::rig->set_ptt($Hamlib::RIG_VFO_A, $val);
+            if ( $val ) {
+                $ptt_button->override_background_color('normal', Gtk3::Gdk::RGBA->new(1.0, 0.0, 0.0, 1.0));
+                print "ptt on\n";
+            } else {
+                $ptt_button->override_background_color('normal', $initial_bg_color);
+                print "ptt off\n";
+            }
+        }
+    );
+
     #########
+    $box->pack_start( $meters_dock_box, TRUE, TRUE, 0);
+    $box->pack_start( $ptt_button,      FALSE, FALSE, 0 );
+    $box->pack_start( $chan_box, FALSE, FALSE, 0 );
+    $box->pack_start( $vfo_sel_button, FALSE, FALSE, 0 );
     $box->pack_start( $vfo_freq_label,  FALSE, FALSE, 0 );
     $box->pack_start( $vfo_freq_entry,  FALSE, FALSE, 0 );
     $box->pack_start( $rig_vol_label,   FALSE, FALSE, 0 );
@@ -1017,6 +1057,7 @@ sub new {
         # GUI widgets
         box               => \$box,
         fm_box            => \$fm_box,
+        dnr_entry         => \$dnr_entry,
         lock_button       => \$lock_button,
         lock_item         => \$lock_item,
         mem_add_button    => \$mem_load_button,
@@ -1025,6 +1066,7 @@ sub new {
         mode_entry        => \$mode_entry,
         rf_gain_entry     => \$rf_gain_entry,
         rig_vol_entry     => \$rig_vol_entry,
+        ptt_button        => \$ptt_button,
         squelch_entry     => \$squelch_entry,
         vfo_freq_entry    => \$vfo_freq_entry,
         vfo_power_entry   => \$vfo_power_entry,
