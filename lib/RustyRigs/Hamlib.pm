@@ -277,7 +277,9 @@ sub read_rig {
     $alc = $rig->get_level($Hamlib::RIG_LEVEL_ALC);
     $comp = $rig->get_level($Hamlib::RIG_LEVEL_COMP);
     # XXX: This needs to use MaxWatts instead of 100...
-    $power = int($rig->get_level_f($Hamlib::RIG_LEVEL_RFPOWER) * 100 + 0.5);
+    my $raw_power = $rig->get_level_f($Hamlib::RIG_LEVEL_RFPOWER);
+    $power = int($raw_power * 100 + 0.5);
+#    print "raw_power: $raw_power = power: $power\n";
     $sig = $rig->get_level_i($Hamlib::RIG_LEVEL_STRENGTH);
     $swr = $rig->get_level_f($Hamlib::RIG_LEVEL_SWR);
 #    $temp = $rig->get_level($Hamlib::RIG_LEVEL_TEMP);

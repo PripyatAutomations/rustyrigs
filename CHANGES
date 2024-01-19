@@ -1,4 +1,5 @@
 2024-01-19
+	* Fixed RF power knob
 	* Fixed volume knob
 	* Broke config saving while clean that mess up... Edit the .yaml
 

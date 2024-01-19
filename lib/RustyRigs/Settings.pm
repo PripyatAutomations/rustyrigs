@@ -66,10 +66,8 @@ sub save {
         $main::log->Log( "config", "debug", "Applying config changes:\n\t$tc_dump");
         # apply temporary settings to main
         $main::cfg_p->apply($tc, FALSE);
-        # we need to clear this, normally, so stale stuff doesn't persist
-#        undef $tc;
-        print "Please restart!\n";
-#        main::restart();
+        $main::log->Log( "core", "warn", "Please restart to apply changes!\n");
+        main::restart();
     }
     else {
         print "No changes to apply.\n";

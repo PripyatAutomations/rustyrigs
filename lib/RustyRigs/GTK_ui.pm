@@ -745,6 +745,7 @@ sub draw_main_win {
             my ( $widget, $event ) = @_;
             my $rp = $main::rig_p->{'gui_applying_changes'};
             $$rp = TRUE;
+            $main::log->Log("gtkui", "debug", "RF Power drag start");
             # reset the value to our stored state to discard this change
             return FALSE;     # Prevent the default behavior
         }
@@ -755,12 +756,8 @@ sub draw_main_win {
         'button-release-event' => sub {
             $dragging = 0;    # Reset dragging flag on button release
             my $rp = $main::rig_p->{'gui_applying_changes'};
-            if ( !defined( $act_vfo->{'power'} ) || $act_vfo->{'power'} eq "" )
-            {
-            # XXX: wut?
-#                $act_vfo->{'power'} = $main::rig->get_vfo();
-            }
 
+            $main::log->Log("gtkui", "debug", "RF power drag end");
             # reset it
             $vfo_power_entry->set_value( $act_vfo->{'power'} );
             $$rp = FALSE;
@@ -784,7 +781,7 @@ sub draw_main_win {
                my $max_change = $step * 5;
 
                # round it
-               $value = int( $value + 0.5 );
+               my $hlval = int( $value + 0.5 ) / 100;
 
                # calculate how much change occurred
                if ( $value > $oldval ) {
@@ -794,7 +791,7 @@ sub draw_main_win {
                    $change = $oldval - $value;
                }
 
-               $main::log->Log("ui", "debug", "change power: dragging: $dragging - change: $change. val $value oldval: $oldval");
+               $main::log->Log("ui", "debug", "change power: dragging: $dragging - change: $change. val $value oldval: $oldval hlval: $hlval");
 
                if ( $dragging < 2 ) {
                    print "rig_power widget dragging: $dragging < 2, not changing value\n";
@@ -804,10 +801,13 @@ sub draw_main_win {
                # Ensure no abrupt changes occurred
                if ( $change <= $max_change ) {
                    $act_vfo->{'power'} = $value;
-                   print "applying power: $value (change: $change)\n";
+                   print "applying power: $value (change: $change, hlval: $hlval)\n";
 
+                   my $rp = $main::rig_p->{'gui_applying_changes'};
+                   $$rp = TRUE;
                    my $rig = $main::rig;
-                   $rig->set_power($curr_vfo);
+                   $rig->set_level($Hamlib::RIG_LEVEL_RFPOWER, $hlval);
+                   $$rp = FALSE;
                }
                else {    # reject change otherwise
                    print "rig_power widget: rejecting power change $change in excess of limit $max_change\n";
