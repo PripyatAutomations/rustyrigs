@@ -916,8 +916,10 @@ sub draw_main_win {
         sub {
             my ( $self ) = @_;
             
-            my $val = $ptt_button->get_active();
-            $ptt_button->set_active(!$val);
+            if (!$main::locked) {
+               my $val = $ptt_button->get_active();
+               $ptt_button->set_active(!$val);
+            }
         }
     );
 
