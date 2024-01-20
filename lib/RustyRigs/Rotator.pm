@@ -13,6 +13,7 @@ sub query {
 
    my $current_bearing = $rot->get_position();
    $main::log->Log("rotate", "info", "Curent rotator bearing is $current_bearing");
+   return;
 }
 
 # Call me with azimuth and elevation as arguments
@@ -22,10 +23,12 @@ sub rotate {
 
    $main::log->Log("rotate", "info", "Rotating to bearing $azimuth at elevation $elevation");
    $$rot->set_position($azimuth, $elevation);
+   return;
 }
 
 sub DESTROY {
    my ( $self ) = @_;
+   return;
 }
 
 sub new {
@@ -45,7 +48,7 @@ sub new {
       $rot_path = "localhost:4533";
    }
 
-   my $rot = new Hamlib::Rot($rot_model);
+   my $rot = Hamlib::Rot->new($rot_model);
    $rot->set_conf('rot_pathname', $rot_path);
 
    # Initialize the rotator connection

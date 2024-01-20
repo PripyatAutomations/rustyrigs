@@ -59,6 +59,7 @@ sub write {
 #    $text_view->scroll_to_iter($end_iter, 0, FALSE, 0, 0);
     $end_mark = $buffer->create_mark("end_mark", $end_iter, FALSE);
     $text_view->scroll_mark_onscreen($end_mark);
+    return;
 }
 
 sub window_state {
@@ -91,6 +92,7 @@ sub window_state {
 
 sub DESTROY {
    ( my $self ) = @_;
+   return;
 }
 
 sub new {

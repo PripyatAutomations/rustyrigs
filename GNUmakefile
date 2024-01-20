@@ -5,8 +5,8 @@ DOC_DIR ?= ${PREFIX}/share/doc
 BIN_DIR ?= ${PREFIX}/bin
 LIB_DIR ?= ${PREFIX}/lib/rustyrigs
 
-NEED_PKG := libgtk3-perl libglib-perl libyaml-perl libhamlib-perl # libdata-structure-util-perl
-NEED_PKG += devscripts dh-make-perl
+NEED_PKG := libgtk3-perl libglib-perl libyaml-perl libhamlib-perl
+DEV_NEED_PKG += devscripts dh-make-perl libperl-critic-community-perl libperl-critic-perl
 
 # Documentation
 DOCS := $(wildcard doc/*)
@@ -93,10 +93,17 @@ ifneq (${RSRC},)
 	${SUDO} ${RM} $(foreach x,${RSRC},${RES_DIR}/${x})
 endif
 
+###############
+# Maintenance #
+###############
+critic:
+	perlcritic rustyrigs $(shell find lib -name \*.pm)
+
 ################
 # Debian stuff #
 ################
 deb: install-deb-deps
+dev-dev: install-deb-dev-deps
 
 install-deb-deps:
 	${SUDO} apt install -y ${NEED_PKG}

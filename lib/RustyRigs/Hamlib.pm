@@ -142,6 +142,7 @@ sub hamlib_debug_level {
         $main::log->Log( "hamlib", "warn", "hamlib_debug_level: returning default Warnings: $new_lvl unrecognized!" );
         return $Hamlib::RIG_DEBUG_WARN;
     }
+    return;
 }
 
 sub ptt_off {
@@ -150,6 +151,7 @@ sub ptt_off {
 
     $main::log->Log( "ptt", "info", "Clearing PTT..." );
     $rig->set_ptt( $vfo, $Hamlib::RIG_PTT_OFF );
+    return;
 }
 
 sub ptt_on {
@@ -158,6 +160,7 @@ sub ptt_on {
 
     $main::log->Log( "ptt", "info", "Setting PTT..." );
     $rig->set_ptt( $vfo, $Hamlib::RIG_PTT_ON );
+    return;
 }
 
 sub set_freq {
@@ -165,6 +168,7 @@ sub set_freq {
     my $curr_vfo = $$cfg->{'active_vfo'};
     $vfos->{$curr_vfo}{'freq'} = $freq;
     $rig->set_freq( $curr_vfo, $freq );
+    return;
 }
 
 
@@ -194,6 +198,7 @@ sub vfo_from_name {
     elsif ( $vfo_name eq 'C' ) {
         return $Hamlib::RIG_VFO_C;
     }
+    return;
 }
 
 sub next_vfo {
@@ -217,6 +222,7 @@ sub next_vfo {
     else {
         die "No such VFO '$vfo' from caller: " .  ( caller(1) )[3] . "\n";
     }
+    return;
 }
 
 # These let us only show messages when a state has changed, regardless
@@ -351,6 +357,7 @@ sub read_rig {
     $main::gtk_ui->refresh_available_widths($width);
     $main::gtk_ui->update_widgets();
     $rigctld_applying_changes = FALSE;
+    return;
 }
 
 # state for our tray mode polling slowdown, not exported
@@ -402,6 +409,7 @@ sub exec_read_rig {
 # XXX: and have a $rig_write_pending variable
 sub write_rig {
     my ( $self ) = @_;
+    return;
 }
 
 sub is_busy {
@@ -543,6 +551,8 @@ sub new {
 }
 
 sub DESTROY {
+    my ( $self ) = @_;
+    return;
 }
 
 1;

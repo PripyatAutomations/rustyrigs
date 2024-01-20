@@ -146,10 +146,12 @@ sub toggle_locked {
         }
     }
     $log->Log( "ui", "debug", "Toggling \$locked to " . ($locked ? 'on' : 'off') . " by $origin" );
+    return;
 }
 
 sub save_config {
     $cfg_p->save($cfg_file);
+    return;
 }
 
 # Parse the command line
@@ -296,6 +298,7 @@ sub hamlib_init {
     }
 
     $hamlib_initialized = 1;
+    return;
 }
 Glib::Timeout->add( 1000, \&hamlib_init );
 

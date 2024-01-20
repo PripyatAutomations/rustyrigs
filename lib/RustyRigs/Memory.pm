@@ -21,7 +21,8 @@ my $tmp_cfg;
 
 sub save {
     ( my $class, my $channel ) = @_;
-    $class->close(TRUE);
+    $class->close_dialog(TRUE);
+    return;
 }
 
 sub show {
@@ -66,7 +67,7 @@ sub show {
     $save_button->signal_connect( clicked => sub { $class->save(); } );
     $save_button->set_tooltip_text("Save memory");
     my $quit_button = Gtk3::Button->new_with_mnemonic('_Quit');
-    $quit_button->signal_connect( clicked => sub { $class->close(FALSE); } );
+    $quit_button->signal_connect( clicked => sub { $class->close_dialog(FALSE); } );
     $quit_button->set_tooltip_text("Close the memory editor");
 
     $w_mem_edit->add_accel_group($mem_edit_accel);
@@ -102,15 +103,16 @@ sub show {
     # Handle close button
     $w_mem_edit->signal_connect(
         'delete-event' => sub {
-            $class->close(FALSE);
+            $class->close_dialog(FALSE);
             return TRUE;
         }
     );
 
     $w_mem_edit->show_all();
+    return;
 }
 
-sub close {
+sub close_dialog {
     ( my $class, my $quiet ) = @_;
 
     if ( !defined $quiet ) {
@@ -164,10 +166,12 @@ sub close {
             $dialog->destroy();
         }
     }
+    return;
 }
 
 sub load_defaults {
     ( my $class, my $defaults ) = @_;
+    return;
 }
 
 sub load_from_yaml {
@@ -183,6 +187,7 @@ sub load_from_yaml {
       # XXX: Save memories
       $self->save($$cfg->{'mem_file'});
    }
+    return;
 }
 
 # This needs to be created from the channel memories loaded from yaml....
@@ -223,6 +228,7 @@ sub new {
 
 sub DESTROY {
     ( my $class ) = @_;
+    return;
 }
 
 1;

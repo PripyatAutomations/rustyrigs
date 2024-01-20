@@ -1,0 +1,13 @@
+#severity = 5
+severity = 4
+#verbose = 11
+#verbose = %f: [%p] %m at line %l, column %c.\n%d\n
+verbose = %f: [%p] %m at line %l, column %c.\n
+theme = core
+#theme = community
+
+[TestingAndDebugging::RequireUseWarnings]
+severity = 5
+
+[Modules::ProhibitEvilModules]
+modules_file = .forbidden_modules

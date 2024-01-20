@@ -51,6 +51,7 @@ sub set_value {
     } elsif ($self->{'decimals'} > 0) {
         # XXX: Zero them all out
     }
+    return;
 }
 
 # Get a single digit: Positive for whole, negative for decimal
@@ -62,10 +63,12 @@ sub get_digit {
 
     my $digits = $self->{'digits'};
 #    print "get_digit: scale=$scale: " . Dumper($digits) . "\n";
+    return;
 }
 
 # Set a single digit: Positive for whole, negative for decimal
 sub set_digit {
+    return;
 }
 
 sub dec_digit {
@@ -80,6 +83,7 @@ sub dec_digit {
     my $new_val = $freq - $mult;
 #    print "dec: scale=$scale, mult=$mult, newval=$new_val, widget=" . Dumper($widget) . "\n";
     $main::rig->set_freq($main::rig->get_vfo(), $new_val);
+    return;
 }
 
 sub inc_digit {
@@ -94,12 +98,13 @@ sub inc_digit {
     my $new_val = $freq + $mult;
 #    print "inc: scale=$scale, mult=$mult, newval=$new_val, widget=" . Dumper($widget) . "\n";
     $main::rig->set_freq($main::rig->get_vfo(), $new_val);
+    return;
 }
 
 # Draw a single digit
 sub draw_digit {
    my ( $self, $scale, $default ) = @_;
-   print "scale: $scale, default: $default, self: " . Dumper($self);
+#   print "scale: $scale, default: $default, self: " . Dumper($self);
    my $box = Gtk3::Box->new('vertical', 0);
    my $up_btn = Gtk3::Button->new('+');
    my $digit = Gtk3::Entry->new();
@@ -256,6 +261,7 @@ sub new {
 
 sub DESTROY {
    my ( $self ) = @_;
+   return;
 }
 
 1;

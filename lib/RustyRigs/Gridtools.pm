@@ -14,7 +14,8 @@ our $tmp_cfg;
 our $state;
 
 sub DESTROY {
-    ( my $self ) = @_;
+    my ( $self ) = @_;
+    return;
 }
 
 sub update {
@@ -114,7 +115,8 @@ sub update {
        }
        undef $state;
     }
- }
+    return;
+}
 
 # Function to filter non-numeric characters
 sub on_insert_text {
@@ -126,6 +128,7 @@ sub on_insert_text {
     } else {
         return 1;  # Block the insertion of non-numeric text
     }
+    return;
 }
 
 sub latlon_entry_clicked {
@@ -133,6 +136,7 @@ sub latlon_entry_clicked {
 #    die "class: " . Dumper($class) . "\nentry: " . Dumper($entry) . "\n";
     my ( $entry ) = @_;
     $entry->select_region(0, length($entry->get_text));
+    return;
 }
   
 sub new {

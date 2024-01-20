@@ -8,6 +8,7 @@ use Glib qw(TRUE FALSE);
 
 sub DESTROY {
    my ( $self ) = @_;
+   return;
 }
 
 sub new {

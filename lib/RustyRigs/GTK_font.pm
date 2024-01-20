@@ -36,6 +36,7 @@ sub load {
 
 sub DESTROY {
     my ( $self ) = @_;
+    return;
 }
 
 sub new {

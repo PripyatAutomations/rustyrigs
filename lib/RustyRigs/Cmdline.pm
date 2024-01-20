@@ -67,6 +67,8 @@ sub parse {
         $main::log->Log( "ui", "error", "You must specify both -x and -y options to place the window at startup" );
         exit 1;
     }
+
+    return;
 }
 
 1;

@@ -1,3 +1,4 @@
+* Make the Gridtools button hide/show (not just iconify) the window...
 * Fix volume blipping to 100% at startup (temp hack in place)
 * Reduce the amount of rig command sent if possible
 -----------

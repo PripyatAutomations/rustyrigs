@@ -5,6 +5,8 @@
 # New settings will get combined
 package RustyRigs::Defconfig;
 use Hamlib;
+use strict;
+use warnings;
 
 # - Default configuration
 our $def_cfg = {

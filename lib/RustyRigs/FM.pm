@@ -46,6 +46,7 @@ sub refresh_tone_freqs {
       my $tx_tone = Woodpile::find_offset(\@RustyRigs::Hamlib::pl_tones, $vfo->{'fm'}{'tone_freq_tx'});
       $tone_freq_tx_entry->set_active($tx_tone);
    }
+   return;
 }
 
 sub new {

@@ -29,7 +29,8 @@ our $w_settings;
 ######################
 sub set_colors() {
    my ( $class ) = @_;
-   my $dialog = RustyRigs::Meterbar::Settings->new(\$w_settings);
+   my $dialog = RustyRigs::Meter::Settings->new(\$w_settings);
+   return;
 }
 
 ##############################
@@ -47,11 +48,13 @@ sub combobox_keys {
         $main::log->Log( "ui", "debug", "xxx: keyval - " . $event->keyval );
         return FALSE;    # Continue default handling
     }
+    return;
 }
 
 sub print_signal_info {
     my ( $widget, $signal_name ) = @_;
     $main::log->Log( "ui", "debug", "Signal emitted by $widget: $signal_name" );
+    return;
 }
 
 sub save {
@@ -75,9 +78,10 @@ sub save {
     }
     $w_settings->close();
     $w_settings->destroy();
+    return;
 }
 
-sub close {
+sub close_dialog {
     ( my $self ) = @_;
     my $dialog =
       Gtk3::MessageDialog->new( $w_settings, 'destroy-with-parent', 'warning',
@@ -103,10 +107,12 @@ sub close {
         $w_settings->present();
         $w_settings->grab_focus();
     }
+    return;
 }
 
 sub DESTROY {
     ( my $self ) = @_;
+    return;
 }
 
 sub new {
@@ -513,7 +519,7 @@ sub new {
     );
     $window_options_box->pack_start( $hide_gridtools_def_button,    FALSE, FALSE, 0 );
 
-    my $hide_logview_button = Gtk3::CheckButton->new();
+    $hide_logview_button = Gtk3::CheckButton->new();
     $hide_logview_button->set_label('Hide log viewer by default?');
     $hide_logview_button->set_active( $cfg->{'hide_logview_at_start'} );
     $hide_logview_button->set_can_focus(1);
@@ -633,10 +639,10 @@ sub new {
     $cancel_button->set_tooltip_text("Discard changes");
     $save_button->signal_connect( 'activate' => sub { $class->save($tmp_cfg); } );
     $save_button->signal_connect( 'clicked'  => sub { $class->save($tmp_cfg); } );
-    $cancel_button->signal_connect( 'activate' => \&close );
-    $cancel_button->signal_connect( 'clicked'  => \&close );
+    $cancel_button->signal_connect( 'activate' => \&close_dialog );
+    $cancel_button->signal_connect( 'clicked'  => \&close_dialog );
     $cancel_button->set_can_focus(1);
-    $w_settings_accel->connect( ord('C'), 'mod1-mask', 'visible', \&close );
+    $w_settings_accel->connect( ord('C'), 'mod1-mask', 'visible', \&close_dialog );
     $button_box->pack_start( $save_button,   TRUE, TRUE, 0 );
     $button_box->pack_start( $cancel_button, TRUE, TRUE, 0 );
 

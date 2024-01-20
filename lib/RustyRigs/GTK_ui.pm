@@ -94,6 +94,7 @@ sub w_main_click {
     if ( $event->type eq 'button-press' && $event->button == 3 ) {
 #        main_menu( $tray_icon, 3, $event->time );
     }
+    return;
 }
 
 sub w_main_fm_toggle {
@@ -109,6 +110,7 @@ sub w_main_fm_toggle {
         $fm_box->hide();
     }
     Woodpile::autosize_height($w_main, $box);
+    return;
 }
 
 sub w_main_hide {
@@ -126,6 +128,7 @@ sub w_main_hide {
        if (defined $lw) {
           $$lw->set_visible(0);
           $$lw->iconify();
+          $$lw->get_window->set_skip_taskbar_hint(TRUE);
        }
     }
 
@@ -135,6 +138,7 @@ sub w_main_hide {
        my $gw = $gt->{'window'};
        $$gw->set_visible(0);
        $$gw->iconify();
+       $$gw->get_window->set_skip_taskbar_hint(TRUE);
     }
     return FALSE;
 }
@@ -158,6 +162,7 @@ sub w_main_show {
           if (defined $w) {
              $$w->set_visible(1);
              $$w->deiconify();
+             $$w->get_window->set_skip_taskbar_hint(FALSE);
           } else {
              print "No logview window\n";
           }
@@ -175,6 +180,7 @@ sub w_main_show {
        if (defined $gw) {
           $$gw->deiconify();
           $$gw->set_visible(1);
+          $$gw->get_window->set_skip_taskbar_hint(FALSE);
        }
     }
 
@@ -212,6 +218,7 @@ sub switch_vfo {
           . $cfg->{'key_vfo'}
           . ")" );
     $cfg->{active_vfo} = $vfo;
+    return;
 }
 
 sub w_main_ontop {
@@ -221,6 +228,7 @@ sub w_main_ontop {
     }
 
     $w_main->set_keep_above($val);
+    return;
 }
 
 sub refresh_available_widths {
@@ -270,6 +278,7 @@ sub refresh_available_widths {
     }
 #    $log->Log( "ui", "debug", "refresh avail widths: VFO $curr_vfo, mode " . $vfo->{'mode'} . " val: $val (rv: $rv)" );
     $width_entry->set_active($rv);
+    return;
 }
 
 sub open_gridtools {
@@ -283,6 +292,7 @@ sub open_gridtools {
        my $gt_win = $main::gridtools->{'window'};
        $$gt_win->present();
     }
+    return;
 }
 
 # initial bg color of the PTT button, so we can set it red during TX
@@ -387,7 +397,7 @@ sub draw_main_win {
     my $meters_dock_box = Gtk3::Box->new('vertical', 5);
     $self->{'meter_dock'} = \$meters_dock_box;
 
-    $meters = RustyRigs::Meterbar->render_meterbars( \$main::meters, \$cfg, $vfos, $w_main );
+    $meters = RustyRigs::Meter->render_meterbars( \$main::meters, \$cfg, $vfos, $w_main );
     # Do we render the meters in the main window?
     my $meters_in_main = $cfg->{'meters_in_main'};
     if ($meters_in_main) {
@@ -1050,6 +1060,7 @@ sub draw_main_win {
         $log->Log( "ui", "info", "stay hidden mode enabled: visible=$vis" );
         $w_main->set_visible($vis);
     }
+    return;
 }
 
 ######################################
@@ -1082,6 +1093,7 @@ sub update_widgets {
     } else {
 #        print "skipping GUI update as read_rig() is running!\n";
     }
+    return;
 }
 
 ######################################
@@ -1124,6 +1136,7 @@ sub new {
 
 sub DESTROY {
     ( my $class ) = @_;
+    return;
 }
 
 1;

@@ -70,6 +70,7 @@ sub load_all {
           $self->get_icon($ico_name);
        }
     }
+    return;
 }
 
 sub get_state_icon {
@@ -94,6 +95,7 @@ sub set_tray_tooltip {
     }
 
     $$icon->set_tooltip_text($tooltip_text);
+    return;
 }
 
 # Set up the tray icon and set a label on it...
@@ -104,6 +106,7 @@ sub set_tray_icon {
 
     my $tray_icon = $main::icons->{'tray_icon'};
     $$tray_icon->set_from_pixbuf(get_state_icon($status));
+    return;
 }
 
 sub set_icon {
@@ -180,10 +183,12 @@ sub set_icon {
     # Apply it to main window & system tray icon
     $$w_main->set_icon($icon);
     $self->set_tray_icon($state);
+    return;
 }
 
 sub DESTROY {
     my ( $self ) = @_;
+    return;
 }
 
 sub new {

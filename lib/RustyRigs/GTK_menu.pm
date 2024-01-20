@@ -32,6 +32,7 @@ sub main_menu_item_clicked {
 
     $main_menu_open = 0;
     $menu->destroy();    # Hide the menu after the choice is made
+    return;
 }
 
 sub main_menu_state {
@@ -122,10 +123,12 @@ sub main_menu {
 
     # XXX: We need to add an event to destroy the menu if it loses focus
     $main_menu->signal_connect( window_state_event => \&main_menu_state );
+    return;
 }
 
 sub DESTROY {
     my ( $self ) = @_;
+    return;
 }
 
 sub new {
