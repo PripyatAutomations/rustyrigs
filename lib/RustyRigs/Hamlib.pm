@@ -471,8 +471,8 @@ sub mic_select {
     } else {
        $main::log->Log("hamlib", "err", "Requested mic select but no cat_mic_(front|back) defined in config!");
        print "Please configure cat_mic_(front|rear) to use this feature...\n";
-       return;
     }
+    return;
 }
 
 sub new {
@@ -493,7 +493,7 @@ sub new {
     if ( !defined $addr || $addr eq "" ) {
         $addr = "localhost:4532";
     }
-    $rig = new Hamlib::Rig($model);
+    $rig = Hamlib::Rig->new($model);
 
     $rig->set_conf( "retry",        "50" );
     $rig->set_conf( 'rig_pathname', $addr );

@@ -7,8 +7,6 @@ use Data::Dumper;
 use Glib qw(TRUE FALSE);
 use Hamlib;
 use Woodpile::GTK3FreqInput;
-#use RustyRigs::Hamlib;
-#use Woodpile;
 
 # Try to make the tooltip's appear faster
 #Gtk3::Settings->get_default->set_property('gtk-tooltip-timeout', 100);
@@ -345,21 +343,6 @@ sub draw_main_win {
     # New widget with 5 whole digits, 3 decimal
     $vfo_freq_entry = Woodpile::GTK3FreqInput->new(8, 0);
     $freq_box = $vfo_freq_entry->{'box'};
-#  XXX: Figure out how to do this...
-#    $vfo_freq_entry->signal_connect(
-#        changed => sub {
-#            my ( $widget, $event ) = @_;
-#
-#            if (!$main::rig_p->is_busy()) {
-#               my $freq = $vfo_freq_entry->get_text();
-#               $log->Log( "vfo", "debug",
-#                   "Changing freq on VFO $curr_vfo to $freq" );
-#               print "Setting VFO " . $curr_vfo . " to freq $freq\n";
-#               $main::rig->set_freq($Hamlib::RIG_VFO_A, $freq);
-#            }
-#            return FALSE;
-#        }
-#    );
 
     # PTT and controls
     # Create a toggle button to represent the lock state
@@ -974,26 +957,42 @@ sub draw_main_win {
     );
 
     #########
-    $box->pack_start( $$freq_box, FALSE, FALSE, 0);
+    my $label_box = Gtk3::Box->new( 'vertical', 0 );
+    my $ctrl_box = Gtk3::Box->new( 'vertical', 0 );
+
+    $box->pack_start( $$freq_box, FALSE, FALSE, 0 );
     $box->pack_start( $ptt_button,      FALSE, FALSE, 0 );
-    $box->pack_start( $meters_dock_box, TRUE,  TRUE,  0);
-    $box->pack_start( $toggle_box,      FALSE, FALSE, 0);
+    $box->pack_start( $meters_dock_box, TRUE,  TRUE,  0 );
+    $box->pack_start( $toggle_box,      FALSE, FALSE, 0 );
     $box->pack_start( $chan_box,        FALSE, FALSE, 0 );
     $box->pack_start( $vfo_sel_button,  FALSE, FALSE, 0 );
-    $box->pack_start( $rig_vol_label,   FALSE, FALSE, 0 );
-    $box->pack_start( $rig_vol_entry,   FALSE, FALSE, 0 );
-    $box->pack_start( $squelch_label,   FALSE, FALSE, 0 );
-    $box->pack_start( $squelch_entry,   FALSE, FALSE, 0 );
-    $box->pack_start( $rf_gain_label,   FALSE, FALSE, 0 );
-    $box->pack_start( $rf_gain_entry,   FALSE, FALSE, 0 );
-    $box->pack_start( $dnr_label,       FALSE, FALSE, 0 );
-    $box->pack_start( $dnr_entry,       FALSE, FALSE, 0 );
-    $box->pack_start( $vfo_power_label, FALSE, FALSE, 0 );
-    $box->pack_start( $vfo_power_entry, FALSE, FALSE, 0 );
-    $box->pack_start( $mode_label,      FALSE, FALSE, 0 );
-    $box->pack_start( $mode_entry,      FALSE, FALSE, 0 );
-    $box->pack_start( $width_label,     FALSE, FALSE, 0 );
-    $box->pack_start( $width_entry,     FALSE, FALSE, 0 );
+    $label_box->pack_start( $rig_vol_label,   FALSE, FALSE, 0 );
+    $ctrl_box->pack_start( $rig_vol_entry,   TRUE, TRUE, 0 );
+
+    $label_box->pack_start( $squelch_label,   FALSE, FALSE, 0 );
+    $ctrl_box->pack_start( $squelch_entry,   TRUE, TRUE, 0 );
+
+    $label_box->pack_start( $rf_gain_label,   FALSE, FALSE, 0 );
+    $ctrl_box->pack_start( $rf_gain_entry,   TRUE, TRUE, 0 );
+
+    $label_box->pack_start( $dnr_label,       FALSE, FALSE, 0 );
+    $ctrl_box->pack_start( $dnr_entry,       TRUE, TRUE, 0 );
+
+    $label_box->pack_start( $vfo_power_label, FALSE, FALSE, 0 );
+    $ctrl_box->pack_start( $vfo_power_entry, TRUE, TRUE, 0 );
+
+    $label_box->pack_start( $mode_label,      FALSE, FALSE, 0 );
+    $ctrl_box->pack_start( $mode_entry,      TRUE, TRUE, 0 );
+
+    $label_box->pack_start( $width_label,     FALSE, FALSE, 0 );
+    $ctrl_box->pack_start( $width_entry,     TRUE, TRUE, 0 );
+
+    my $controls_box = Gtk3::Box->new( 'horizontal', 0 );
+    $controls_box->pack_start( $label_box, FALSE, FALSE, 0 );
+    $controls_box->pack_start( $ctrl_box, TRUE, TRUE, 0 );
+    $box->pack_start( $controls_box,    FALSE, FALSE, 0 );
+    #########
+
     $box->pack_start( $fm_box,          FALSE, FALSE, 0 );
     $box->pack_start( $lock_button,     FALSE, FALSE, 0 );
 

@@ -13,11 +13,11 @@ sub hex_to_gdk_rgba {
     if ( !defined $hex_color ) {
         die "Invalid color (from: " . ( caller(1) )[3] . ")!\n";
     }
-    my ( $r, $g, $b ) = map { hex($_) / 255 } $hex_color =~ m/[\da-f]{2}/ig;
+    my ( $red, $green, $blue ) = map { hex($_) / 255 } $hex_color =~ m/[\da-f]{2}/ig;
 
     # Create a Gtk3::Gdk::RGBA object using the calculated RGBA components
     my $rgba_color =
-      Gtk3::Gdk::RGBA->new( $r, $g, $b, 1.0 );    # 1.0 is alpha (fully opaque)
+      Gtk3::Gdk::RGBA->new( $red, $green, $blue, 1.0 );    # 1.0 is alpha (fully opaque)
 
     return $rgba_color;
 }
@@ -25,15 +25,15 @@ sub hex_to_gdk_rgba {
 sub gdk_rgba_to_hex {
     my ($rgba) = @_;
     
-    my ($r, $g, $b) = map { int($_ * 255 + 0.5) } ($rgba->red, $rgba->green, $rgba->blue);
+    my ($red, $green, $blue) = map { int($_ * 255 + 0.5) } ($rgba->red, $rgba->green, $rgba->blue);
 
-    return sprintf("#%02X%02X%02X", $r, $g, $b);
+    return sprintf("#%02X%02X%02X", $red, $green, $blue);
 }
 
 sub gdk_rgb_to_hex {
     my ($rgb) = @_;
-    my ($r, $g, $b) = map { sprintf("%02X", $_ / 256) } ($rgb->red, $rgb->green, $rgb->blue);
-    return "#$r$g$b";
+    my ($red, $green, $blue) = map { sprintf("%02X", $_ / 256) } ($rgb->red, $rgb->green, $rgb->blue);
+    return "#$red$green$blue";
 }
 
 sub find_offset {
@@ -129,8 +129,8 @@ sub Log {
     shift;
     shift;
     shift;
-    foreach my $a (@_) {
-       $buf .= " " . $a;
+    foreach my $arg (@_) {
+       $buf .= " " . $arg;
     }
     $buf .= "\n";
 
@@ -140,7 +140,7 @@ sub Log {
     # If we've established a log output handler, send it there
     if (defined $self->{'handler'}) {
        my $i = $self->{'handler'};
-       $i->write($buf);
+       $i->append($buf);
     }
 
     # if we're debugging, or no handler send it to stdout

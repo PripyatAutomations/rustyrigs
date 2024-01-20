@@ -333,7 +333,7 @@ sub new {
     $core_debug->set_tooltip_text("Select the core log level");
     my $curr_cl_dbg = -1;
     my $i           = 0;
-    for our $cl_dbg_opt ( keys %Woodpile::Log::log_levels ) {
+    for my $cl_dbg_opt ( keys %Woodpile::Log::log_levels ) {
         if ( $cl_dbg_opt eq $cfg->{'log_level'} ) {
             $curr_cl_dbg = $i;
         }
@@ -357,7 +357,7 @@ sub new {
     $hamlib_debug->set_tooltip_text("Select the logging level of hamlib");
     $i = 0;
     my $cur_hl_dbg = -1;
-    for our $hl_dbg_opt ( keys %RustyRigs::Hamlib::hamlib_debug_levels ) {
+    for my $hl_dbg_opt ( keys %RustyRigs::Hamlib::hamlib_debug_levels ) {
         if ( $hl_dbg_opt eq $cfg->{'hamlib_loglevel'} ) {
             $cur_hl_dbg = $i;
         }

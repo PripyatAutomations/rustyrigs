@@ -3,9 +3,6 @@ package RustyRigs::GTK_icon;
 use strict;
 use warnings;
 use Data::Dumper;
-#use Gtk3;
-#use Pango;
-#use Glib qw(TRUE FALSE);
 
 our $icons;
 our $log;

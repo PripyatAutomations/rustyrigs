@@ -19,7 +19,7 @@ our $end_mark;
 
 my @log_buffer;
 
-sub write {
+sub append {
     ( my $self, my $message ) = @_;
     my $sb = $$cfg->{'scrollback_lines'};
 
