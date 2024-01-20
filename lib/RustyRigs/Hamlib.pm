@@ -267,7 +267,7 @@ sub read_rig {
 
     # Get the RX volume
     my $raw_vol = $rig->get_level_f( $Hamlib::RIG_LEVEL_AF );
-    # This needs sorted out
+    # XXX: This needs sorted out
     if ($raw_vol == 1) {
        print "vol bug... fix me!\n";
        $raw_vol = 0;
@@ -334,12 +334,12 @@ sub read_rig {
     # Set the icons appropriately & update the tooltip
     if (!$ptt) {
        if (!defined $last_ptt || $last_ptt != $ptt) {
-          $main::log->Log("hamlib", "info", "PTT off");
+          $main::log->Log("hamlib", "debug", "PTT off");
        }
        $main::icons->set_icon("idle");
     } else {
        if (!defined $last_ptt || $last_ptt != $ptt) {
-          $main::log->Log("hamlib", "info", "PTT on");
+          $main::log->Log("hamlib", "debug", "PTT on");
        }
        $main::icons->set_icon("transmit");
     }

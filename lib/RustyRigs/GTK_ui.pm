@@ -6,6 +6,7 @@ use Carp;
 use Data::Dumper;
 use Glib qw(TRUE FALSE);
 use Hamlib;
+use Woodpile::GTK3FreqInput;
 #use RustyRigs::Hamlib;
 #use Woodpile;
 
@@ -283,6 +284,7 @@ sub open_gridtools {
     }
 }
 
+# initial bg color of the PTT button, so we can set it red during TX
 our $initial_bg_color;
 sub draw_main_win {
     my ( $self ) = @_;
@@ -359,10 +361,8 @@ sub draw_main_win {
             $main::rig->set_ptt($Hamlib::RIG_VFO_A, $val);
             if ( $val ) {
                 $ptt_button->override_background_color('normal', Gtk3::Gdk::RGBA->new(1.0, 0.0, 0.0, 1.0));
-                print "ptt on\n";
             } else {
                 $ptt_button->override_background_color('normal', $initial_bg_color);
-                print "ptt off\n";
             }
         }
     );
@@ -942,6 +942,12 @@ sub draw_main_win {
     # XXX: This will change soon as _accel will be wrapped in window object
     my $fm_p = RustyRigs::FM->new( $cfg, $w_main, $w_main_accel );
     $fm_box = $fm_p->{box};
+
+    # New widget with 5 whole digits, 3 decimal
+    my $tmp = Woodpile::GTK3FreqInput->new(5, 3);
+    my $tmp_box = $tmp->{'box'};
+    $tmp->set_value("14074.003");
+    $box->pack_start($$tmp_box, FALSE, FALSE, 0);
 
     # Create a toggle button to represent the lock state
     my $key_lock = $cfg->{'key_lock'};

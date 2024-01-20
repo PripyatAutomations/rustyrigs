@@ -401,12 +401,10 @@ sub new {
     if ($gt_ah) {
         if (defined $gw) {
            $gw->iconify();
-           $gw->set_visible(0);
         }
     } else {
         if (defined $gw) {
            $gw->deiconify();
-           $gw->set_visible(1);
         }
     }
 
