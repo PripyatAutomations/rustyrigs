@@ -123,7 +123,9 @@ my $pending_changes = {
     }
 };
 
-our $volume;
+# state variables
+our $volume = 0;
+our $active_mic;
 
 ########################################################################
 sub hamlib_debug_level {
@@ -135,9 +137,7 @@ sub hamlib_debug_level {
         return $val;
     }
     else {
-        $main::log->Log( "hamlib", "warn",
-"hamlib_debug_level: returning default Warnings: $new_lvl unrecognized!"
-        );
+        $main::log->Log( "hamlib", "warn", "hamlib_debug_level: returning default Warnings: $new_lvl unrecognized!" );
         return $Hamlib::RIG_DEBUG_WARN;
     }
 }
@@ -266,7 +266,13 @@ sub read_rig {
     }
 
     # Get the RX volume
-    $volume = int($rig->get_level_f( $Hamlib::RIG_LEVEL_AF ) * 100);
+    my $raw_vol = $rig->get_level_f( $Hamlib::RIG_LEVEL_AF );
+    # This needs sorted out
+    if ($raw_vol == 1) {
+       print "vol bug... fix me!\n";
+       $raw_vol = 0;
+    }
+    $volume = int($raw_vol) * 100;
     if (defined $volume) {
 #       print "setting volume: $volume\n";
        $self->{'volume'} = $volume;
@@ -294,6 +300,7 @@ sub read_rig {
     $squelch = $rig->get_level_i($Hamlib::RIG_LEVEL_SQL);
 #    $temp = $rig->get_level($Hamlib::RIG_LEVEL_TEMP);
 #    $vdd = $rig->get_level($Hamlib::RIG_LEVEL_VDD);
+    
     my $stats = $vfos->{'stats'};
     $stats->{'alc'} = $alc;
     $stats->{'comp'} = $comp;
@@ -405,6 +412,59 @@ sub is_gui_busy {
    return $gui_applying_changes;
 }
 
+# Selects front or rear microphone input
+sub mic_select {
+    my ( $self, $mic ) = @_;
+    my $rig = $main::rig;
+    my $line_term = $$cfg->{'cat_line_term'};
+
+    # default to yaesu's ';'
+    if (!defined $line_term) {
+       $line_term = ';';
+    }
+
+    if (!defined $mic) {
+       $mic = !$self->{'active_mic'};
+    }
+    $self->{'active_mic'} = $mic;
+
+    # which mic? 1 for rear
+    my $cat_cmds;
+    if ($mic) {
+       $cat_cmds = $$cfg->{'cat_mic_rear'};
+    } else {
+       $cat_cmds = $$cfg->{'cat_mic_front'};
+    }
+    my $str_mic = $mic ? "back" : "front";
+    my $cat_line_term = $$cfg->{'cat_line_term'};
+
+    if (defined $cat_cmds) {
+       $main::log->Log("hamlib", "info", "Switching microphone to $str_mic ($mic)");
+       print "Switch to $str_mic ($mic)\n";
+       my @commands = split($line_term, $cat_cmds);
+       foreach my $cmd (@commands) {
+           my ( $out, $out_len );
+
+           # Trim trailing and leading spaces and append trailing ';'
+           $cmd =~ s/^\s+|\s+$//g;
+           $cmd = "${cmd}${line_term}";
+           # send the command
+
+           print "Sending CAT command: $cmd -";
+           $rig->rig_send_raw($cmd, length($cmd), $out, $out_len, $cat_line_term);
+           if (defined $out) {
+              print " returned '$out'\n";
+           } else {
+              print "\n";
+           }
+       }
+    } else {
+       $main::log->Log("hamlib", "err", "Requested mic select but no cat_mic_(front|back) defined in config!");
+       print "Please configure cat_mic_(front|rear) to use this feature...\n";
+       return;
+    }
+}
+
 sub new {
     ( my $class, my $cfg_ref ) = @_;
     $cfg = $cfg_ref;
@@ -460,18 +520,20 @@ sub new {
       Glib::Timeout->add( $poll_interval, \&exec_read_rig );
 
     my $self = {
-        rig                      => $rig,
+        active_mic               => \$active_mic,
+        %hamlib_debug_levels     => \%hamlib_debug_levels,
         gui_applying_changes     => \$gui_applying_changes,
+        @pl_tones                => \@pl_tones,
+        rig                      => $rig,
         rigctld_applying_changes => \$rigctld_applying_changes,
         timer                    => $rig_timer,
         update_needed            => \$update_needed,
         vfos                     => \$vfos,
-        %hamlib_debug_levels     => \%hamlib_debug_levels,
-        @pl_tones                => \@pl_tones,
         %vfo_mapping             => \%vfo_mapping,
         @vfo_widths_am           => \@vfo_widths_am,
         @vfo_widths_fm           => \@vfo_widths_fm,
         @vfo_widths_ssb          => \@vfo_widths_ssb,
+        volume                   => \$volume
     };
     bless $self, $class;
 

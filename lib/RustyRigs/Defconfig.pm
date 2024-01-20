@@ -15,6 +15,10 @@ our $def_cfg = {
     rigctl_model        => $Hamlib::RIG_MODEL_NETRIGCTL,
     rotctl_addr         => 'localhost:4533',
     rotctl_model        => $Hamlib::ROT_MODEL_NETROTCTL,
+    # CAT commands
+    cat_line_term       => ';',
+    cat_mic_front       => "EX11050;EX09010;EX08090;EX06050;",
+    cat_mic_rear        => "EX11051;EX09011;EX08091;EX06051;",
     # general configuration
     active_vfo          => 'A',
     always_on_top       => 0,       # 1 will keep window always on top by default
@@ -57,6 +61,7 @@ our $def_cfg = {
     key_width           => 'Z',
     log_level           => "debug",
     meters_in_main      => 1,			  # 1 will show meters in main window
+    mic_select          => 0,
     my_qth              => "AA00aa",		  # my 6 digit gridsquare
     my_qth_elev         => 300,			  # QTH elevation in *METERS*
     poll_interval       => 250,                      # every 1/4 sec

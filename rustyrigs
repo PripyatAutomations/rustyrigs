@@ -111,15 +111,15 @@ sub toggle_locked {
     }
 
     my @widgets = (
-       $gtk_ui->{'dnr_entry'},
-       $gtk_ui->{'mem_load_button'},
+#       $gtk_ui->{'dnr_entry'},
+#       $gtk_ui->{'mem_load_button'},
        $gtk_ui->{'ptt_button'},
        $gtk_ui->{'mode_entry'},
-       $gtk_ui->{'rf_gain_entry'},
+#       $gtk_ui->{'rf_gain_entry'},
        $gtk_ui->{'rig_vol_entry'},
        $gtk_ui->{'vfo_freq_entry'},
        $gtk_ui->{'vfo_power_entry'},
-       $gtk_ui->{'vfo_sel_button'},
+#       $gtk_ui->{'vfo_sel_button'},
        $gtk_ui->{'width_entry'}
     );
 

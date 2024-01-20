@@ -400,13 +400,13 @@ sub new {
 
     if ($gt_ah) {
         if (defined $gw) {
-           print "hide\n";
            $gw->iconify();
+           $gw->set_visible(0);
         }
     } else {
         if (defined $gw) {
-           print "show\n";
            $gw->deiconify();
+           $gw->set_visible(1);
         }
     }
 

@@ -345,6 +345,60 @@ sub draw_main_win {
        print "BUG!!! Undocked meters not yet implemented\n";
     }
 
+
+    # PTT and controls
+    # Create a toggle button to represent the lock state
+    my $key_ptt = $cfg->{'key_ptt'};
+    $ptt_button = Gtk3::ToggleButton->new_with_label("PTT ($key_ptt)");
+    $initial_bg_color = $ptt_button->get_style_context->get_background_color('normal');
+    $ptt_button->signal_connect(
+        toggled => sub {
+            my ( $self ) = @_;
+            my $val = $ptt_button->get_active();
+            $main::log->Log("hamlib", "info", "PTT set to $val");
+            $main::rig->set_ptt($Hamlib::RIG_VFO_A, $val);
+            if ( $val ) {
+                $ptt_button->override_background_color('normal', Gtk3::Gdk::RGBA->new(1.0, 0.0, 0.0, 1.0));
+                print "ptt on\n";
+            } else {
+                $ptt_button->override_background_color('normal', $initial_bg_color);
+                print "ptt off\n";
+            }
+        }
+    );
+    $w_main_accel->connect(
+        ord( $cfg->{'key_ptt'} ),
+        $cfg->{'shortcut_key'},
+        'visible',
+        sub {
+            my ( $self ) = @_;
+            
+            if (!$main::locked) {
+               my $val = $ptt_button->get_active();
+               $ptt_button->set_active(!$val);
+            }
+        }
+    );
+
+    my $toggle_box = Gtk3::Box->new('horizontal', 5);
+    my $mic_toggle = Gtk3::CheckButton->new();
+    $mic_toggle->set_label('Use rear mic?');
+    $mic_toggle->set_active( $cfg->{'mic_select'} );
+    $mic_toggle->set_can_focus(1);
+    $mic_toggle->signal_connect(
+        'toggled' => sub {
+            my ( $button ) = @_;
+
+            if ( $button->get_active() ) {
+                $main::rig_p->mic_select(1);
+            }
+            else {
+                $main::rig_p->mic_select(0);
+            }
+        }
+    );
+    $toggle_box->pack_start( $mic_toggle, FALSE, FALSE, 0);
+
     #################
     # Channel stuff #
     #################
@@ -447,7 +501,6 @@ sub draw_main_win {
         }
     );
     $chan_box->pack_start( $mem_btn_box, FALSE, FALSE, 0 );
-
 
     # VFO choser:
     $vfo_sel_button =
@@ -665,7 +718,6 @@ sub draw_main_win {
                  $main::log->Log("gtkui", "err", "Unknown mode: $selected_item");
                }
                my $vfo = $vfos->{$curr_vfo};
-               print "mode: " . Dumper($hl_mode) . "\n";
                $main::rig->set_mode($hl_mode, $vfo->{'width'});
             }
             w_main_fm_toggle();
@@ -918,44 +970,12 @@ sub draw_main_win {
         }
     );
 
-    # Create a toggle button to represent the lock state
-    my $key_ptt = $cfg->{'key_ptt'};
-    $ptt_button = Gtk3::ToggleButton->new_with_label("PTT ($key_ptt)");
-    $initial_bg_color = $ptt_button->get_style_context->get_background_color('normal');
-    $ptt_button->signal_connect(
-        toggled => sub {
-            my ( $self ) = @_;
-            my $val = $ptt_button->get_active();
-            $main::log->Log("hamlib", "info", "PTT set to $val");
-            $main::rig->set_ptt($Hamlib::RIG_VFO_A, $val);
-            if ( $val ) {
-                $ptt_button->override_background_color('normal', Gtk3::Gdk::RGBA->new(1.0, 0.0, 0.0, 1.0));
-                print "ptt on\n";
-            } else {
-                $ptt_button->override_background_color('normal', $initial_bg_color);
-                print "ptt off\n";
-            }
-        }
-    );
-    $w_main_accel->connect(
-        ord( $cfg->{'key_ptt'} ),
-        $cfg->{'shortcut_key'},
-        'visible',
-        sub {
-            my ( $self ) = @_;
-            
-            if (!$main::locked) {
-               my $val = $ptt_button->get_active();
-               $ptt_button->set_active(!$val);
-            }
-        }
-    );
-
     #########
-    $box->pack_start( $meters_dock_box, TRUE, TRUE, 0);
+    $box->pack_start( $meters_dock_box, TRUE,  TRUE,  0);
     $box->pack_start( $ptt_button,      FALSE, FALSE, 0 );
-    $box->pack_start( $chan_box, FALSE, FALSE, 0 );
-    $box->pack_start( $vfo_sel_button, FALSE, FALSE, 0 );
+    $box->pack_start( $toggle_box,      FALSE, FALSE, 0);
+    $box->pack_start( $chan_box,        FALSE, FALSE, 0 );
+    $box->pack_start( $vfo_sel_button,  FALSE, FALSE, 0 );
     $box->pack_start( $vfo_freq_label,  FALSE, FALSE, 0 );
     $box->pack_start( $vfo_freq_entry,  FALSE, FALSE, 0 );
     $box->pack_start( $rig_vol_label,   FALSE, FALSE, 0 );
