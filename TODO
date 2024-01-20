@@ -15,13 +15,8 @@
   - numeric entry field
   - up & down buttons
   - step slider
-* While transmitting, make the power meter show the RFPOWER meter instead of commanded power
-  if possible.
-* Add a squelch control
 * Add preamp control
 * Add mic gain control
-* Add DNR/DNF controls
-* PTT button & Light
 * Add signal bar to SWR widget
   - implement multiple bars (ugh!)
 * Add a widget (scale/slider?) under the freq selector to allow chosing the step size
