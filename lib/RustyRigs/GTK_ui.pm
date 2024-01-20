@@ -36,6 +36,7 @@ our $vfo_sel_button;
 our $width_entry;
 our $box;
 our $fm_box;
+our $freq_box;
 our $lock_button;
 our $lock_item;
 our $power_changing;
@@ -331,22 +332,24 @@ sub draw_main_win {
     $w_main->add_accel_group($w_main_accel);
     $box = Gtk3::Box->new( 'vertical', 5 );
 
-    # add a placeholder box we can insert/edit easily
-    my $meters_dock_box = Gtk3::Box->new('vertical', 5);
-    $self->{'meter_dock'} = \$meters_dock_box;
-
-    $meters = RustyRigs::Meterbar->render_meterbars( \$main::meters, \$cfg, $vfos, $w_main );
-    # Do we render the meters in the main window?
-    my $meters_in_main = $cfg->{'meters_in_main'};
-    if ($meters_in_main) {
-       my $meter_box = $meters->{'box'};
-       $meters_dock_box->pack_start( $meter_box, TRUE, TRUE, 0 );
-    } else {
-       # Show the meters window
-#       $meters->show();
-       print "BUG!!! Undocked meters not yet implemented\n";
-    }
-
+    # New widget with 5 whole digits, 3 decimal
+    $vfo_freq_entry = Woodpile::GTK3FreqInput->new(8, 0);
+    $freq_box = $vfo_freq_entry->{'box'};
+#  XXX: Figure out how to do this...
+#    $vfo_freq_entry->signal_connect(
+#        changed => sub {
+#            my ( $widget, $event ) = @_;
+#
+#            if (!$main::rig_p->is_busy()) {
+#               my $freq = $vfo_freq_entry->get_text();
+#               $log->Log( "vfo", "debug",
+#                   "Changing freq on VFO $curr_vfo to $freq" );
+#               print "Setting VFO " . $curr_vfo . " to freq $freq\n";
+#               $main::rig->set_freq($Hamlib::RIG_VFO_A, $freq);
+#            }
+#            return FALSE;
+#        }
+#    );
 
     # PTT and controls
     # Create a toggle button to represent the lock state
@@ -379,6 +382,22 @@ sub draw_main_win {
             }
         }
     );
+
+    # add a placeholder box we can insert/edit easily
+    my $meters_dock_box = Gtk3::Box->new('vertical', 5);
+    $self->{'meter_dock'} = \$meters_dock_box;
+
+    $meters = RustyRigs::Meterbar->render_meterbars( \$main::meters, \$cfg, $vfos, $w_main );
+    # Do we render the meters in the main window?
+    my $meters_in_main = $cfg->{'meters_in_main'};
+    if ($meters_in_main) {
+       my $meter_box = $meters->{'box'};
+       $meters_dock_box->pack_start( $meter_box, TRUE, TRUE, 0 );
+    } else {
+       # Show the meters window
+#       $meters->show();
+       print "BUG!!! Undocked meters not yet implemented\n";
+    }
 
     my $toggle_box = Gtk3::Box->new('horizontal', 5);
     my $mic_toggle = Gtk3::CheckButton->new();
@@ -576,33 +595,6 @@ sub draw_main_win {
         }
     );
 
-    # Active VFO settings
-    my $vfo_freq_label =
-      Gtk3::Label->new( 'Frequency (Hz) (' . $cfg->{'key_freq'} . ')' );
-
-    $vfo_freq_entry = Gtk3::SpinButton->new_with_range(
-        $act_vfo->{'min_freq'},
-        $act_vfo->{'max_freq'},
-        $act_vfo->{'vfo_step'}
-    );
-    $vfo_freq_entry->set_numeric(TRUE);
-    $vfo_freq_entry->set_wrap(FALSE);
-    $vfo_freq_entry->set_tooltip_text("VFO frequency input");
-
-    $vfo_freq_entry->signal_connect(
-        changed => sub {
-            my ( $widget, $event ) = @_;
-
-            if (!$main::rig_p->is_busy()) {
-               my $freq = $vfo_freq_entry->get_text();
-               $log->Log( "vfo", "debug",
-                   "Changing freq on VFO $curr_vfo to $freq" );
-               print "Setting VFO " . $curr_vfo . " to freq $freq\n";
-               $main::rig->set_freq($Hamlib::RIG_VFO_A, $freq);
-            }
-            return FALSE;
-        }
-    );
 
     # XXX: ACCEL-Replace these with a global function
     $w_main_accel->connect(
@@ -943,11 +935,6 @@ sub draw_main_win {
     my $fm_p = RustyRigs::FM->new( $cfg, $w_main, $w_main_accel );
     $fm_box = $fm_p->{box};
 
-    # New widget with 5 whole digits, 3 decimal
-    my $tmp = Woodpile::GTK3FreqInput->new(5, 3);
-    my $tmp_box = $tmp->{'box'};
-    $tmp->set_value("14074.003");
-    $box->pack_start($$tmp_box, FALSE, FALSE, 0);
 
     # Create a toggle button to represent the lock state
     my $key_lock = $cfg->{'key_lock'};
@@ -977,13 +964,12 @@ sub draw_main_win {
     );
 
     #########
-    $box->pack_start( $meters_dock_box, TRUE,  TRUE,  0);
+    $box->pack_start( $$freq_box, FALSE, FALSE, 0);
     $box->pack_start( $ptt_button,      FALSE, FALSE, 0 );
+    $box->pack_start( $meters_dock_box, TRUE,  TRUE,  0);
     $box->pack_start( $toggle_box,      FALSE, FALSE, 0);
     $box->pack_start( $chan_box,        FALSE, FALSE, 0 );
     $box->pack_start( $vfo_sel_button,  FALSE, FALSE, 0 );
-    $box->pack_start( $vfo_freq_label,  FALSE, FALSE, 0 );
-    $box->pack_start( $vfo_freq_entry,  FALSE, FALSE, 0 );
     $box->pack_start( $rig_vol_label,   FALSE, FALSE, 0 );
     $box->pack_start( $rig_vol_entry,   FALSE, FALSE, 0 );
     $box->pack_start( $squelch_label,   FALSE, FALSE, 0 );

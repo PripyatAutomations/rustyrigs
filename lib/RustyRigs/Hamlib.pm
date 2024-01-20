@@ -63,6 +63,7 @@ our $vfos = {
         min_power  => 5,
         max_power  => 100,
         power_step => 5,
+        ptt        => 0,
         min_freq   => 3000,
         max_freq   => 56000000,
         squelch    => 0,
@@ -89,6 +90,7 @@ our $vfos = {
         width      => 3000,
         min_power  => 5,
         max_power  => 100,
+        ptt        => 0,
         power_step => 5,
         min_freq   => 3000,
         max_freq   => 56000000,
@@ -162,7 +164,7 @@ sub set_freq {
     ( my $self, my $freq ) = @_;
     my $curr_vfo = $$cfg->{'active_vfo'};
     $vfos->{$curr_vfo}{'freq'} = $freq;
-#    $rig->set_freq( $curr_vfo, $freq );
+    $rig->set_freq( $curr_vfo, $freq );
 }
 
 
