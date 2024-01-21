@@ -953,39 +953,46 @@ sub draw_main_win {
     my $label_box = Gtk3::Box->new( 'vertical', 5 );
     my $ctrl_box = Gtk3::Box->new( 'vertical', 5 );
 
-    $box->pack_start( $$freq_box, FALSE, FALSE, 0 );
+    $box->pack_start( $$freq_box,       FALSE, FALSE, 0 );
     $box->pack_start( $ptt_button,      FALSE, FALSE, 0 );
     $box->pack_start( $meters_dock_box, TRUE,  TRUE,  0 );
     $box->pack_start( $toggle_box,      FALSE, FALSE, 0 );
     $box->pack_start( $chan_box,        FALSE, FALSE, 0 );
     $box->pack_start( $vfo_sel_button,  FALSE, FALSE, 0 );
+
+    $rig_vol_label->set_alignment(1, 0.5);
     $label_box->pack_start( $rig_vol_label,   FALSE, FALSE, 0 );
-    $ctrl_box->pack_start( $rig_vol_entry,   TRUE, TRUE, 0 );
+    $ctrl_box->pack_start( $rig_vol_entry,    TRUE, TRUE, 0 );
 
+    $squelch_label->set_alignment(1, 0.5);
     $label_box->pack_start( $squelch_label,   FALSE, FALSE, 0 );
-    $ctrl_box->pack_start( $squelch_entry,   TRUE, TRUE, 0 );
+    $ctrl_box->pack_start( $squelch_entry,    TRUE, TRUE, 0 );
 
+    $rf_gain_label->set_alignment(1, 0.5);
     $label_box->pack_start( $rf_gain_label,   FALSE, FALSE, 0 );
-    $ctrl_box->pack_start( $rf_gain_entry,   TRUE, TRUE, 0 );
+    $ctrl_box->pack_start( $rf_gain_entry,    TRUE, TRUE, 0 );
 
+    $dnr_label->set_alignment(1, 0.5);
     $label_box->pack_start( $dnr_label,       FALSE, FALSE, 0 );
-    $ctrl_box->pack_start( $dnr_entry,       TRUE, TRUE, 0 );
+    $ctrl_box->pack_start( $dnr_entry,        TRUE, TRUE, 0 );
 
+    $vfo_power_label->set_alignment(1, 0.5);
     $label_box->pack_start( $vfo_power_label, FALSE, FALSE, 0 );
-    $ctrl_box->pack_start( $vfo_power_entry, TRUE, TRUE, 0 );
+    $ctrl_box->pack_start( $vfo_power_entry,  TRUE, TRUE, 0 );
 
+    $mode_label->set_alignment(1, 0.5);
     $label_box->pack_start( $mode_label,      FALSE, FALSE, 0 );
-    $ctrl_box->pack_start( $mode_entry,      TRUE, TRUE, 0 );
+    $ctrl_box->pack_start( $mode_entry,       TRUE, TRUE, 0 );
 
+    $width_label->set_alignment(1, 0.5);
     $label_box->pack_start( $width_label,     FALSE, FALSE, 0 );
-    $ctrl_box->pack_start( $width_entry,     TRUE, TRUE, 0 );
+    $ctrl_box->pack_start( $width_entry,      TRUE, TRUE, 0 );
 
     my $controls_box = Gtk3::Box->new( 'horizontal', 0 );
-    $controls_box->pack_start( $label_box, FALSE, FALSE, 0 );
-    $controls_box->pack_start( $ctrl_box, TRUE, TRUE, 0 );
-    $box->pack_start( $controls_box,    FALSE, FALSE, 0 );
-    #########
+    $controls_box->pack_start( $label_box,    FALSE, TRUE, 0 );
+    $controls_box->pack_start( $ctrl_box,     TRUE, TRUE, 0 );
 
+    $box->pack_start( $controls_box,    FALSE, FALSE, 0 );
     $box->pack_start( $fm_box,          FALSE, FALSE, 0 );
     $box->pack_start( $lock_button,     FALSE, FALSE, 0 );
 

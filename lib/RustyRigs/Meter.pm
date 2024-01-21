@@ -102,7 +102,8 @@ sub new {
        $bar_label->override_font($font);
        $val_label->override_font($font);
     }
-
+    $bar_label->set_alignment(1, 0.5);
+    $val_label->set_alignment(1, 0.5);
     my $bar = Gtk3::Box->new( 'horizontal', 0 );
     my $bar_sep = Gtk3::Separator->new('horizontal');
     my $val_sep = Gtk3::Separator->new('horizontal');
