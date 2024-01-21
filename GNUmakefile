@@ -98,6 +98,8 @@ endif
 ###############
 critic:
 	perlcritic rustyrigs $(shell find lib -name \*.pm)
+lines:
+	cat $(shell find . -name \*.pm) rustyrigs | wc -l
 
 ################
 # Debian stuff #
