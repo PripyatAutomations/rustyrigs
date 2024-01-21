@@ -161,9 +161,9 @@ sub dock_meterbars {
 #       $dock->pack_start($meters, TRUE, TRUE, 0);
 #       $docked = 1;
     } else {
-       print "already docked!\n";
+       $main::log->Log("gtkui", "debug", "meters already docked!");
     }
-    print "dock meters win\n";
+    $main::log->Log("gtkui", "debug", "dock meters win");
     return;
 }
 
@@ -172,7 +172,7 @@ sub hide_meterbars {
     my $dock = $self->{'meter_dock'};
     my $gtk_ui = $main::gtk_ui;
 
-    print "hide meters win\n";
+    $main::log->Log("gtkui", "debug", "hide meters win");
     return;
 }
 
@@ -185,7 +185,7 @@ sub show_meterbar_win {
     if ($docked) {
        # XXX: Remove from dock first
     }
-    print "show meters win\n";
+    $main::log->Log("gtkui", "debug", "show meters win");
     return;
 }
 
@@ -223,7 +223,7 @@ sub render_meterbars {
           $meter_box->pack_start( $widget->{'grid'}, TRUE, TRUE, 0 );
        }
        else {
-          print "skipping disabled meter: $m_name\n";
+          $main::log->Log("gtkui", "debug", "skipping disabled meter: $m_name");
        }
     }
 

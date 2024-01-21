@@ -153,7 +153,6 @@ sub w_main_show {
     if ($hide_lv_too) {
        my $lv = $main::logview;
 
-       print "showing logview too\n";
        # Raise logview with main window, if configured to do so
        if (defined $lv) {
           my $w = $lv->{'window'};
@@ -161,11 +160,7 @@ sub w_main_show {
              $$w->set_visible(1);
              $$w->deiconify();
              $$w->get_window->set_skip_taskbar_hint(FALSE);
-          } else {
-             print "No logview window\n";
           }
-       } else {
-          print "No logview\n";
        }
     }
     $w_main->show_all();
@@ -246,7 +241,7 @@ sub refresh_available_widths {
     }
 
     if ( $val == 0 ) {
-       print "width == 0, caller: " . ( caller(1) )[3] . "\n";
+       $main::log->Log("gtkui", "debug", "width == 0, caller: " . (caller(1))[3]);
     }
 
     if ( $vfo->{'mode'} eq "FM" ) {
@@ -387,7 +382,7 @@ sub draw_main_win {
     } else {
        # Show the meters window
 #       $meters->show();
-       print "BUG!!! Undocked meters not yet implemented\n";
+       $main::log->Log("gtkui", "bug", "BUG!!! Undocked meters not yet implemented");
     }
 
     my $toggle_box = Gtk3::Box->new('horizontal', 5);
@@ -885,7 +880,7 @@ sub draw_main_win {
                $main::log->Log("ui", "debug", "change power: dragging: $dragging - change: $change. val $value oldval: $oldval hlval: $hlval");
 
                if ( !$power_changing && $dragging < 2 ) {
-                   print "rig_power widget dragging: $dragging < 2, not changing value\n";
+                   $main::log->Log("gtkui", "bug", "rig_power widget dragging: $dragging < 2, not changing value");
                    return FALSE;
                }
 
@@ -894,13 +889,13 @@ sub draw_main_win {
                    my $rp = $main::rig_p->{'gui_applying_changes'};
                    $$rp = TRUE;
                    $act_vfo->{'power'} = $value;
-                   print "applying power: $value (change: $change, hlval: $hlval)\n";
+                   $main::log->Log("gtkui", "info", "applying power: $value (change: $change, hlval: $hlval)");
                    my $rig = $main::rig;
                    $rig->set_level($Hamlib::RIG_LEVEL_RFPOWER, $hlval);
                    $$rp = FALSE;
                }
                else {    # reject change otherwise
-                   print "rig_power widget: rejecting power change $change in excess of limit $max_change\n";
+                   $main::log->Log("gtkui", "core", "rig_power widget: rejecting power change $change in excess of limit $max_change");
                    return FALSE;
                }
                $power_changing = FALSE;
@@ -1087,8 +1082,6 @@ sub update_widgets {
         $power_changing = TRUE;        
         $vfo_power_entry->set_value( $vfo->{'power'} );
         $power_changing = FALSE;
-    } else {
-#        print "skipping GUI update as read_rig() is running!\n";
     }
     return;
 }

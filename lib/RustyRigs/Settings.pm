@@ -60,20 +60,16 @@ sub print_signal_info {
 sub save {
    my ( $self, $tc ) = @_;
 
-   print "self: " . Dumper($self) . " // " . ( caller(1) )[3] . "\n";
    if (defined $tc) {
         $main::log->Log( "config", "info",
             "Merging settings into in-memory config" );
         my $tc_dump = Dumper($tc);
-        print "Changes to be applied:\n$tc_dump\n";
         $main::log->Log( "config", "debug", "Applying config changes:\n\t$tc_dump");
-        # apply temporary settings to main
         $main::cfg_p->apply($tc, FALSE);
         $main::log->Log( "core", "warn", "Please restart to apply changes!\n");
         main::restart();
     }
     else {
-        print "No changes to apply.\n";
         $main::log->Log( "config", "info", "no changes to save" );
     }
     $w_settings->close();

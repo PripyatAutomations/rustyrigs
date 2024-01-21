@@ -208,7 +208,7 @@ sub next_vfo {
        $vfo = shift;
     }
     else {
-       print "not enough arguments to next_vfo\n";
+       $main::log->Log("hamlib", "bug", "not enough arguments to next_vfo");
        return;
     }
 
@@ -277,18 +277,17 @@ sub read_rig {
     my $raw_vol = $rig->get_level_f( $Hamlib::RIG_LEVEL_AF );
     # XXX: This needs sorted out
     if ($raw_vol == 1) {
-       print "vol bug... fix me!\n";
+       $main::log->Log("hamlib", "bug", "vol bug hack... fix me!");
        $raw_vol = 0;
     }
     $volume = int($raw_vol) * 100;
     if (defined $volume) {
-#       print "setting volume: $volume\n";
        $self->{'volume'} = $volume;
        my $rve = $main::gtk_ui->{'rig_vol_entry'};
        $$rve->set_value($volume);
     }
     else {
-       print "no volume\n";
+       $main::log->Log("hamlib", "bug", "no volume");
        $volume = 0;
     }
 
@@ -323,8 +322,7 @@ sub read_rig {
     $stats->{'temp'} = $temp;
     $stats->{'vdd'} = $vdd;
     $stats->{'signal'} = $rig->get_level_f( $curr_hlvfo, $Hamlib::RIG_LEVEL_STRENGTH );
-#    print "[read_rig] power: $power\trfpower: $rfpower\tmode: $textmode ($mode)\tstrength: " . $stats->{'signal'} . "\tswr: $swr\tvolume: $volume\talc $alc\tcomp: $comp\tsquelch: $squelch\tdnr: $dnr\n";
-
+#    $main::log->Log("hamlib", "debug", "[read_rig] power: $power\trfpower: $rfpower\tmode: $textmode ($mode)\tstrength: " . $stats->{'signal'} . "\tswr: $swr\tvolume: $volume\talc $alc\tcomp: $comp\tsquelch: $squelch\tdnr: $dnr");
     #    my $atten = $rig->{caps}->{attenuator};
     #    $stats->{'atten'} = $atten;
     #    $main::log->Log("hamlib", "debug", "Attenuators:\t\t@$atten");
@@ -370,7 +368,7 @@ sub exec_read_rig {
 
     # Don't read the rig while GUI is applying changes...
     if ($gui_applying_changes) {
-       print "skipping read_rig as GUI update in progress\n";
+       $main::log->Log("hamlib", "debug", "skipping read_rig as GUI update in progress");
        return TRUE;
     }
     $main::gtk_ui->update_widgets();
@@ -450,7 +448,6 @@ sub mic_select {
 
     if (defined $cat_cmds) {
        $main::log->Log("hamlib", "info", "Switching microphone to $str_mic ($mic)");
-       print "Switch to $str_mic ($mic)\n";
        my @commands = split($line_term, $cat_cmds);
        foreach my $cmd (@commands) {
            my ( $out, $out_len );
@@ -460,17 +457,14 @@ sub mic_select {
            $cmd = "${cmd}${line_term}";
            # send the command
 
-           print "Sending CAT command: $cmd -";
+           $main::log->Log("hamlib", "debug", "Sending CAT command: $cmd");
            $rig->rig_send_raw($cmd, length($cmd), $out, $out_len, $cat_line_term);
            if (defined $out) {
-              print " returned '$out'\n";
-           } else {
-              print "\n";
+              $main::log->Log("hamlib", "debug", "Command returned '$out");
            }
        }
     } else {
        $main::log->Log("hamlib", "err", "Requested mic select but no cat_mic_(front|back) defined in config!");
-       print "Please configure cat_mic_(front|rear) to use this feature...\n";
     }
     return;
 }

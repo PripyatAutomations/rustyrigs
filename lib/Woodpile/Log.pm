@@ -60,9 +60,9 @@ sub Log {
     }
 
     # if we're debugging, or no handler send it to stdout
-    if (!defined $self->{'handler'} || $lvl eq 'debug') {
+#    if (!defined $self->{'handler'} || $lvl eq 'debug') {
        print $buf;
-    }
+#    }
     return;
 }
 
@@ -80,7 +80,7 @@ sub set_log_level {
 sub add_handler {
    ( my $self, my $handler ) = @_;
 
-    $self->Log("core", "notice", "Switching logging to external handler, tty will go silent except runtime errors/debugging info... Logfile is at " . $self->{'log_file'});
+#    $self->Log("core", "notice", "Switching logging to external handler, tty will go silent except runtime errors/debugging info... Logfile is at " . $self->{'log_file'});
     $self->{'handler'} = $handler;
     return;
 }

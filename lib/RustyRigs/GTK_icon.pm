@@ -23,17 +23,16 @@ sub get_icon {
     my $ico = $icons->{$name};
 
     if (defined $ico) {
-#       print "returning cached icon $name\n";
+#       $main::log->Log("gtkui", "debug", "returning cached icon $name");
        return $ico;
     }
 
     # Nope, lets try to resolve it via config file
     my $key = "icon_$name";
     my $cfg_ico = $$cfg->{$key};
-#    print "caller: " . ( caller(1) )[3] . " name: " . Dumper($name);
 
     if (!defined $cfg_ico) {
-       print "No icon specified for $name in config!\n";
+       $main::log->Log("gtkui", "debug", "No icon specified for $name in config!");
        return;
     }
 
@@ -73,7 +72,6 @@ sub load_all {
 sub get_state_icon {
     my ( $state ) = @_;
 
-#    print "get_state_icon: " . Dumper($state) . "\n";
     # look up the icon, if it's available return it,
     my $ico = $main::icons->get_icon($state);
     if (!defined $ico) {
@@ -87,7 +85,7 @@ sub set_tray_tooltip {
     my ( $self, $icon, $tooltip_text ) = @_;
 
     if (!defined $icon) {
-       print "\$tray_icon undefined\n";
+       $main::log->Log("set_tray_tooltip: \$tray_icon undefined");
        return;
     }
 
@@ -99,7 +97,6 @@ sub set_tray_tooltip {
 #############
 sub set_tray_icon {
     my ( $self, $status ) = @_;
-#    print "set_tray_icon: status: " . Dumper($status) . "\n";
 
     my $tray_icon = $main::icons->{'tray_icon'};
     $$tray_icon->set_from_pixbuf(get_state_icon($status));
@@ -174,7 +171,6 @@ sub set_icon {
         $main::app_name . ": $state_txt " . $$cfg->{'rigctl_addr'} );
 
     # Find the appropriate icon
-#    print "set_icon: state: " . Dumper($state) . "\n";
     my $icon = get_state_icon($state);
 
     # Apply it to main window & system tray icon
