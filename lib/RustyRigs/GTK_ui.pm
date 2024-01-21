@@ -207,7 +207,7 @@ sub switch_vfo {
     my $vfo = shift;
 
     $log->Log( "vfo", "info", "Switching to VFO $vfo" );
-    $vfo_sel_button->set_label( "VFO: "
+    $vfo_sel_button->set_label( "Active VFO: "
           . $main::rig_p->next_vfo($vfo) . " ("
           . $cfg->{'key_vfo'}
           . ")" );
@@ -336,6 +336,29 @@ sub draw_main_win {
     my $w_main_accel = Gtk3::AccelGroup->new();
     $w_main->add_accel_group($w_main_accel);
     $box = Gtk3::Box->new( 'vertical', 5 );
+
+    # VFO choser:
+    $vfo_sel_button =
+      Gtk3::Button->new( "Active VFO: " . $curr_vfo . " (" . $cfg->{'key_vfo'} . ")" );
+    $vfo_sel_button->set_tooltip_text("Toggle active VFO");
+    $vfo_sel_button->set_sensitive(0);
+
+    $vfo_sel_button->signal_connect(
+        clicked => sub {
+            $main::rig_p->next_vfo();
+        }
+    );
+
+    # XXX: ACCEL-Replace these with a global function
+    $w_main_accel->connect(
+        ord( $cfg->{'key_vfo'} ),
+        $cfg->{'shortcut_key'},
+        'visible',
+        sub {
+            $vfo_sel_button->grab_focus();
+            $main::rig_p->next_vfo();
+        }
+    );
 
     # New widget with 5 whole digits, 3 decimal
     $vfo_freq_entry = Woodpile::GTK3FreqInput->new("Hz", 8, 0);
@@ -526,29 +549,6 @@ sub draw_main_win {
         }
     );
     $chan_box->pack_start( $mem_btn_box, FALSE, FALSE, 0 );
-
-    # VFO choser:
-    $vfo_sel_button =
-      Gtk3::Button->new( "VFO: " . $curr_vfo . " (" . $cfg->{'key_vfo'} . ")" );
-    $vfo_sel_button->set_tooltip_text("Toggle active VFO");
-    $vfo_sel_button->set_sensitive(0);
-
-    $vfo_sel_button->signal_connect(
-        clicked => sub {
-            $main::rig_p->next_vfo();
-        }
-    );
-
-    # XXX: ACCEL-Replace these with a global function
-    $w_main_accel->connect(
-        ord( $cfg->{'key_vfo'} ),
-        $cfg->{'shortcut_key'},
-        'visible',
-        sub {
-            $vfo_sel_button->grab_focus();
-            $main::rig_p->next_vfo();
-        }
-    );
 
     ################################
     # rig volume
@@ -1012,12 +1012,12 @@ sub draw_main_win {
     my $label_box = Gtk3::Box->new( 'vertical', 5 );
     my $ctrl_box = Gtk3::Box->new( 'vertical', 5 );
 
+    $box->pack_start( $vfo_sel_button,  FALSE, FALSE, 0 );
     $box->pack_start( $$freq_box,       TRUE, TRUE, 0 );
     $box->pack_start( $ptt_button,      FALSE, FALSE, 0 );
     $box->pack_start( $meters_dock_box, TRUE,  TRUE,  0 );
     $box->pack_start( $toggle_box,      FALSE, FALSE, 0 );
     $box->pack_start( $chan_box,        FALSE, FALSE, 0 );
-    $box->pack_start( $vfo_sel_button,  FALSE, FALSE, 0 );
 
     $label_box->pack_start( $rig_vol_label,   FALSE, FALSE, 0 );
     $ctrl_box->pack_start( $rig_vol_box,      TRUE, TRUE, 0 );

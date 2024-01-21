@@ -1,3 +1,5 @@
+* Fix volume slider not tracking rig state
+* Fix power slider not allowing other programs to change power
 * Tune button (ON/OFF/AUTO)
 * VOX toggle
 * Clean up read_rig to update $vfos->{$curr_vfo} and call gtk_ui->update()

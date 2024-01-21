@@ -61,6 +61,7 @@ our $def_cfg = {
     key_vfo             => 'V',
     key_volume          => 'K',
     key_width           => 'Z',
+    log_file		=> "none",	  	  # put none here to disable log file
     log_level           => "debug",
     meters_in_main      => 1,			  # 1 will show meters in main window
     mic_select          => 0,

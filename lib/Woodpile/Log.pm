@@ -50,8 +50,10 @@ sub Log {
     }
     $buf .= "\n";
 
-    # send to the log file, always
-    print { $self->{log_fh} } $buf;
+    # send to the log file, always, if open
+    if (defined $self->{'log_fh'}) {
+       print { $self->{'log_fh'} } $buf;
+    }
 
     # If we've established a log output handler, send it there
     if (defined $self->{'handler'}) {
@@ -78,22 +80,38 @@ sub set_log_level {
 }
 
 sub add_handler {
-   ( my $self, my $handler ) = @_;
-
-#    $self->Log("core", "notice", "Switching logging to external handler, tty will go silent except runtime errors/debugging info... Logfile is at " . $self->{'log_file'});
+    ( my $self, my $handler ) = @_;
+    my $log_msg;
+    
+    if (lc($self->{'log_file'}) eq "none") {
+       $log_msg = "log file is disabled";
+    } else {
+       $log_msg = "Maintaining logfile at " . $self->{'log_file'};
+    }
+    $self->Log("core", "notice", "Enabled external log handler. $log_msg");
     $self->{'handler'} = $handler;
     return;
 }
 
-sub new {
-    my ( $class, $log_file, $log_level ) = @_;
+sub open_logfile {
+    my ( $class, $log_file ) = @_;
+    # support disabling logging
+    my $log_fh;
 
-    open my $log_fh, '>>', $log_file or die "Unable to open $log_file: $!\n";
+    if (defined $log_file && !(lc($log_file) eq "none")) {
+       open $log_fh, '>>', $log_file or warn "Unable to open $log_file: $!\n";
+    }
+    print "Enabled logging to file at $log_file\n";
+    $class->{'log_fh'} = $log_fh;
+    $class->{'log_file'} = $log_file;
+    return $class;
+}
+
+sub new {
+    my ( $class, $log_level ) = @_;
 
     my $self = {
-        log_file  => $log_file,
-        log_level => $log_level,
-        log_fh    => $log_fh
+        log_level => $log_level
     };
     bless $self, $class;
 

@@ -1,3 +1,6 @@
+2024-01-21
+	* Added 'none' config option for log_file to disable logging to a file
+
 2024-01-20
 	* Replaced frequency input with a nicer widget i made
 	* Fixed some bugs and made some more

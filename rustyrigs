@@ -20,7 +20,6 @@ our $app_name         = 'rustyrigs';
 our $app_descr        = "GTK frontend for rigctld";
 our $default_cfg_file = $ENV{"HOME"} . "/.config/${app_name}.yaml";
 our $cfg_file         = $default_cfg_file;
-our $log_file         = $ENV{"HOME"} . "/${app_name}.log";
 
 # Prefer libraries from the source tree, if we are there, over system-wide
 if (-f 'lib/Woodpile.pm') {
@@ -48,7 +47,7 @@ use RustyRigs::Logview;		# log viewer window
 use RustyRigs::Gridtools;
 
 # Start logging in debug mode until config is loaded and we quiet down...
-our $log = Woodpile::Log->new( $log_file, "debug" );
+our $log = Woodpile::Log->new( "debug" );
 
 ##################
 # Run time state #
@@ -165,6 +164,9 @@ if ($cfg_readonly) {
     $log->Log( "core", "info", "using configuration read-only" );
     $cfg->{'read_only'} = 1;
 }
+
+# Switch to log file
+$log->open_logfile($$cfg->{'log_file'});
 
 # We need config loaded to define the meters...
 our $meters = {
