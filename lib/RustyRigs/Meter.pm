@@ -1,10 +1,12 @@
-# here we render a meter bar widget
+#
+# Bar style meter widget.
+# Composed of a filled background and a bar that covers it and some labels
 package RustyRigs::Meter;
 use warnings;
 use strict;
 use Carp;
 use Data::Dumper;
-use Glib                  qw(TRUE FALSE);
+use Glib qw(TRUE FALSE);
 use RustyRigs::Meter::Settings;
 
 #####
@@ -98,6 +100,8 @@ sub new {
     my $val_label = Gtk3::Label->new($value);
     $bar_label->set_width_chars(6);
     $val_label->set_width_chars(6);
+
+# XXX: We need to sort out font loading
 #    if (defined $font) {
 #       $bar_label->override_font($font);
 #       $val_label->override_font($font);

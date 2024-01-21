@@ -405,6 +405,25 @@ sub draw_main_win {
     );
     $toggle_box->pack_start( $mic_toggle, FALSE, FALSE, 0);
 
+    my $vox_toggle = Gtk3::CheckButton->new();
+    $vox_toggle->set_label('Use VOX?');
+    $vox_toggle->set_active( $cfg->{'mic_select'} );
+    $vox_toggle->set_can_focus(1);
+    $vox_toggle->signal_connect(
+        'toggled' => sub {
+            my ( $button ) = @_;
+            my $val = $button->get_active();
+            $main::log->Log("gtkui", "debug", "vox_toggle ($val) nyi!");
+            if ($val) {
+#                $main::rig_p->vox_select(1);
+            }
+            else {
+#                $main::rig_p->vox_select(0);
+            }
+        }
+    );
+    $toggle_box->pack_start( $vox_toggle, FALSE, FALSE, 0);
+
     #################
     # Channel stuff #
     #################
@@ -932,6 +951,7 @@ sub draw_main_win {
                    $main::log->Log("gtkui", "info", "applying power: $value (change: $change, hlval: $hlval)");
                    my $rig = $main::rig;
                    $rig->set_level($Hamlib::RIG_LEVEL_RFPOWER, $hlval);
+                   $vfo_power_val->set_text($value . "W");
                    $$rp = FALSE;
                }
                else {    # reject change otherwise
@@ -960,7 +980,6 @@ sub draw_main_win {
     # XXX: This will change soon as _accel will be wrapped in window object
     my $fm_p = RustyRigs::FM->new( $cfg, $w_main, $w_main_accel );
     $fm_box = $fm_p->{box};
-
 
     # Create a toggle button to represent the lock state
     my $key_lock = $cfg->{'key_lock'};

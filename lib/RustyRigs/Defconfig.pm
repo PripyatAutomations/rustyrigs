@@ -17,7 +17,7 @@ our $def_cfg = {
     rigctl_model        => $Hamlib::RIG_MODEL_NETRIGCTL,
     rotctl_addr         => 'localhost:4533',
     rotctl_model        => $Hamlib::ROT_MODEL_NETROTCTL,
-    # CAT commands
+    # CAT commands (defaults are for ft891/991) for send_raw
     cat_line_term       => ';',
     cat_mic_front       => "EX11050;EX09010;EX08090;EX06050;",
     cat_mic_rear        => "EX11051;EX09011;EX08091;EX06051;",
@@ -66,8 +66,8 @@ our $def_cfg = {
     mic_select          => 0,
     my_qth              => "AA00aa",		  # my 6 digit gridsquare
     my_qth_elev         => 300,			  # QTH elevation in *METERS*
-    poll_interval       => 250,                      # every 1/4 sec
-    poll_tray_every     => 20,                       # at 1/20th the rate of normal (every 5 sec)
+    poll_interval       => 250,                   # every 1/4 sec
+    poll_tray_every     => 20,                    # at 1/20th the rate of normal (every 5 sec)
     res_dir             => "./res",
     scrollback_lines    => 200,		   # number of lines to hold in logview buffer
     shortcut_key        => 'mod1-mask',    # alt (use control-mask for ctrl)
@@ -124,16 +124,19 @@ our $def_cfg = {
     ui_volt_fg              => '#70f070',      # VDD meter active color
     ui_volt_font            => 'Monospace',
     ui_volt_text            => '#000000',      # VDD meter text color
+
+    # User toggles
     use_amp                 => 0,              # 1 will enable amplifier support
     use_rotator             => 0,              # 1 will enable rotator support
     use_metric              => 0,	       # 1 will use metric (miles, etc)
+
+    # Default window properties
     win_border              => 10,
     win_height              => 1024,
     win_width               => 682,
     win_visible             => 0,
     win_x                   => 2252,
     win_y                   => 49,
-
     # center, mouse, center_always, center_on_parent, none (place at x,y below)
     win_gridtools_placement => 'none',
     win_gridtools_height    => 480,
