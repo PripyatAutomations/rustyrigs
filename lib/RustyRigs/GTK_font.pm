@@ -26,8 +26,8 @@ sub load {
         my $font = Pango::FontDescription->new ();
         $font->set_family($font_name);
         $fonts->{$font_name} = $font;
-    } else {
-        $main::log->Log("gtkui", "debug", "using cached font $font_name");
+#    } else {
+#        $main::log->Log("gtkui", "debug", "using cached font $font_name");
     }
 
     return $font;
