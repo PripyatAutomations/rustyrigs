@@ -1,7 +1,7 @@
 2024-01-20
 	* Replaced frequency input with a nicer widget i made
 	* Fixed some bugs and made some more
-	  - AF volume level needs sorted out
+	  - AF volume level needs sorted out, it jumps 100% at start - why?
 
 2024-01-19
 	* Added PTT button

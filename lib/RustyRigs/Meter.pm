@@ -98,10 +98,10 @@ sub new {
     my $val_label = Gtk3::Label->new($value);
     $bar_label->set_width_chars(6);
     $val_label->set_width_chars(6);
-    if (defined $font) {
-       $bar_label->override_font($font);
-       $val_label->override_font($font);
-    }
+#    if (defined $font) {
+#       $bar_label->override_font($font);
+#       $val_label->override_font($font);
+#    }
     $bar_label->set_alignment(1, 0.5);
     $val_label->set_alignment(1, 0.5);
     my $bar = Gtk3::Box->new( 'horizontal', 0 );

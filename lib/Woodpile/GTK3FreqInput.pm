@@ -192,7 +192,7 @@ sub draw_digit {
 #}
 
 sub new {
-   my ( $class, $places, $decimals, $default ) = @_;
+   my ( $class, $label, $places, $decimals, $default ) = @_;
 
    # set some defaults
    if (!defined $decimals) {
@@ -249,6 +249,9 @@ sub new {
          $digit--;
       }
    }
+
+   my $widget_label = Gtk3::Label->new($label);
+   $box->pack_start($widget_label, FALSE, FALSE, 0);
 
    # If a default value exists, set it on the widget
    if (defined $default) {

@@ -16,6 +16,7 @@ our $vfos;
 our $cfg;
 our $log;
 our $cfg_file;
+our $started;
 
 # gui widgets
 our $w_main;
@@ -240,9 +241,9 @@ sub refresh_available_widths {
        $val = $vfo->{'width'};
     }
 
-    if ( $val == 0 ) {
-       $main::log->Log("gtkui", "debug", "width == 0, caller: " . (caller(1))[3]);
-    }
+#    if ( $val == 0 ) {
+#       $main::log->Log("gtkui", "debug", "width == 0, caller: " . (caller(1))[3]);
+#    }
 
     if ( $vfo->{'mode'} eq "FM" ) {
         foreach my $value (@RustyRigs::Hamlib::vfo_widths_fm) {
@@ -294,6 +295,8 @@ sub draw_main_win {
     my ( $self ) = @_;
 
     $w_main = Gtk3::Window->new('toplevel');
+    my $rig_p = $main::rig_p;
+    my $rig = $rig_p->{'rig'};
 
     my $curr_vfo = $cfg->{active_vfo};
     if ( $curr_vfo eq '' ) {
@@ -329,12 +332,13 @@ sub draw_main_win {
     #####################
     # Layout the window #
     #####################
+    my $val;
     my $w_main_accel = Gtk3::AccelGroup->new();
     $w_main->add_accel_group($w_main_accel);
     $box = Gtk3::Box->new( 'vertical', 5 );
 
     # New widget with 5 whole digits, 3 decimal
-    $vfo_freq_entry = Woodpile::GTK3FreqInput->new(8, 0);
+    $vfo_freq_entry = Woodpile::GTK3FreqInput->new("Hz", 8, 0);
     $freq_box = $vfo_freq_entry->{'box'};
 
     # PTT and controls
@@ -342,17 +346,14 @@ sub draw_main_win {
     my $key_ptt = $cfg->{'key_ptt'};
     $ptt_button = Gtk3::ToggleButton->new_with_label("PTT ($key_ptt)");
     $initial_bg_color = $ptt_button->get_style_context->get_background_color('normal');
+    $ptt_button->override_background_color('normal', Gtk3::Gdk::RGBA->new(0.0, 1.0, 0.0, 1.0));
+    $ptt_button->override_background_color('active', Gtk3::Gdk::RGBA->new(1.0, 0.0, 0.0, 1.0));
     $ptt_button->signal_connect(
         toggled => sub {
             my ( $self ) = @_;
             my $val = $ptt_button->get_active();
             $main::log->Log("hamlib", "info", "PTT set to $val");
             $main::rig->set_ptt($Hamlib::RIG_VFO_A, $val);
-            if ( $val ) {
-                $ptt_button->override_background_color('normal', Gtk3::Gdk::RGBA->new(1.0, 0.0, 0.0, 1.0));
-            } else {
-                $ptt_button->override_background_color('normal', $initial_bg_color);
-            }
         }
     );
     $w_main_accel->connect(
@@ -530,15 +531,24 @@ sub draw_main_win {
         }
     );
 
+    ################################
     # rig volume
     my $rig_vol_label =
       Gtk3::Label->new( "Volume % (" . $cfg->{'key_volume'} . ")" );
+    $rig_vol_label->set_alignment(1, 0.5);
     $rig_vol_entry = Gtk3::Scale->new_with_range( 'horizontal', 0, 100, 1 );
     $rig_vol_entry->set_digits(0);
     $rig_vol_entry->set_draw_value(TRUE);
     $rig_vol_entry->set_value_pos('right');
     $rig_vol_entry->set_value(0);	# default to 0 until hamlib loaded
     $rig_vol_entry->set_tooltip_text("Set RX volume");
+    $rig_vol_entry->set_property('draw-value' => FALSE);
+    my $rig_vol_box = Gtk3::Box->new('horizontal', 0);
+    my $rig_vol_val = Gtk3::Label->new("    ");
+    $rig_vol_val->set_alignment(1, 0.5);
+    $rig_vol_box->pack_start($rig_vol_entry, TRUE, TRUE, 0);
+    $rig_vol_box->pack_start($rig_vol_val, FALSE, TRUE, 0);
+
     $rig_vol_entry->signal_connect(
         button_press_event => sub {
             my $rp = $main::rig_p->{'gui_applying_changes'};
@@ -556,6 +566,9 @@ sub draw_main_win {
     $rig_vol_entry->signal_connect(
         value_changed => sub {
             my ( $widget ) = @_;
+            if (time - $started < 2) {
+               return;
+            }
             my $rig_p = $main::rig_p;
             my $rig = $rig_p->{'rig'};
             my $rp = $main::rig_p->{'gui_applying_changes'};
@@ -564,7 +577,9 @@ sub draw_main_win {
 
             $rig_p->{'volume'} = $vol;
             $rig->set_level($Hamlib::RIG_LEVEL_AF, $vol / 100);
-#            $main::rig->set_level($Hamlib::RIG_LEVEL_AF, $vol / 100);
+            my $tmp_vol = int($rig_p->{'volume'});
+            my $val = sprintf("%*s%%", 3, $tmp_vol);
+            $rig_vol_val->set_label($val);
 
             $$rp = FALSE;
 
@@ -589,6 +604,43 @@ sub draw_main_win {
         'visible',
         sub {
             $vfo_freq_entry->grab_focus();
+        }
+    );
+
+    my $squelch_label =
+      Gtk3::Label->new( 'Squelch (' . $cfg->{'key_squelch'} . ')' );
+    $squelch_label->set_alignment(1, 0.5);
+    $squelch_entry = Gtk3::Scale->new_with_range( 'horizontal', 0, 20, 1 );
+    $squelch_entry->set_digits(0);
+    $squelch_entry->set_draw_value(TRUE);
+    $squelch_entry->set_value_pos('right');
+    $squelch_entry->set_value( $act_vfo->{'squelch'} );
+    $squelch_entry->set_tooltip_text("Please Click and DRAG to change RF gain");
+    $squelch_entry->set_property('draw-value' => FALSE);
+    $squelch_entry->set_sensitive(0);
+    my $squelch_box = Gtk3::Box->new('horizontal', 0);
+    my $squelch_val = Gtk3::Label->new("  0%");
+    $squelch_val->set_alignment(1, 0.5);
+    $squelch_box->pack_start($squelch_entry, TRUE, TRUE, 0);
+    $squelch_box->pack_start($squelch_val, FALSE, TRUE, 0);
+
+    # XXX: ACCEL-Replace these with a global function
+    $w_main_accel->connect(
+        ord( $cfg->{'key_squelch'} ),
+        $cfg->{'shortcut_key'},
+        'visible',
+        sub {
+            $squelch_entry->grab_focus();
+        }
+    );
+    $squelch_entry->signal_connect(
+        value_changed => sub {
+            my ( $class ) = @_;
+            if (!$main::rig_p->is_busy()) {
+               my $curr_vfo = $cfg->{'active_vfo'};
+               my $value    = $squelch_entry->get_value();
+               $act_vfo->{'squelch'} = $value;
+            }
         }
     );
 
@@ -745,6 +797,12 @@ sub draw_main_win {
     $rf_gain_entry->set_value( $act_vfo->{'rf_gain'} );
     $rf_gain_entry->set_tooltip_text("Please Click and DRAG to change RF gain");
     $rf_gain_entry->set_sensitive(0);
+    $rf_gain_entry->set_property('draw-value' => FALSE);
+    my $rf_gain_box = Gtk3::Box->new('horizontal', 0);
+    my $rf_gain_val = Gtk3::Label->new("  0%");
+    $rf_gain_val->set_alignment(1, 0.5);
+    $rf_gain_box->pack_start($rf_gain_entry, TRUE, TRUE, 0);
+    $rf_gain_box->pack_start($rf_gain_val, FALSE, TRUE, 0);
 
     # XXX: ACCEL-Replace these with a global function
     $w_main_accel->connect(
@@ -775,6 +833,12 @@ sub draw_main_win {
     $dnr_entry->set_value( $act_vfo->{'dnr'} );
     $dnr_entry->set_tooltip_text("DSP Noise Reduction");
     $dnr_entry->set_sensitive(0);
+    $dnr_entry->set_property('draw-value' => FALSE);
+    my $dnr_box = Gtk3::Box->new('horizontal', 0);
+    my $dnr_val = Gtk3::Label->new("  0%");
+    $dnr_val->set_alignment(1, 0.5);
+    $dnr_box->pack_start($dnr_entry, TRUE, TRUE, 0);
+    $dnr_box->pack_start($dnr_val, FALSE, TRUE, 0);
 
     # XXX: ACCEL-Replace these with a global function
     $w_main_accel->connect(
@@ -796,36 +860,6 @@ sub draw_main_win {
         }
     );
 
-    my $squelch_label =
-      Gtk3::Label->new( 'Squelch (' . $cfg->{'key_squelch'} . ')' );
-    $squelch_entry = Gtk3::Scale->new_with_range( 'horizontal', 0, 20, 1 );
-    $squelch_entry->set_digits(0);
-    $squelch_entry->set_draw_value(TRUE);
-    $squelch_entry->set_value_pos('right');
-    $squelch_entry->set_value( $act_vfo->{'squelch'} );
-    $squelch_entry->set_tooltip_text("Please Click and DRAG to change RF gain");
-    $squelch_entry->set_sensitive(0);
-
-    # XXX: ACCEL-Replace these with a global function
-    $w_main_accel->connect(
-        ord( $cfg->{'key_squelch'} ),
-        $cfg->{'shortcut_key'},
-        'visible',
-        sub {
-            $squelch_entry->grab_focus();
-        }
-    );
-    $squelch_entry->signal_connect(
-        value_changed => sub {
-            my ( $class ) = @_;
-            if (!$main::rig_p->is_busy()) {
-               my $curr_vfo = $cfg->{'active_vfo'};
-               my $value    = $squelch_entry->get_value();
-               $act_vfo->{'squelch'} = $value;
-            }
-        }
-    );
-
     # Variable to track if the scale is being dragged
     my $dragging = 0;
 
@@ -838,8 +872,14 @@ sub draw_main_win {
     $vfo_power_entry->set_digits(0);
     $vfo_power_entry->set_draw_value(TRUE);
     $vfo_power_entry->set_value_pos('right');
-    $vfo_power_entry->set_tooltip_text(
-        "Please Click and DRAG to change TX power");
+    $vfo_power_entry->set_tooltip_text( "Please Click and DRAG to change TX power");
+    $vfo_power_entry->set_property('draw-value' => FALSE);
+    my $vfo_power_box = Gtk3::Box->new('horizontal', 0);
+    $val = sprintf("%*sW", 3, $act_vfo->{'power'});
+    my $vfo_power_val = Gtk3::Label->new("$val");
+    $vfo_power_val->set_alignment(1, 0.5);
+    $vfo_power_box->pack_start($vfo_power_entry, TRUE, TRUE, 0);
+    $vfo_power_box->pack_start($vfo_power_val, FALSE, TRUE, 0);
 
     # XXX: ACCEL-Replace these with a global function
     $w_main_accel->connect(
@@ -854,7 +894,7 @@ sub draw_main_win {
     $vfo_power_entry->signal_connect(
         value_changed => sub {
             if (!$main::rig_p->is_busy()) {
-               my $value  = $vfo_power_entry->get_value();
+               my $value  = int($vfo_power_entry->get_value() + 0.5);
                my $oldval = $act_vfo->{'power'};
                my $change = 0;
                my $step   = $act_vfo->{'power_step'};
@@ -953,32 +993,31 @@ sub draw_main_win {
     my $label_box = Gtk3::Box->new( 'vertical', 5 );
     my $ctrl_box = Gtk3::Box->new( 'vertical', 5 );
 
-    $box->pack_start( $$freq_box,       FALSE, FALSE, 0 );
+    $box->pack_start( $$freq_box,       TRUE, TRUE, 0 );
     $box->pack_start( $ptt_button,      FALSE, FALSE, 0 );
     $box->pack_start( $meters_dock_box, TRUE,  TRUE,  0 );
     $box->pack_start( $toggle_box,      FALSE, FALSE, 0 );
     $box->pack_start( $chan_box,        FALSE, FALSE, 0 );
     $box->pack_start( $vfo_sel_button,  FALSE, FALSE, 0 );
 
-    $rig_vol_label->set_alignment(1, 0.5);
     $label_box->pack_start( $rig_vol_label,   FALSE, FALSE, 0 );
-    $ctrl_box->pack_start( $rig_vol_entry,    TRUE, TRUE, 0 );
+    $ctrl_box->pack_start( $rig_vol_box,      TRUE, TRUE, 0 );
 
     $squelch_label->set_alignment(1, 0.5);
     $label_box->pack_start( $squelch_label,   FALSE, FALSE, 0 );
-    $ctrl_box->pack_start( $squelch_entry,    TRUE, TRUE, 0 );
+    $ctrl_box->pack_start( $squelch_box,      TRUE, TRUE, 0 );
 
     $rf_gain_label->set_alignment(1, 0.5);
     $label_box->pack_start( $rf_gain_label,   FALSE, FALSE, 0 );
-    $ctrl_box->pack_start( $rf_gain_entry,    TRUE, TRUE, 0 );
+    $ctrl_box->pack_start( $rf_gain_box  ,    TRUE, TRUE, 0 );
 
     $dnr_label->set_alignment(1, 0.5);
     $label_box->pack_start( $dnr_label,       FALSE, FALSE, 0 );
-    $ctrl_box->pack_start( $dnr_entry,        TRUE, TRUE, 0 );
+    $ctrl_box->pack_start( $dnr_box,          TRUE, TRUE, 0 );
 
     $vfo_power_label->set_alignment(1, 0.5);
     $label_box->pack_start( $vfo_power_label, FALSE, FALSE, 0 );
-    $ctrl_box->pack_start( $vfo_power_entry,  TRUE, TRUE, 0 );
+    $ctrl_box->pack_start( $vfo_power_box,    TRUE, TRUE, 0 );
 
     $mode_label->set_alignment(1, 0.5);
     $label_box->pack_start( $mode_label,      FALSE, FALSE, 0 );
@@ -1103,6 +1142,7 @@ sub new {
     $log      = $log_ref;
     $vfos     = ${vfos_ref};
 
+    $started = time;
     my $self = {
         # GUI widgets
         box               => \$box,

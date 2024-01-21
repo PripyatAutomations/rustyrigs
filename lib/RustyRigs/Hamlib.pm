@@ -274,17 +274,16 @@ sub read_rig {
     }
 
     # Get the RX volume
+    # XXX: Fix this broken mess..
     my $raw_vol = $rig->get_level_f( $Hamlib::RIG_LEVEL_AF );
-    # XXX: This needs sorted out
-    if ($raw_vol == 1) {
-       $main::log->Log("hamlib", "bug", "vol bug hack... fix me!");
-       $raw_vol = 0;
-    }
     $volume = int($raw_vol) * 100;
     if (defined $volume) {
-       $self->{'volume'} = $volume;
-       my $rve = $main::gtk_ui->{'rig_vol_entry'};
-       $$rve->set_value($volume);
+       if ($volume != 0 && $volume != 100) {
+          $main::log->Log("hamlib", "debug", "setting volume to $volume as requested by: " . ( caller(1) )[3]);
+          $self->{'volume'} = $volume;
+          my $rve = $main::gtk_ui->{'rig_vol_entry'};
+          $$rve->set_value($volume);
+       }
     }
     else {
        $main::log->Log("hamlib", "bug", "no volume");
