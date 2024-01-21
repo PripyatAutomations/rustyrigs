@@ -1,10 +1,10 @@
 # here we render a meter bar widget
 package RustyRigs::Meter;
+use warnings;
+use strict;
 use Carp;
 use Data::Dumper;
 use Glib                  qw(TRUE FALSE);
-use warnings;
-use strict;
 use RustyRigs::Meter::Settings;
 
 #####
@@ -79,10 +79,10 @@ sub new {
     my $s        = "ui_${lc_label}";
     my $l        = $main::meters->{$lc_label}{'title'};
 
-    my $bg       = Woodpile::hex_to_gdk_rgba( $$cfg->{"${s}_bg"} );
-    my $alarm_bg = Woodpile::hex_to_gdk_rgba( $$cfg->{"${s}_alarm_bg"} );
-    my $fg       = Woodpile::hex_to_gdk_rgba( $$cfg->{"${s}_fg"} );
-    my $txt_fg   = Woodpile::hex_to_gdk_rgba( $$cfg->{"${s}_text"} );
+    my $bg       = Woodpile::Gtk::hex_to_gdk_rgba( $$cfg->{"${s}_bg"} );
+    my $alarm_bg = Woodpile::Gtk::hex_to_gdk_rgba( $$cfg->{"${s}_alarm_bg"} );
+    my $fg       = Woodpile::Gtk::hex_to_gdk_rgba( $$cfg->{"${s}_fg"} );
+    my $txt_fg   = Woodpile::Gtk::hex_to_gdk_rgba( $$cfg->{"${s}_text"} );
     my $txt_font = $$cfg->{"${s}_font"};
     my $value;
 
@@ -196,8 +196,8 @@ sub render_meterbars {
     my $meters = ${$meters_ref};
     # Box for the meters
     my $meter_box   = Gtk3::Box->new( 'vertical', 5 );
-    my $meter_label = Gtk3::Label->new("Meters");
-    $meter_box->pack_start( $meter_label, FALSE, FALSE, 0 );
+#    my $meter_label = Gtk3::Label->new("Meters");
+#    $meter_box->pack_start( $meter_label, FALSE, FALSE, 0 );
 
     my @meter_names = sort keys %$meters;
     my $sorted_meters = { map { $_ => $meters->{$_} } sort keys %$meters };

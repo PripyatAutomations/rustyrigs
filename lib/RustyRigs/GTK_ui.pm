@@ -309,8 +309,6 @@ sub draw_main_win {
     $w_main->set_title("rustyrigs: Not connected");
     $w_main->set_default_size( $cfg->{'win_width'}, $cfg->{'win_height'} );
     $w_main->set_border_width( $cfg->{'win_border'} );
-    my $resizable = 0;
-
     $w_main->set_resizable(0);
 
     if ( $cfg->{'always_on_top'} ) {
@@ -957,8 +955,8 @@ sub draw_main_win {
     );
 
     #########
-    my $label_box = Gtk3::Box->new( 'vertical', 0 );
-    my $ctrl_box = Gtk3::Box->new( 'vertical', 0 );
+    my $label_box = Gtk3::Box->new( 'vertical', 5 );
+    my $ctrl_box = Gtk3::Box->new( 'vertical', 5 );
 
     $box->pack_start( $$freq_box, FALSE, FALSE, 0 );
     $box->pack_start( $ptt_button,      FALSE, FALSE, 0 );
