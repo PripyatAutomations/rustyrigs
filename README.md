@@ -7,11 +7,11 @@ Installing
 Install needed perl packages:
 - sudo apt install -y libgtk3-perl libglib-perl libyaml-perl libhamlib-perl
 
-- Then try it out before installing:
-`	./rustyrigs
+Then try it out before installing:
+-	./rustyrigs
 
-- If successful, optionally install it:
-`	make install
+If successful, optionally install it:
+-	make install
 
 Configuring
 ===========
