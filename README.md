@@ -1,5 +1,6 @@
 This is a small perl/gtk3 frontend for hamlib
 
+![alt text](https://github.com/pripyatautomations/rustyrigs/blob/main/doc/screenshot.png?raw=true)
 
 ==========
 Installing
