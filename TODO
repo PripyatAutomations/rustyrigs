@@ -1,7 +1,13 @@
+* Fix volume blipping to 100% at startup (temp hack in place)
+* Find/fix remaining UI bugs
+* Add preamp control
+* Add mic gain control
+* Add signal bar to SWR widget
 * Fix volume slider not tracking rig state
 * Fix power slider not allowing other programs to change power
 * Tune button (ON/OFF/AUTO)
-* VOX toggle
+* Add speech for blind users
+* VOX controls with visibility controlled by Use VOX toggle
 * Clean up read_rig to update $vfos->{$curr_vfo} and call gtk_ui->update()
 * Move GTK GUI update code from Hamlib.pm to update() in GTK_ui.pm
 * FreqInput widget:
@@ -9,27 +15,17 @@
   - while typing, suspend actions on the field and allow typing normally
 * Fix bug where gridtools is shown when main is hidden/show even when hide_gridtools_too is false
 * Make the Gridtools button hide/show (not just iconify) the window...
-* Fix volume blipping to 100% at startup (temp hack in place)
 * Reduce the amount of rig command sent if possible
 * Add more verification/error checking
   - gridtools - Confirm if grids are valid or not
+  - FreqInput - Add upper/lower bounds from querying hamlib
 * Maybe make blocks able to be pulled out into the own window or returned to main window?
   - Add option to move the meters to a floating window
-* Maybe move the FM stuff to the right of the rest? or maybe a floating window?
-* Replace freq slider (gtk3 box with these widgets):
-  - numeric entry field
-  - up & down buttons
-  - step slider
-* Add preamp control
-* Add mic gain control
-* Add signal bar to SWR widget
-  - implement multiple bars (ugh!)
 * Add a widget (scale/slider?) under the freq selector to allow chosing the step size
   - drop down with step values is probably the best
 * More keyboard controls! make it so you can type to search the boxes
 * Add some holdoff before actually sending commands to the rig, in case of further changes
   - This should (re)start a timer that must elapse before write_rig() is called
-* Add speech for blind users
 * Support for multiple VFOs is not yet usable
 * Combined meter view for RX/TX in one line
   - Toggle on click with full view
@@ -39,3 +35,4 @@
 * Implement ncurses or similar TUI
 * Add a WSJT-X listener for displaying the messages from WSJT-X
   - Add support to re-sending them to other addresses?
+* Maybe move the FM stuff to the right of the rest? or maybe a floating window?

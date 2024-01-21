@@ -29,6 +29,7 @@ our $rf_gain_entry;
 our $dnr_entry;
 our $squelch_entry;
 our $rig_vol_entry;
+our $rig_vol_val;
 our $vfo_freq_entry;
 our $vfo_power_entry;
 our $vfo_sel_button;
@@ -563,7 +564,7 @@ sub draw_main_win {
     $rig_vol_entry->set_tooltip_text("Set RX volume");
     $rig_vol_entry->set_property('draw-value' => FALSE);
     my $rig_vol_box = Gtk3::Box->new('horizontal', 0);
-    my $rig_vol_val = Gtk3::Label->new("    ");
+    $rig_vol_val = Gtk3::Label->new("    ");
     $rig_vol_val->set_alignment(1, 0.5);
     $rig_vol_box->pack_start($rig_vol_entry, TRUE, TRUE, 0);
     $rig_vol_box->pack_start($rig_vol_val, FALSE, TRUE, 0);
@@ -1147,6 +1148,10 @@ sub update_widgets {
         $power_changing = TRUE;        
         $vfo_power_entry->set_value( $vfo->{'power'} );
         $power_changing = FALSE;
+
+        # Update the meters
+#        my $meters = $main::meters;
+#        $meters->refresh();
     }
     return;
 }
@@ -1175,6 +1180,7 @@ sub new {
         mode_entry        => \$mode_entry,
         rf_gain_entry     => \$rf_gain_entry,
         rig_vol_entry     => \$rig_vol_entry,
+        rig_vol_val       => \$rig_vol_val,
         ptt_button        => \$ptt_button,
         squelch_entry     => \$squelch_entry,
         vfo_freq_entry    => \$vfo_freq_entry,

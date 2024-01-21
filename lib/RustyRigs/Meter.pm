@@ -139,13 +139,9 @@ sub new {
         max           => $max_val,
         min_threshold => -1,
         max_threshold => -1,
-        set_label     => \&set_label,
-        set_threshold => \&set_threshold,
-        set_value     => \&set_value,
         value         => $value,
         val_label     => $val_label,
         val_sep       => $val_sep,
-        zero          => \&zero
     };
     bless $self, $class;
     return $self;
@@ -194,6 +190,11 @@ sub show_meterbar_win {
     return;
 }
 
+sub refresh_meterbars {
+    my ( $class ) = @_;
+    print "refresh mb\n";
+    return;
+}
 # This will return an object containing all the meters and their properties
 sub render_meterbars {
     ( my $class, my $meters_ref, my $cfg, my $vfos, my $w_main ) = @_;
@@ -236,6 +237,7 @@ sub render_meterbars {
         dock_meterbars => \&dock_meterbars,	# Dock in main window
         hide_meterbars => \&hide_meterbars,	# Hide the popup window
         show_meterbar_win => \&show_meterbar_win,	# Show in a popup window
+        refresh => \&refresh_meterbars,		# refresh the meter bars
         box => $meter_box,
         meters => \$meters,
         docked => \$docked

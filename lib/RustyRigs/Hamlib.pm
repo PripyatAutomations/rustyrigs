@@ -282,7 +282,9 @@ sub read_rig {
           $main::log->Log("hamlib", "debug", "setting volume to $volume as requested by: " . ( caller(1) )[3]);
           $self->{'volume'} = $volume;
           my $rve = $main::gtk_ui->{'rig_vol_entry'};
+          my $rvv = $main::gtk_ui->{'rog_vol_val'};
           $$rve->set_value($volume);
+          $$rvv->set_text($volume . "X");
        }
     }
     else {
