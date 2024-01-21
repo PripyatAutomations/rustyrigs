@@ -1,6 +1,6 @@
-This is a small perl/gtk3 frontend for hamlib
+This is a small perl/gtk3 frontend for hamlib using a minimum of external libraries.
 
-![alt text](https://github.com/pripyatautomations/rustyrigs/blob/main/doc/screenshot.png?raw=true)
+![screenshot](https://github.com/pripyatautomations/rustyrigs/blob/main/doc/screenshot.png?raw=true)
 
 Installing
 ==========
@@ -8,10 +8,10 @@ Install needed perl packages:
 - sudo apt install -y libgtk3-perl libglib-perl libyaml-perl libhamlib-perl
 
 - Then try it out before installing:
-	./rustyrigs
+`	./rustyrigs
 
-- If successful, optionally install it with
-make install
+- If successful, optionally install it:
+`	make install
 
 Configuring
 ===========
