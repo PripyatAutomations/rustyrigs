@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 # rustyrigs.pl: GTK rigctld frontend for the system tray
 # You need to run rigctld with -o such as in ./run-dummy-rigctld
+# I apologize for the horrors you will see within.. ;) ~ rustyaxe
 use strict;
 use warnings;
 #use diagnostics;
@@ -39,12 +40,13 @@ use RustyRigs::Doc;		# help messages
 use RustyRigs::Hamlib;		# hamlib rig control
 use RustyRigs::Amp;		# hamlib amplifier control
 use RustyRigs::Rotator;		# hamlib rotator control
-use RustyRigs::Settings;		# settings editor window (includes color choser)
+use RustyRigs::Settings;	# settings editor window (includes color choser)
 use RustyRigs::FM;		# FM settings sub-box for main window
 use RustyRigs::Memory;		# channel memory management
 use RustyRigs::Meter;		# meter bars and window
 use RustyRigs::Logview;		# log viewer window
-use RustyRigs::Gridtools;
+use RustyRigs::Gridtools;	# grid square tools
+use RustyRigs::Baresip;		# Control baresip client for audio path
 
 # Start logging in debug mode until config is loaded and we quiet down...
 our $log = Woodpile::Log->new( "debug" );
@@ -58,6 +60,9 @@ our $locked       = FALSE;
 
 # Channel memories
 our $channels;
+
+# SIP stuff
+our $sip;
 
 # Hamlib stuff
 our $hamlib_riginfo;
@@ -270,6 +275,9 @@ $gridtools = RustyRigs::Gridtools->new();
 $channels = RustyRigs::Memory->new($cfg, $gtk_ui->{'w_main'}, $mem_file);
 $channels->load_from_yaml($mem_file);
 #$channels->refresh_ui();
+
+# Initialize SIP system
+$sip = RustyRigs::Baresip->new();
 
 # Delay the hamlib init at least a second, for reliability
 our $hamlib_initialized = 0;

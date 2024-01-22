@@ -7,6 +7,7 @@ use Glib qw(TRUE FALSE);
 use strict;
 use warnings;
 use Data::Dumper;
+use Scalar::Util qw(reftype);
 my $cfg;
 my $rig;
 
@@ -274,22 +275,24 @@ sub read_rig {
     }
 
     # Get the RX volume
-    # XXX: Fix this broken mess..
     my $raw_vol = $rig->get_level_f( $Hamlib::RIG_LEVEL_AF );
-    $volume = int($raw_vol) * 100;
-    if (defined $volume) {
-       if ($volume != 0 && $volume != 100) {
-          $main::log->Log("hamlib", "debug", "setting volume to $volume as requested by: " . ( caller(1) )[3]);
-          $self->{'volume'} = $volume;
-          my $rve = $main::gtk_ui->{'rig_vol_entry'};
-          my $rvv = $main::gtk_ui->{'rog_vol_val'};
-          $$rve->set_value($volume);
-          $$rvv->set_text($volume . "X");
+    # Prevent volume jumping to 100% at startup
+    if ($raw_vol != 1) {
+       $volume = int($raw_vol) * 100;
+       if (defined $volume) {
+          if ($volume != 0 && $volume != 100) {
+             $main::log->Log("hamlib", "debug", "setting volume to $volume as requested by: " . ( caller(1) )[3]);
+             $self->{'volume'} = $volume;
+             my $rve = $main::gtk_ui->{'rig_vol_entry'};
+             my $rvv = $main::gtk_ui->{'rog_vol_val'};
+             $$rve->set_value($volume);
+             $$rvv->set_text($volume . "X");
+          }
        }
-    }
-    else {
-       $main::log->Log("hamlib", "bug", "no volume");
-       $volume = 0;
+       else {
+          $main::log->Log("hamlib", "bug", "no volume");
+          $volume = 0;
+       }
     }
 
     # XXX: Figure out which width table applies and find the appropriate width index then select it...
@@ -445,11 +448,11 @@ sub mic_select {
        $cat_cmds = $$cfg->{'cat_mic_front'};
     }
     my $str_mic = $mic ? "back" : "front";
-    my $cat_line_term = $$cfg->{'cat_line_term'};
 
     if (defined $cat_cmds) {
        $main::log->Log("hamlib", "info", "Switching microphone to $str_mic ($mic)");
        my @commands = split($line_term, $cat_cmds);
+
        foreach my $cmd (@commands) {
            my ( $out, $out_len );
 
@@ -457,9 +460,14 @@ sub mic_select {
            $cmd =~ s/^\s+|\s+$//g;
            $cmd = "${cmd}${line_term}";
            # send the command
-
            $main::log->Log("hamlib", "debug", "Sending CAT command: $cmd");
-           $rig->rig_send_raw($cmd, length($cmd), $out, $out_len, $cat_line_term);
+           print "type: " .  reftype($rig) . " | ref: " . ref($rig) . "\n";
+           # ***   RuntimeError Usage:
+           # rig_send_raw(rig,send,send_len,reply,reply_len,term);
+           # at /home/joseph/rustyrigs/lib/RustyRigs/Hamlib.pm line 464.
+#           Hamlib::Rig->rig_send_raw($rig, $cmd, length($cmd), $out, $out_len, $line_term);
+           $main::rig->rig_send_raw($cmd, length($cmd), $out, $out_len, $line_term);
+
            if (defined $out) {
               $main::log->Log("hamlib", "debug", "Command returned '$out");
            }

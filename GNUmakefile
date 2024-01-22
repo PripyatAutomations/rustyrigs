@@ -5,7 +5,7 @@ DOC_DIR ?= ${PREFIX}/share/doc
 BIN_DIR ?= ${PREFIX}/bin
 LIB_DIR ?= ${PREFIX}/lib/rustyrigs
 
-NEED_PKG := libgtk3-perl libglib-perl libyaml-perl libhamlib-perl
+NEED_PKG := libgtk3-perl libglib-perl libyaml-perl libhamlib-perl libexpect-perl baresip
 DEV_NEED_PKG += devscripts dh-make-perl libperl-critic-community-perl libperl-critic-perl
 
 # Documentation

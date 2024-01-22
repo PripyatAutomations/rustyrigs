@@ -27,9 +27,15 @@ our $w_settings;
 ######################
 # Exported Functions #
 ######################
-sub set_colors() {
+sub meter_settings {
    my ( $class ) = @_;
    my $dialog = RustyRigs::Meter::Settings->new(\$w_settings);
+   return;
+}
+
+sub sip_settings {
+   my ( $class ) = @_;
+   my $dialog = $main::sip->settings();
    return;
 }
 
@@ -605,16 +611,26 @@ sub new {
     );
     $window_options_box->pack_start( $meter_ontop_button, FALSE, FALSE, 0 );
 
-
-    # Create an OK button to apply settings
-    my $colors_button = Gtk3::Button->new('_Meters');
-    $colors_button->set_tooltip_text("Change Meter settings");
-    $colors_button->set_can_focus(1);
-    $colors_button->signal_connect( 'activate' => sub { (my $self) = @_; $class->set_colors(); } );
-    $colors_button->signal_connect( 'clicked'  => sub { (my $self) = @_; $class->set_colors(); } );
+    # Create a button for meter settings
+    my $meters_button = Gtk3::Button->new('_Meter Setup');
+    $meters_button->set_tooltip_text("Change Meter settings");
+    $meters_button->set_can_focus(1);
+    $meters_button->signal_connect( 'activate' => sub { (my $self) = @_; $class->meter_settings(); } );
+    $meters_button->signal_connect( 'clicked'  => sub { (my $self) = @_; $class->meter_settings(); } );
     $w_settings_accel->connect(
         ord('U'),  $cfg->{'shortcut_key'},
-        'visible', sub { $colors_button->grab_focus(); }
+        'visible', sub { $meters_button->grab_focus(); }
+    );
+
+    # Create a button for SIP settings
+    my $sip_button = Gtk3::Button->new('S_IP (VoIP) Setup');
+    $sip_button->set_tooltip_text("SIP (VoIP) settings");
+    $sip_button->set_can_focus(1);
+    $sip_button->signal_connect( 'activate' => sub { (my $self) = @_; $class->sip_settings(); } );
+    $sip_button->signal_connect( 'clicked'  => sub { (my $self) = @_; $class->sip_settings(); } );
+    $w_settings_accel->connect(
+        ord('U'),  $cfg->{'shortcut_key'},
+        'visible', sub { $sip_button->grab_focus(); }
     );
 
     ###########
@@ -667,7 +683,8 @@ sub new {
     $main_box->pack_start( $start_locked_toggle, FALSE, FALSE, 0 );
     $config_box->pack_start( $main_box, FALSE, FALSE, 0 );
     $config_box->pack_start( $window_options_box,  FALSE, FALSE, 0 );
-    $config_box->pack_start( $colors_button,   FALSE, FALSE, 0 );
+    $config_box->pack_start( $meters_button,   FALSE, FALSE, 0 );
+    $config_box->pack_start( $sip_button,   FALSE, FALSE, 0 );
     $config_box->pack_start( $button_box, FALSE, FALSE, 0 );
     $config_box->pack_start( $restart_note_label, FALSE, FALSE, 0);
 
