@@ -5,7 +5,7 @@ This is a small perl/gtk3 frontend for hamlib using a minimum of external librar
 Installing
 ==========
 Install needed perl packages:
-- sudo apt install -y libgtk3-perl libglib-perl libyaml-perl libhamlib-perl
+- sudo apt install -y libgtk3-perl libglib-perl libyaml-perl libhamlib-perl libexpect-perl
 
 Then try it out before installing:
 -	./rustyrigs
