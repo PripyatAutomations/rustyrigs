@@ -1,20 +1,22 @@
+* Fix controls not being synced from hamlib at startup:
+  - volume blipping to 100% at startup (temp hack in place)
+  - volume slider not tracking rig state
+  - power slider not allowing other programs to change power
+  - ensure labels in new multi-column controls are being updated appropriately
 * SIP stuff
   - Implement sip_volume to use baresip volume instead of rig speaker
-* Fix volume blipping to 100% at startup (temp hack in place)
+* FreqInput widget:
+  - support for auto moving to next digit when a digit is keyed in manually
+  - while typing, suspend actions on the field and allow typing normally
 * Find/fix remaining UI bugs
 * Add preamp control
 * Add mic gain control
 * Add signal bar to SWR widget
-* Fix volume slider not tracking rig state
-* Fix power slider not allowing other programs to change power
 * Tune button (ON/OFF/AUTO)
 * Add speech for blind users
 * VOX controls with visibility controlled by Use VOX toggle
 * Clean up read_rig to update $vfos->{$curr_vfo} and call gtk_ui->update()
 * Move GTK GUI update code from Hamlib.pm to update() in GTK_ui.pm
-* FreqInput widget:
-  - support for auto moving to next digit when a digit is keyed in manually
-  - while typing, suspend actions on the field and allow typing normally
 * Fix bug where gridtools is shown when main is hidden/show even when hide_gridtools_too is false
 * Make the Gridtools button hide/show (not just iconify) the window...
 * Reduce the amount of rig command sent if possible

@@ -1,2 +1,12 @@
-* Bandwidth usage:
-	Active window: Up Avg 12kbit, Down Avg 22 kbit
+Here's the results of some testing I've done. I'll try to keep them up to date.
+
+Bandwidth usage
+===============
+	rig control:
+		Active window:  12kbit Up / 22 kbit Down
+		Tray (hidden):    kbit Up /    kbit Down
+
+	VoIP (SIP):
+		  Max Quality:    kbit Up /    kbit Down
+	         128kbit chan:    kbit Up /    kbit Down
+		  Min Quality:    kbit Up /    kbit Down

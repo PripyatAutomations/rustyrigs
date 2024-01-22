@@ -1,8 +1,11 @@
 # This wraps up the baresip UA and allows us to control it enough to keep a call going
+#
+# Mostly based around the perl Expect module, but also generates basic config for the UA
+#
 package RustyRigs::Baresip;
 use strict;
 use warnings;
-use Expect;
+use Expect;		# https://metacpan.org/pod/Expect
 use File::Path qw(make_path remove_tree);
 use RustyRigs::Baresip::Settings;
 
@@ -135,23 +138,22 @@ sub new {
     my $cfg = $main::cfg;
     my $baresip_cmd = "baresip";
     my $ua_dir = "tmp/baresip-ua/";
-    my $expect_log = $$cfg->{'sip_logfile'} if (!(lc($$cfg->{'sip_logfile'}) eq 'none'));
-    print "expect logfile: $expect_log\n";
+    my $expect_log = $$cfg->{'sip_logfile'};
     my @params = ( "-f", $ua_dir );
     my $baresip_conf = $class->genconf($ua_dir);
     # create an Expect object by spawning another process
     my $exp = Expect->new();
 
     # For now, we want some debugging...
-    $exp->debug(1);
-
+    my $sip_debug = $$cfg->{'sip_expect_debug'};
+    $exp->debug($sip_debug);
 
     # set up logging, if desired
     my $main_log = $main::log;
     my $main_log_fh = $main_log->{'log_fh'};
 
     # If use has defined a logfile for expect messages
-    if (defined $expect_log) {
+    if (!$expect_log eq 'none') {
        $exp->log_file($expect_log);
     } elsif (defined $main_log_fh) {
        # Otherwise, try the main log filehandle

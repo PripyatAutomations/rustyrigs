@@ -73,6 +73,7 @@ our $def_cfg = {
     scrollback_lines    => 200,		   # number of lines to hold in logview buffer
     sip_au_indev        => "pipewire",	   # microphone device
     sip_au_outdev       => "pipewire",     # headphone/speaker device
+    sip_expect_debug    => 2,              # debug level for Expect in baresip wrapper
     sip_host            => "10.187.0.10",  # SIP *REMOTE* address
     sip_port            => 5060,           # SIP *REMOTE* port
     sip_laddr           => "127.0.0.1",    # SIP *LOCAL* address
