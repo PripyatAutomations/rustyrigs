@@ -49,6 +49,9 @@ our $tmp_cfg;
 sub close_main_win {
     my ( $widget, $event ) = @_;
 
+    my $expect = $main::sip->{'expect'};
+    $$expect->hard_close();
+
     main::save_config();
     Gtk3->main_quit();
     return TRUE;

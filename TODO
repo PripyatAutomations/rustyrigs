@@ -1,3 +1,5 @@
+* SIP stuff
+  - Implement sip_volume to use baresip volume instead of rig speaker
 * Fix volume blipping to 100% at startup (temp hack in place)
 * Find/fix remaining UI bugs
 * Add preamp control
