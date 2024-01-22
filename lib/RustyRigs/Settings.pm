@@ -87,7 +87,7 @@ sub close_dialog {
     ( my $self ) = @_;
     my $dialog =
       Gtk3::MessageDialog->new( $w_settings, 'destroy-with-parent', 'warning',
-        'yes_no', "Close settings window? Unsaved changes may be lost." );
+        'yes_no', "Close settings window? Unsaved changes will be lost." );
     $dialog->set_title('Confirm Close');
     $dialog->set_default_response('no');
     $dialog->set_transient_for($w_settings);

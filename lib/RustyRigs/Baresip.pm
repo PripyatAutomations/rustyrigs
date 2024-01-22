@@ -81,6 +81,7 @@ module                  stdio.so
 module                  cons.so
 module                  evdev.so
 module                  httpd.so
+module                  telnet.so
 module                  opus.so
 #module                 amr.so
 #module                 g7221.so
@@ -145,11 +146,14 @@ sub new {
     }
     # For now, we want some debugging...
     $exp->debug(1);
+
+    # XXX: Add glib timer to poll the baresip client
     my $obj = {
        # stuff and things
        baresip_conf => \$baresip_conf,
        expect => \$exp
     };
+
     bless $obj, $class if (defined $obj);
     return $obj;
 }

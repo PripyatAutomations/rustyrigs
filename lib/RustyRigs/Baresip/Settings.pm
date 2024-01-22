@@ -5,6 +5,7 @@ use Gtk3;
 use Glib qw(TRUE FALSE);
 
 my $tmp_cfg;
+our $w_sip_settings;
 
 sub DESTROY {
    my ( $self ) = @_;
@@ -13,6 +14,37 @@ sub DESTROY {
 
 sub save {
    my ( $self ) = @_;
+   
+   $w_sip_settings->destroy();
+   return;
+}
+
+sub close_dialog {
+   my ( $self ) = @_;
+   my $dialog =
+     Gtk3::MessageDialog->new( $w_sip_settings, 'destroy-with-parent', 'warning',
+       'yes_no', "Close settings window? Unsaved changes will be lost." );
+   $dialog->set_title('Confirm Close');
+   $dialog->set_default_response('no');
+   $dialog->set_transient_for($w_sip_settings);
+   $dialog->set_modal(1);
+   $dialog->set_keep_above(1);
+   $dialog->present();
+   $dialog->grab_focus();
+
+   my $response = $dialog->run();
+
+   if ( $response eq 'yes' ) {
+       undef $tmp_cfg;
+       $dialog->destroy();
+       $w_sip_settings->destroy();
+       bless $self, 'undef';
+   }
+   else {
+       $dialog->destroy();
+       $w_sip_settings->present();
+       $w_sip_settings->grab_focus();
+   }
    return;
 }
 
@@ -22,7 +54,7 @@ sub new {
    my $gtkui = $main::gtkui;
    my $w_main = $gtkui->{'w_main'};
 
-   my $wsp = $cfg->{'win_baresip_settings_placement'};
+   my $wsp = $$cfg->{'win_baresip_settings_placement'};
    if (!defined $wsp) {
       $wsp = 'none';
    }
@@ -35,7 +67,7 @@ sub new {
    );
 
    $win->set_transient_for($w_main);
-   $win->set_title("Settings");
+   $win->set_title("VoIP Settings");
    $win->set_border_width(5);
    $win->set_keep_above(1);
    $win->set_modal(1);
@@ -47,34 +79,16 @@ sub new {
    $win->add_accel_group($win_accel);
    my $config_box = Gtk3::Box->new( 'vertical', 5 );
 
-   # Set width/height of teh window
-   $win->set_default_size( $cfg->{'win_settings_width'},
-       $cfg->{'win_settings_height'} );
-
-   # If placement type is none, we should manually place the window at x,y
-   if ($wsp =~ m/none/) {
-      # Place the window
-      $win->move( $cfg->{'win_settings_x'}, $cfg->{'win_settings_y'} );
-   }
-
-   my $w_state = $cfg->{'win_settings_state'};
-   if (defined $w_state) {
-      $win->set_state($w_state);
-   }
    $win->signal_connect(
        'configure-event' => sub {
            my ( $widget, $event ) = @_;
 
            # Retrieve the size and position information
-           my ( $width, $height ) = $widget->get_size();
            my ( $x,     $y )      = $widget->get_position();
 
            # Save the data...
            $tmp_cfg->{'win_baresip_settings_x'}      = $x;
            $tmp_cfg->{'win_baresip_settings_y'}      = $y;
-           $tmp_cfg->{'win_baresip_settings_height'} = $height;
-           $tmp_cfg->{'win_baresip_settings_width'}  = $width;
-           $tmp_cfg->{'win_baresip_settings_state'}  = $widget->get_state();
 
            # Return FALSE to allow the event to propagate
            return FALSE;
@@ -95,7 +109,7 @@ sub new {
    $save_button->set_tooltip_text("Save and apply changes");
    $save_button->set_can_focus(1);
    $win_accel->connect(
-       ord('S'),  $cfg->{'shortcut_key'},
+       ord('S'),  $$cfg->{'shortcut_key'},
        'visible', sub { $class->save($tmp_cfg); }
    );
 
@@ -124,6 +138,7 @@ sub new {
    my $obj = {
       win => $win
    };
+   $w_sip_settings = $win;
    bless $obj, $class if (defined $obj);
    return $obj;
 }
