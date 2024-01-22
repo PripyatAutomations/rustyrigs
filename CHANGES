@@ -1,6 +1,9 @@
 2024-01-21
 	* Added 'none' config option for log_file to disable logging to a file
-	* Added basic support for baresip ua to connect to the audio path
+	* Added basic support for SIP audio path
+	  - This uses Expect library in perl
+          - SIP support is provided by the baresip console client
+	  - Be sure to set sip_logfile to 'none' or a proper path
 
 2024-01-20
 	* Replaced frequency input with a nicer widget i made

@@ -132,20 +132,34 @@ sub new {
 
     # Generate configuration
 #    my $expect_log;
+    my $cfg = $main::cfg;
     my $baresip_cmd = "baresip";
     my $ua_dir = "tmp/baresip-ua/";
-    my $expect_log = "$ua_dir/expect.log";
+    my $expect_log = $$cfg->{'sip_logfile'} if (!(lc($$cfg->{'sip_logfile'}) eq 'none'));
+    print "expect logfile: $expect_log\n";
     my @params = ( "-f", $ua_dir );
     my $baresip_conf = $class->genconf($ua_dir);
     # create an Expect object by spawning another process
-    my $exp = Expect->spawn($baresip_cmd, @params) or die "Cannot spawn $baresip_cmd: $!\n";
+    my $exp = Expect->new();
 
-    # set up logging, if desired
-    if (defined $expect_log) {
-       $exp->log_file($expect_log);
-    }
     # For now, we want some debugging...
     $exp->debug(1);
+
+
+    # set up logging, if desired
+    my $main_log = $main::log;
+    my $main_log_fh = $main_log->{'log_fh'};
+
+    # If use has defined a logfile for expect messages
+    if (defined $expect_log) {
+       $exp->log_file($expect_log);
+    } elsif (defined $main_log_fh) {
+       # Otherwise, try the main log filehandle
+       $exp->log_file($$main_log_fh);
+    }
+
+    # Start the process
+    $exp->spawn($baresip_cmd, @params) or die "Cannot spawn $baresip_cmd: $!\n";
 
     # XXX: Add glib timer to poll the baresip client
     my $obj = {

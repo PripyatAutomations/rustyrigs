@@ -77,6 +77,7 @@ our $def_cfg = {
     sip_port            => 5060,           # SIP *REMOTE* port
     sip_laddr           => "127.0.0.1",    # SIP *LOCAL* address
     sip_lport           => 5061,           # SIP *LOCAL* port
+    sip_logfile         => 'none',	   # Log file or none for SIP client
     sip_ctrl_port       => 14103,          # this must be unique and listens on localhost, port to control baresip via 
     sip_user            => 'netrig',       # SIP username
     sip_pass            => 'insecure',     # SIP password
