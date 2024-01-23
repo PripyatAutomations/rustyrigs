@@ -89,6 +89,7 @@ our $cfg_p;
 # Set up logging...
 $log->Log( "core", "info", "$app_name  is starting" );
 
+
 sub restart {
   print "restarting!\n";
   exec $^X, $0, @ARGV;
@@ -169,6 +170,36 @@ if ($cfg_readonly) {
     $log->Log( "core", "info", "using configuration read-only" );
     $cfg->{'read_only'} = 1;
 }
+
+# Load CSS
+Gtk3::CssProvider->load_from_data('
+    * {
+        -GtkWidget-focus-line-width: 1;
+        -GtkWidget-focus-padding: 1;
+        -GtkWidget-outside-focus-line: true;
+        background-contrast: false;
+    }
+');
+
+## Load CSS
+#my $css_provider = Gtk3::CssProvider->new();
+#$css_provider->load_from_data('
+#    * {
+#        -GtkWidget-focus-line-width: 1;
+#        -GtkWidget-focus-padding: 1;
+#        -GtkWidget-outside-focus-line: true;
+#    }
+#');
+## Get the GdkX11Screen object
+#my $screen = Gtk3::Gdk::Screen->get_default();
+#
+## Apply the CSS provider to the GdkX11Screen
+#my $style_context = Gtk3::StyleContext->new();
+#$style_context->add_provider_for_screen($screen, $css_provider, $Gtk3::STYLE_PROVIDER_PRIORITY_APPLICATION);
+# - and/or -
+# Prefer dark theme? XXX: use_dark_theme
+#my $settings = Gtk3::Settings->get_default();
+#$settings->set('gtk-application-prefer-dark-theme', 1);
 
 # Switch to log file
 $log->open_logfile($$cfg->{'log_file'});
@@ -260,6 +291,7 @@ our $meters = {
 $fonts = RustyRigs::GTK_font->new();
 $icons = RustyRigs::GTK_icon->new();
 $icons->load_all();
+#RustyRigs::GTK_ui->customize_css();
 $gtk_ui = RustyRigs::GTK_ui->new( $cfg, $log, $vfos );
 $gtk_ui->draw_main_win();
 $icons->set_icon("connecting");
@@ -277,7 +309,9 @@ $channels->load_from_yaml($mem_file);
 #$channels->refresh_ui();
 
 # Initialize SIP system
-$sip = RustyRigs::Baresip->new();
+if ($$cfg->{'use_sip'}) {
+   $sip = RustyRigs::Baresip->new();
+}
 
 # Delay the hamlib init at least a second, for reliability
 our $hamlib_initialized = 0;

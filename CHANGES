@@ -1,3 +1,6 @@
+2024-01-22
+	* SIP configuration dialog skeleton
+
 2024-01-21
 	* Added 'none' config option for log_file to disable logging to a file
 	* Added basic support for SIP audio path

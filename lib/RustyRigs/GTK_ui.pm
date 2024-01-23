@@ -46,11 +46,31 @@ our $settings;
 our $meters;
 our $tmp_cfg;
 
+sub customize_css {
+    # Load CSS
+    Gtk3::CssProvider->load_from_data('
+        * {
+            -GtkWidget-focus-line-width: 1;
+            -GtkWidget-focus-padding: 1;
+            -GtkWidget-outside-focus-line: true;
+            background-contrast: false;
+        }
+    ');
+
+    # Apply the CSS provider
+    my $screen = Gtk3::Gdk::Screen::get_default();
+    my $style_context = Gtk3::StyleContext->new();
+    $style_context->add_provider_for_screen($screen, $Gtk3::STYLE_PROVIDER_PRIORITY_APPLICATION);
+}
+
 sub close_main_win {
     my ( $widget, $event ) = @_;
 
-    my $expect = $main::sip->{'expect'};
-    $$expect->hard_close();
+    # close SIP client subprocess, if applicable
+    if (defined $main::sip) {
+       my $expect = $main::sip->{'expect'};
+       $$expect->hard_close();
+    }
 
     main::save_config();
     Gtk3->main_quit();
@@ -373,8 +393,8 @@ sub draw_main_win {
     my $key_ptt = $cfg->{'key_ptt'};
     $ptt_button = Gtk3::ToggleButton->new_with_label("PTT ($key_ptt)");
     $initial_bg_color = $ptt_button->get_style_context->get_background_color('normal');
-    $ptt_button->override_background_color('normal', Gtk3::Gdk::RGBA->new(0.0, 1.0, 0.0, 1.0));
-    $ptt_button->override_background_color('active', Gtk3::Gdk::RGBA->new(1.0, 0.0, 0.0, 1.0));
+    $ptt_button->override_background_color('normal', Gtk3::Gdk::RGBA->new(0.0, 0.3, 0.0, 1.0));
+    $ptt_button->override_background_color('active', Gtk3::Gdk::RGBA->new(0.5, 0.0, 0.0, 1.0));
     $ptt_button->signal_connect(
         toggled => sub {
             my ( $self ) = @_;

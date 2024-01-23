@@ -2,6 +2,7 @@
 #
 # Mostly based around the perl Expect module, but also generates basic config for the UA
 #
+# XXX: Investigate using the http API for baresip to make life simpler?
 package RustyRigs::Baresip;
 use strict;
 use warnings;
@@ -13,6 +14,20 @@ sub settings {
     my ( $self ) = @_;
     my $win = RustyRigs::Baresip::Settings->new();
     return $win;
+}
+
+# Find an unused TCP port for our HTTP control port of baresip
+sub find_free_ctrl_port {
+   my ( $self ) = @_;
+   my $cfg = $main::cfg;
+   my $port;
+
+   # For if available and not 'auto', use the configured one...
+   $port = $$cfg->{'sip_ctrl_port'};
+   if (!defined $port || $port eq 'auto') {
+      # Try to figure out a suitable port and return it...
+   }
+   return $port;
 }
 
 sub genconf {
@@ -84,7 +99,7 @@ module                  stdio.so
 module                  cons.so
 module                  evdev.so
 module                  httpd.so
-module                  telnet.so
+#module                  telnet.so
 module                  opus.so
 #module                 amr.so
 #module                 g7221.so
@@ -104,9 +119,9 @@ module_tmp              account.so
 
 module_app              auloop.so
 module_app              contact.so
-module_app              debug_cmd.so
+#module_app              debug_cmd.so
 module_app              menu.so
-module_app              syslog.so
+#module_app              syslog.so
 
 #cons_listen             127.0.0.1:\$sip_cons_port # cons - Console UI UDP/TCP sockets
 #http_listen             127.0.0.1:\$sip_http_port # httpd - HTTP Server

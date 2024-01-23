@@ -103,32 +103,100 @@ sub new {
        }
    );
 
+   my $sip_label = Gtk3::Label->new( 'SIP Server' );
+   my $sip_label_box = Gtk3::Box->new( 'vertical', 5 );
+   my $sip_ctrl_box = Gtk3::Box->new( 'vertical', 5 );
+   my $sip_host_label = Gtk3::Label->new( 'SIP Host:port' );
+   my $sip_host_entry = Gtk3::Entry->new();
+   $sip_label_box->pack_start( $sip_host_label, FALSE, FALSE, 0 );
+   $sip_ctrl_box->pack_start( $sip_host_entry, TRUE, TRUE, 0 );
+
+   my $sip_user_label = Gtk3::Label->new( 'SIP user' );
+   my $sip_user_entry = Gtk3::Entry->new();
+   $sip_label_box->pack_start( $sip_user_label, FALSE, FALSE, 0 );
+   $sip_ctrl_box->pack_start( $sip_user_entry, TRUE, TRUE, 0 );
+
+   my $sip_pass_label = Gtk3::Label->new( 'SIP password' );
+   my $sip_pass_entry = Gtk3::Entry->new();
+   $sip_pass_entry->set_input_purpose( 'password' );
+   $sip_pass_entry->set_visibility( 0 );
+   $sip_label_box->pack_start( $sip_pass_label, FALSE, FALSE, 0 );
+   $sip_ctrl_box->pack_start( $sip_pass_entry, TRUE, TRUE, 0 );
+
+   my $sip_laddr_label = Gtk3::Label->new( 'Local IP:port' );
+   my $sip_laddr_entry = Gtk3::Entry->new();
+   $sip_label_box->pack_start( $sip_laddr_label, FALSE, FALSE, 0 );
+   $sip_ctrl_box->pack_start( $sip_laddr_entry, TRUE, TRUE, 0 );
+
+   my $sip_dest_label = Gtk3::Label->new( 'Call destination' );
+   my $sip_dest_entry = Gtk3::Entry->new();
+   $sip_label_box->pack_start( $sip_dest_label, FALSE, FALSE, 0 );
+   $sip_ctrl_box->pack_start( $sip_dest_entry, TRUE, TRUE, 0 );
+
+   my $debug_label = Gtk3::Label->new("Debugging Settings");
+   my $debug_box = Gtk3::Box->new( 'horizontal', 5 );
+   my $debug_label_box = Gtk3::Box->new( 'vertical', 5 );
+   my $debug_ctrl_box = Gtk3::Box->new( 'vertical', 5 );
+   $debug_box->pack_start( $debug_label_box, TRUE, TRUE, 0 );
+   $debug_box->pack_start( $debug_ctrl_box, TRUE, TRUE, 0 );
+   my $sip_exp_logfile_label = Gtk3::Label->new( 'Expect logfile' );
+   my $sip_exp_logfile_entry = Gtk3::Entry->new();
+   $debug_label_box->pack_start( $sip_exp_logfile_label, FALSE, FALSE, 0 );
+   $debug_ctrl_box->pack_start( $sip_exp_logfile_entry, TRUE, TRUE, 0 );
+
+   my $sip_box = Gtk3::Box->new( 'horizontal', 5 );
+
+   my $audev_label = Gtk3::Label->new( 'Audio Devices' );
+   my $audev_box = Gtk3::Box->new( 'horizontal', 5 );
+   my $audev_label_box = Gtk3::Box->new( 'vertical', 5 );
+   my $audev_ctrl_box = Gtk3::Box->new( 'vertical', 5 );
+   my $sip_volume_entry = Gtk3::CheckButton->new();
+   my $sip_volume_dummy = Gtk3::Label->new();
+   $sip_volume_entry->set_label( 'Use SIP volume?' );
+   $audev_label_box->pack_start( $sip_volume_entry, TRUE, TRUE, 0 );
+   $audev_ctrl_box->pack_start( $sip_volume_dummy, TRUE, TRUE, 0 );
+   $audev_box->pack_start( $audev_label_box, TRUE, TRUE, 0 );
+   $audev_box->pack_start( $audev_ctrl_box, TRUE, TRUE, 0 );
+   my $audev_in_label = Gtk3::Label->new( 'input device' );
+   my $audev_in_entry = Gtk3::Entry->new();
+   my $audev_out_label = Gtk3::Label->new( 'output device' );
+   my $audev_out_entry = Gtk3::Entry->new();
+   $audev_label_box->pack_start( $audev_in_label, FALSE, FALSE, 0);
+   $audev_label_box->pack_start( $audev_out_label, FALSE, FALSE, 0);
+   $audev_ctrl_box->pack_start( $audev_in_entry, TRUE, TRUE, 0 );
+   $audev_ctrl_box->pack_start( $audev_out_entry, TRUE, TRUE, 0 );
+
    my $button_box = Gtk3::Box->new( 'horizontal', 5 );
-   # Create an OK button to apply settings
-   my $save_button = Gtk3::Button->new('_Save');
-   $save_button->set_tooltip_text("Save and apply changes");
-   $save_button->set_can_focus(1);
+   my $save_button = Gtk3::Button->new( '_Save' );
+   $save_button->set_tooltip_text( "Save and apply changes" );
+   $save_button->set_can_focus( 1 );
    $win_accel->connect(
        ord('S'),  $$cfg->{'shortcut_key'},
        'visible', sub { $class->save($tmp_cfg); }
    );
-
-   # Create a Cancel button to discard changes
-   my $cancel_button = Gtk3::Button->new('_Cancel');
-   $cancel_button->set_tooltip_text("Discard changes");
+   my $cancel_button = Gtk3::Button->new( '_Cancel' );
+   $cancel_button->set_tooltip_text( "Discard changes" );
    $save_button->signal_connect( 'activate' => sub { $class->save($tmp_cfg); } );
    $save_button->signal_connect( 'clicked'  => sub { $class->save($tmp_cfg); } );
    $cancel_button->signal_connect( 'activate' => \&close_dialog );
    $cancel_button->signal_connect( 'clicked'  => \&close_dialog );
-   $cancel_button->set_can_focus(1);
+   $cancel_button->set_can_focus( 1 );
    $win_accel->connect( ord('C'), 'mod1-mask', 'visible', \&close_dialog );
    $button_box->pack_start( $save_button,   TRUE, TRUE, 0 );
    $button_box->pack_start( $cancel_button, TRUE, TRUE, 0 );
+   my $restart_note_label = Gtk3::Label->new( '* Will restart on save' );
 
-   my $restart_note_label = Gtk3::Label->new('* Will restart on save');
-
+   ##########
+   $sip_box->pack_start( $sip_label_box, FALSE, FALSE, 0 );
+   $sip_box->pack_start( $sip_ctrl_box, FALSE, FALSE, 0 );
+   $config_box->pack_start( $sip_label, TRUE, TRUE, 0 );
+   $config_box->pack_start( $sip_box, TRUE, TRUE, 0 );
+   $config_box->pack_start( $audev_label, TRUE, TRUE, 0 );
+   $config_box->pack_start( $audev_box, TRUE, TRUE, 0 );
+   $config_box->pack_start( $debug_label, TRUE, TRUE, 0 );
+   $config_box->pack_start( $debug_box, TRUE, TRUE, 0 );
    $config_box->pack_start( $button_box, FALSE, FALSE, 0 );
-   $config_box->pack_start( $restart_note_label, FALSE, FALSE, 0);
+   $config_box->pack_start( $restart_note_label, FALSE, FALSE, 0 );
 
    # Add the config box, show the window, and focus first input
 #   $win->signal_connect( key_release_event => \&combobox_keys );

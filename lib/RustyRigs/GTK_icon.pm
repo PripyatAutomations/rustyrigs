@@ -124,11 +124,15 @@ sub set_icon {
     my $atten      = $act_vfo->{'stats'}{'atten'};
     my $freq_txt   = $act_vfo->{'freq'};
     my $mode_txt   = $act_vfo->{'mode'};
-    my $width_text = $act_vfo->{'width'};
-    my $power_text = $act_vfo->{'power'};
+    my $width_txt = $act_vfo->{'width'};
+    my $power_txt = $act_vfo->{'power'};
     my $rigctl_addr = $$cfg->{'rigctl_addr'};
     my $swr_txt    = $act_vfo->{'stats'}{'swr'};
     my $sig_txt    = $act_vfo->{'stats'}{'signal'};
+
+    $width_txt = '-' if (!defined $width_txt);
+    $swr_txt = '-' if (!defined $swr_txt);
+    $power_txt = '-' if (!defined $power_txt);
 
     if ( defined($main::rig) ) {
         if ( $main::rig->get_ptt($Hamlib::RIG_VFO_A) ) {
@@ -158,9 +162,9 @@ sub set_icon {
     my $tray_tooltip =
       $main::app_name . ": Click to toggle display or right click for menu.\n";
     $tray_tooltip .= "\t$connected_txt to $rigctl_addr\n";
-    $tray_tooltip .= "\t$status_txt $freq_txt $mode_txt ${width_text} hz\n\n";
+    $tray_tooltip .= "\t$status_txt $freq_txt $mode_txt ${width_txt} hz\n\n";
     $tray_tooltip .= "Meters:\n";
-    $tray_tooltip .= "\t\tPower: ${power_text}W\n\t\tSWR: ${swr_txt}:1\n";
+    $tray_tooltip .= "\t\tPower: ${power_txt}W\n\t\tSWR: ${swr_txt}:1\n";
     # update the tooltip
     $self->set_tray_tooltip( $tray_icon, $tray_tooltip );
 
