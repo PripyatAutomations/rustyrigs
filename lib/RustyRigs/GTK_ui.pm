@@ -426,7 +426,7 @@ sub draw_main_win {
     my $meters_in_main = $cfg->{'meters_in_main'};
     if ($meters_in_main) {
        my $meter_box = $meters->{'box'};
-       $meters_dock_box->pack_start( $meter_box, TRUE, TRUE, 0 );
+       $meters_dock_box->pack_start( $meter_box, TRUE, TRUE, 5 );
     } else {
        # Show the meters window
 #       $meters->show();
@@ -450,7 +450,7 @@ sub draw_main_win {
             }
         }
     );
-    $toggle_box->pack_start( $mic_toggle, FALSE, FALSE, 0);
+    $toggle_box->pack_start( $mic_toggle, FALSE, FALSE, 5);
 
     my $vox_toggle = Gtk3::CheckButton->new();
     $vox_toggle->set_label('Use VOX?');
@@ -469,7 +469,7 @@ sub draw_main_win {
             }
         }
     );
-    $toggle_box->pack_start( $vox_toggle, FALSE, FALSE, 0);
+    $toggle_box->pack_start( $vox_toggle, FALSE, FALSE, 5);
 
     my $use_sip_toggle = Gtk3::CheckButton->new();
     $use_sip_toggle->set_label('Use SIP?');
@@ -488,7 +488,7 @@ sub draw_main_win {
             $main::cfg_p->apply($tmp_cfg, FALSE);
         }
     );
-    $toggle_box->pack_start( $use_sip_toggle, FALSE, FALSE, 0);
+    $toggle_box->pack_start( $use_sip_toggle, FALSE, FALSE, 5);
 
     #################
     # Channel stuff #
@@ -496,7 +496,7 @@ sub draw_main_win {
     my $chan_box = Gtk3::Box->new( 'vertical', 5 );
 
     my $chan_label = Gtk3::Label->new( "Channel (" . $cfg->{'key_chan'} . ")" );
-    $chan_box->pack_start( $chan_label, FALSE, FALSE, 0 );
+    $chan_box->pack_start( $chan_label, FALSE, FALSE, 5 );
 
     # Show the channel choser combobox
     my $chan_combo = Gtk3::ComboBox->new();
@@ -514,7 +514,7 @@ sub draw_main_win {
     $chan_combo->add_attribute( $render3, text => 2 );
     $chan_combo->set_sensitive(0);
 
-    $chan_box->pack_start( $chan_combo, FALSE, FALSE, 0 );
+    $chan_box->pack_start( $chan_combo, FALSE, FALSE, 5 );
 
     $w_main_accel->connect(
         ord( $cfg->{'key_chan'} ),
@@ -541,7 +541,7 @@ sub draw_main_win {
         }
     );
 
-    $mem_btn_box->pack_start( $mem_load_button, TRUE, TRUE, 0 );
+    $mem_btn_box->pack_start( $mem_load_button, TRUE, TRUE, 5 );
 
     # Memory write button
     $mem_write_button =
@@ -553,7 +553,7 @@ sub draw_main_win {
         clicked => sub {
         }
     );
-    $mem_btn_box->pack_start( $mem_write_button, TRUE, TRUE, 0 );
+    $mem_btn_box->pack_start( $mem_write_button, TRUE, TRUE, 5 );
 
     # XXX: ACCEL-Replace these with a global function
     $w_main_accel->connect(
@@ -579,7 +579,7 @@ sub draw_main_win {
             $main::channels->show();
         }
     );
-    $mem_btn_box->pack_start( $mem_edit_button, TRUE, TRUE, 0 );
+    $mem_btn_box->pack_start( $mem_edit_button, TRUE, TRUE, 5 );
 
     # XXX: ACCEL-Replace these with a global function
     $w_main_accel->connect(
@@ -591,7 +591,7 @@ sub draw_main_win {
             $main::channels->show();
         }
     );
-    $chan_box->pack_start( $mem_btn_box, FALSE, FALSE, 0 );
+    $chan_box->pack_start( $mem_btn_box, FALSE, FALSE, 5 );
 
     ################################
     # rig volume
@@ -605,11 +605,11 @@ sub draw_main_win {
     $rig_vol_entry->set_value(0);	# default to 0 until hamlib loaded
     $rig_vol_entry->set_tooltip_text("Set RX volume");
     $rig_vol_entry->set_property('draw-value' => FALSE);
-    my $rig_vol_box = Gtk3::Box->new('horizontal', 0);
+    my $rig_vol_box = Gtk3::Box->new('horizontal', 5);
     $rig_vol_val = Gtk3::Label->new("    ");
     $rig_vol_val->set_alignment(1, 0.5);
-    $rig_vol_box->pack_start($rig_vol_entry, TRUE, TRUE, 0);
-    $rig_vol_box->pack_start($rig_vol_val, FALSE, TRUE, 0);
+    $rig_vol_box->pack_start($rig_vol_entry, TRUE, TRUE, 5);
+    $rig_vol_box->pack_start($rig_vol_val, FALSE, TRUE, 5);
 
     $rig_vol_entry->signal_connect(
         button_press_event => sub {
@@ -638,10 +638,13 @@ sub draw_main_win {
             my $vol = $widget->get_value();
 
             $rig_p->{'volume'} = $vol;
-            $rig->set_level($Hamlib::RIG_LEVEL_AF, $vol / 100);
-            my $tmp_vol = int($rig_p->{'volume'});
-            my $val = sprintf("%*s%%", 3, $tmp_vol);
-            $rig_vol_val->set_label($val);
+            my $tmp_vol = $vol / 100;
+            print "Would set volume to: $tmp_vol\n";
+# XXX: Fix this crap
+#            $rig->set_level($Hamlib::RIG_LEVEL_AF, $vol / 100);
+#            my $tmp_vol = int($rig_p->{'volume'});
+#            my $val = sprintf("%*s%%", 3, $tmp_vol);
+#            $rig_vol_val->set_label($val);
 
             $$rp = FALSE;
 
@@ -680,11 +683,11 @@ sub draw_main_win {
     $squelch_entry->set_tooltip_text("Please Click and DRAG to change RF gain");
     $squelch_entry->set_property('draw-value' => FALSE);
     $squelch_entry->set_sensitive(0);
-    my $squelch_box = Gtk3::Box->new('horizontal', 0);
+    my $squelch_box = Gtk3::Box->new('horizontal', 5);
     my $squelch_val = Gtk3::Label->new("  0%");
     $squelch_val->set_alignment(1, 0.5);
-    $squelch_box->pack_start($squelch_entry, TRUE, TRUE, 0);
-    $squelch_box->pack_start($squelch_val, FALSE, TRUE, 0);
+    $squelch_box->pack_start($squelch_entry, TRUE, TRUE, 5);
+    $squelch_box->pack_start($squelch_val, FALSE, TRUE, 5);
 
     # XXX: ACCEL-Replace these with a global function
     $w_main_accel->connect(
@@ -860,10 +863,10 @@ sub draw_main_win {
     $rf_gain_entry->set_tooltip_text("Please Click and DRAG to change RF gain");
     $rf_gain_entry->set_sensitive(0);
     $rf_gain_entry->set_property('draw-value' => FALSE);
-    my $rf_gain_box = Gtk3::Box->new('horizontal', 0);
+    my $rf_gain_box = Gtk3::Box->new('horizontal', 5);
     my $rf_gain_val = Gtk3::Label->new("  0%");
     $rf_gain_val->set_alignment(1, 0.5);
-    $rf_gain_box->pack_start($rf_gain_entry, TRUE, TRUE, 0);
+    $rf_gain_box->pack_start($rf_gain_entry, TRUE, TRUE, 5);
     $rf_gain_box->pack_start($rf_gain_val, FALSE, TRUE, 0);
 
     # XXX: ACCEL-Replace these with a global function
@@ -896,11 +899,11 @@ sub draw_main_win {
     $dnr_entry->set_tooltip_text("DSP Noise Reduction");
     $dnr_entry->set_sensitive(0);
     $dnr_entry->set_property('draw-value' => FALSE);
-    my $dnr_box = Gtk3::Box->new('horizontal', 0);
+    my $dnr_box = Gtk3::Box->new('horizontal', 5);
     my $dnr_val = Gtk3::Label->new("  0%");
     $dnr_val->set_alignment(1, 0.5);
-    $dnr_box->pack_start($dnr_entry, TRUE, TRUE, 0);
-    $dnr_box->pack_start($dnr_val, FALSE, TRUE, 0);
+    $dnr_box->pack_start($dnr_entry, TRUE, TRUE, 5);
+    $dnr_box->pack_start($dnr_val, FALSE, TRUE, 5);
 
     # XXX: ACCEL-Replace these with a global function
     $w_main_accel->connect(
@@ -936,12 +939,12 @@ sub draw_main_win {
     $vfo_power_entry->set_value_pos('right');
     $vfo_power_entry->set_tooltip_text( "Please Click and DRAG to change TX power");
     $vfo_power_entry->set_property('draw-value' => FALSE);
-    my $vfo_power_box = Gtk3::Box->new('horizontal', 0);
+    my $vfo_power_box = Gtk3::Box->new('horizontal', 5);
     $val = sprintf("%*sW", 3, $act_vfo->{'power'});
     my $vfo_power_val = Gtk3::Label->new("$val");
     $vfo_power_val->set_alignment(1, 0.5);
-    $vfo_power_box->pack_start($vfo_power_entry, TRUE, TRUE, 0);
-    $vfo_power_box->pack_start($vfo_power_val, FALSE, TRUE, 0);
+    $vfo_power_box->pack_start($vfo_power_entry, TRUE, TRUE, 5);
+    $vfo_power_box->pack_start($vfo_power_val, FALSE, TRUE, 5);
 
     # XXX: ACCEL-Replace these with a global function
     $w_main_accel->connect(
@@ -1055,47 +1058,47 @@ sub draw_main_win {
     my $label_box = Gtk3::Box->new( 'vertical', 5 );
     my $ctrl_box = Gtk3::Box->new( 'vertical', 5 );
 
-    $box->pack_start( $vfo_sel_button,  FALSE, FALSE, 0 );
-    $box->pack_start( $$freq_box,       TRUE, TRUE, 0 );
-    $box->pack_start( $ptt_button,      FALSE, FALSE, 0 );
-    $box->pack_start( $meters_dock_box, TRUE,  TRUE,  0 );
-    $box->pack_start( $toggle_box,      FALSE, FALSE, 0 );
-    $box->pack_start( $chan_box,        FALSE, FALSE, 0 );
+    $box->pack_start( $vfo_sel_button,  FALSE, FALSE, 5 );
+    $box->pack_start( $$freq_box,       TRUE, TRUE, 5 );
+    $box->pack_start( $ptt_button,      FALSE, FALSE, 5 );
+    $box->pack_start( $meters_dock_box, TRUE,  TRUE,  5 );
+    $box->pack_start( $toggle_box,      FALSE, FALSE, 5 );
+    $box->pack_start( $chan_box,        FALSE, FALSE, 5 );
 
-    $label_box->pack_start( $rig_vol_label,   FALSE, FALSE, 0 );
-    $ctrl_box->pack_start( $rig_vol_box,      TRUE, TRUE, 0 );
+    $label_box->pack_start( $rig_vol_label,   FALSE, FALSE, 5 );
+    $ctrl_box->pack_start( $rig_vol_box,      TRUE, TRUE, 5 );
 
     $squelch_label->set_alignment(1, 0.5);
-    $label_box->pack_start( $squelch_label,   FALSE, FALSE, 0 );
-    $ctrl_box->pack_start( $squelch_box,      TRUE, TRUE, 0 );
+    $label_box->pack_start( $squelch_label,   FALSE, FALSE, 5 );
+    $ctrl_box->pack_start( $squelch_box,      TRUE, TRUE, 5 );
 
     $rf_gain_label->set_alignment(1, 0.5);
-    $label_box->pack_start( $rf_gain_label,   FALSE, FALSE, 0 );
-    $ctrl_box->pack_start( $rf_gain_box  ,    TRUE, TRUE, 0 );
+    $label_box->pack_start( $rf_gain_label,   FALSE, FALSE, 5 );
+    $ctrl_box->pack_start( $rf_gain_box  ,    TRUE, TRUE, 5 );
 
     $dnr_label->set_alignment(1, 0.5);
-    $label_box->pack_start( $dnr_label,       FALSE, FALSE, 0 );
-    $ctrl_box->pack_start( $dnr_box,          TRUE, TRUE, 0 );
+    $label_box->pack_start( $dnr_label,       FALSE, FALSE, 5 );
+    $ctrl_box->pack_start( $dnr_box,          TRUE, TRUE, 5 );
 
     $vfo_power_label->set_alignment(1, 0.5);
-    $label_box->pack_start( $vfo_power_label, FALSE, FALSE, 0 );
-    $ctrl_box->pack_start( $vfo_power_box,    TRUE, TRUE, 0 );
+    $label_box->pack_start( $vfo_power_label, FALSE, FALSE, 5 );
+    $ctrl_box->pack_start( $vfo_power_box,    TRUE, TRUE, 5 );
 
     $mode_label->set_alignment(1, 0.5);
-    $label_box->pack_start( $mode_label,      FALSE, FALSE, 0 );
-    $ctrl_box->pack_start( $mode_entry,       TRUE, TRUE, 0 );
+    $label_box->pack_start( $mode_label,      FALSE, FALSE, 5 );
+    $ctrl_box->pack_start( $mode_entry,       TRUE, TRUE, 5 );
 
     $width_label->set_alignment(1, 0.5);
-    $label_box->pack_start( $width_label,     FALSE, FALSE, 0 );
-    $ctrl_box->pack_start( $width_entry,      TRUE, TRUE, 0 );
+    $label_box->pack_start( $width_label,     FALSE, FALSE, 5 );
+    $ctrl_box->pack_start( $width_entry,      TRUE, TRUE, 5 );
 
-    my $controls_box = Gtk3::Box->new( 'horizontal', 0 );
-    $controls_box->pack_start( $label_box,    FALSE, TRUE, 0 );
-    $controls_box->pack_start( $ctrl_box,     TRUE, TRUE, 0 );
+    my $controls_box = Gtk3::Box->new( 'horizontal', 5 );
+    $controls_box->pack_start( $label_box,    FALSE, TRUE, 5 );
+    $controls_box->pack_start( $ctrl_box,     TRUE, TRUE, 5 );
 
-    $box->pack_start( $controls_box,    FALSE, FALSE, 0 );
-    $box->pack_start( $fm_box,          FALSE, FALSE, 0 );
-    $box->pack_start( $lock_button,     FALSE, FALSE, 0 );
+    $box->pack_start( $controls_box,    FALSE, FALSE, 5 );
+    $box->pack_start( $fm_box,          FALSE, FALSE, 5 );
+    $box->pack_start( $lock_button,     FALSE, FALSE, 5 );
 
     # Add the Buttons
     ##################
@@ -1124,10 +1127,10 @@ sub draw_main_win {
     $quit_button->set_tooltip_text("Exit the program");
 
     # Add widgets and insert the box in the window
-    $box->pack_start( $hide_button,     FALSE, FALSE, 0 );
-    $box->pack_start( $settings_button, FALSE, FALSE, 0 );
-    $box->pack_start( $gridtools_button, FALSE, FALSE, 0 );
-    $box->pack_start( $quit_button,     FALSE, FALSE, 0 );
+    $box->pack_start( $hide_button,     FALSE, FALSE, 5 );
+    $box->pack_start( $settings_button, FALSE, FALSE, 5 );
+    $box->pack_start( $gridtools_button, FALSE, FALSE, 5 );
+    $box->pack_start( $quit_button,     FALSE, FALSE, 5 );
     $w_main->add($box);
 
     $w_main->signal_connect(

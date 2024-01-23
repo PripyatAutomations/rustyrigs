@@ -1,5 +1,7 @@
 2024-01-22
 	* SIP configuration dialog skeleton
+	* Added some padding around all widgets
+	* Improved FreqInput widget to allow typing & arrow navigation
 
 2024-01-21
 	* Added 'none' config option for log_file to disable logging to a file

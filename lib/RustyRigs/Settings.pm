@@ -162,9 +162,7 @@ sub new {
     $config_box = Gtk3::Box->new( 'vertical', 5 );
 
     # Set width/height of teh window
-    $w_settings->set_default_size( $cfg->{'win_settings_width'},
-        $cfg->{'win_settings_height'} );
-
+    $w_settings->set_default_size( 300, 300 );
     # If placement type is none, we should manually place the window at x,y
     if ($wsp =~ m/none/) {
        # Place the window
@@ -623,15 +621,18 @@ sub new {
     );
 
     # Create a button for SIP settings
-    my $sip_button = Gtk3::Button->new('S_IP (VoIP) Setup');
-    $sip_button->set_tooltip_text("SIP (VoIP) settings");
-    $sip_button->set_can_focus(1);
-    $sip_button->signal_connect( 'activate' => sub { (my $self) = @_; $class->sip_settings(); } );
-    $sip_button->signal_connect( 'clicked'  => sub { (my $self) = @_; $class->sip_settings(); } );
-    $w_settings_accel->connect(
-        ord('U'),  $cfg->{'shortcut_key'},
-        'visible', sub { $sip_button->grab_focus(); }
-    );
+    my $sip_button;
+    if ($cfg->{'use_sip'} || defined $tmp_cfg->{'use_sip'}) {
+        $sip_button = Gtk3::Button->new('S_IP (VoIP) Setup');
+        $sip_button->set_tooltip_text("SIP (VoIP) settings");
+        $sip_button->set_can_focus(1);
+        $sip_button->signal_connect( 'activate' => sub { (my $self) = @_; $class->sip_settings(); } );
+        $sip_button->signal_connect( 'clicked'  => sub { (my $self) = @_; $class->sip_settings(); } );
+        $w_settings_accel->connect(
+            ord('U'),  $cfg->{'shortcut_key'},
+            'visible', sub { $sip_button->grab_focus(); }
+        );
+    }
 
     ###########
     # We want Save and Cancel next to each other, so use a box to wrap
@@ -684,7 +685,10 @@ sub new {
     $config_box->pack_start( $main_box, FALSE, FALSE, 0 );
     $config_box->pack_start( $window_options_box,  FALSE, FALSE, 0 );
     $config_box->pack_start( $meters_button,   FALSE, FALSE, 0 );
-    $config_box->pack_start( $sip_button,   FALSE, FALSE, 0 );
+
+    if ($cfg->{'use_sip'} || $tmp_cfg->{'use_sip'}) {
+       $config_box->pack_start( $sip_button,   FALSE, FALSE, 0 );
+    }
     $config_box->pack_start( $button_box, FALSE, FALSE, 0 );
     $config_box->pack_start( $restart_note_label, FALSE, FALSE, 0);
 
