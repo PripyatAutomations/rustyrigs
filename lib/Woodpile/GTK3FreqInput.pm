@@ -32,7 +32,7 @@ sub set_value {
        die "FreqInput widget can't handle numbers longer than $limit long. Input |$integer_part| is $i_len long! Either increase the size when creating widget or truncate input! Called by " . ( caller(1) )[3] . "\n";
     }
 
-    # Calculate the number of leading zeros needed
+    # add leading zeros as needed
     my $leading_zeros = $limit - $i_len;
     $integer_part = '0' x $leading_zeros . $integer_part;
 
@@ -88,9 +88,10 @@ sub set_digit {
     my $vfo      = $vfos->{$curr_vfo};
     my $curr_freq = $vfo->{'freq'};
 
-    if ($scale > 0) {
+    if ( $scale > 0 ) {
        my $new_freq = replace_nth_digit( $curr_freq, ($places - $scale), $newval );
-       $main::rig->set_freq($main::rig->get_vfo(), $new_freq);
+       $widget->set_value( $new_freq );
+       $main::rig->set_freq( $main::rig->get_vfo(), $new_freq );
        print "Setting $scale digit to $newval, resulting in new freq of $new_freq\n";
     } else {
        print "we currently do not support decimal frequencies :(\n";
@@ -107,6 +108,8 @@ sub dec_digit {
     my $freq     = $vfo->{'freq'};
     my $mult     = (10**$scale)/10;
     my $new_val = $freq - $mult;
+
+    $widget->set_value($new_val);
     $main::rig->set_freq($main::rig->get_vfo(), $new_val);
     return;
 }
@@ -120,6 +123,8 @@ sub inc_digit {
     my $freq     = $vfo->{'freq'};
     my $mult     = (10**$scale)/10;
     my $new_val = $freq + $mult;
+
+    $widget->set_value($new_val);
     $main::rig->set_freq($main::rig->get_vfo(), $new_val);
     return;
 }
@@ -206,7 +211,6 @@ sub draw_digit {
       }
    );
 
-   # Ughh..
    $dwn_btn->signal_connect( activate => sub {
       my ( $widget ) = @_;
       $widget->down_button($scale);
