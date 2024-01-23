@@ -28,8 +28,8 @@ our $mode_entry;
 our $rf_gain_entry;
 our $dnr_entry;
 our $squelch_entry;
-our $rig_vol_entry;
-our $rig_vol_val;
+our $vol_entry;
+our $vol_val;
 our $vfo_freq_entry;
 our $vfo_power_entry;
 our $vfo_sel_button;
@@ -596,37 +596,37 @@ sub draw_main_win {
 
     ################################
     # rig volume
-    my $rig_vol_label =
+    my $vol_label =
       Gtk3::Label->new( "Volume % (" . $cfg->{'key_volume'} . ")" );
-    $rig_vol_label->set_alignment(1, 0.5);
-    $rig_vol_entry = Gtk3::Scale->new_with_range( 'horizontal', 0, 100, 1 );
-    $rig_vol_entry->set_digits(0);
-    $rig_vol_entry->set_draw_value(TRUE);
-    $rig_vol_entry->set_value_pos('right');
-    $rig_vol_entry->set_value(0);	# default to 0 until hamlib loaded
-    $rig_vol_entry->set_tooltip_text("Set RX volume");
-    $rig_vol_entry->set_property('draw-value' => FALSE);
-    my $rig_vol_box = Gtk3::Box->new('horizontal', 5);
-    $rig_vol_val = Gtk3::Label->new("    ");
-    $rig_vol_val->set_alignment(1, 0.5);
-    $rig_vol_box->pack_start($rig_vol_entry, TRUE, TRUE, 5);
-    $rig_vol_box->pack_start($rig_vol_val, FALSE, TRUE, 5);
+    $vol_label->set_alignment(1, 0.5);
+    $vol_entry = Gtk3::Scale->new_with_range( 'horizontal', 0, 100, 1 );
+    $vol_entry->set_digits(0);
+    $vol_entry->set_draw_value(TRUE);
+    $vol_entry->set_value_pos('right');
+    $vol_entry->set_value(0);
+    $vol_entry->set_tooltip_text("Set RX volume");
+    $vol_entry->set_property('draw-value' => FALSE);
+    my $vol_box = Gtk3::Box->new('horizontal', 5);
+    $vol_val = Gtk3::Label->new("    ");
+    $vol_val->set_alignment(1, 0.5);
+    $vol_box->pack_start($vol_entry, TRUE, TRUE, 5);
+    $vol_box->pack_start($vol_val, FALSE, TRUE, 5);
 
-    $rig_vol_entry->signal_connect(
+    $vol_entry->signal_connect(
         button_press_event => sub {
             my $rp = $main::rig_p->{'gui_applying_changes'};
             $$rp = TRUE;
             return FALSE;
         }
     );
-    $rig_vol_entry->signal_connect(
+    $vol_entry->signal_connect(
         button_release_event => sub {
             my $rp = $main::rig_p->{'gui_applying_changes'};
             $$rp = FALSE;
             return FALSE;
         }
     );
-    $rig_vol_entry->signal_connect(
+    $vol_entry->signal_connect(
         value_changed => sub {
             my ( $widget ) = @_;
             if (time - $started < 2) {
@@ -640,13 +640,14 @@ sub draw_main_win {
 
             $rig_p->{'volume'} = $vol;
             my $tmp_vol = $vol / 100;
-            print "Would set volume to: $tmp_vol\n";
-# XXX: Fix this crap
-#            $rig->set_level($Hamlib::RIG_LEVEL_AF, $vol / 100);
-#            my $tmp_vol = int($rig_p->{'volume'});
-#            my $val = sprintf("%*s%%", 3, $tmp_vol);
-#            $rig_vol_val->set_label($val);
-
+            if ($main::hamlib_initialized && !$main::rig_p->is_busy()) {
+               my $vfo_name = RustyRigs::Hamlib::vfo_name($rig->get_vfo());
+               $main::log->Log("rig", "info", "Set volume to: $vol on VFO " . $vfo_name);
+               $rig->set_level($Hamlib::RIG_LEVEL_AF, $vol / 100);
+               my $tmp_vol = int($rig_p->{'volume'});
+               my $val = sprintf("%*s%%", 3, $tmp_vol);
+               $vol_val->set_label($val);
+            }
             $$rp = FALSE;
 
             return FALSE;
@@ -658,7 +659,7 @@ sub draw_main_win {
         $cfg->{'shortcut_key'},
         'visible',
         sub {
-            $rig_vol_entry->grab_focus();
+            $vol_entry->grab_focus();
         }
     );
 
@@ -1066,8 +1067,8 @@ sub draw_main_win {
     $box->pack_start( $toggle_box,      FALSE, FALSE, 5 );
     $box->pack_start( $chan_box,        FALSE, FALSE, 5 );
 
-    $label_box->pack_start( $rig_vol_label,   FALSE, FALSE, 5 );
-    $ctrl_box->pack_start( $rig_vol_box,      TRUE, TRUE, 5 );
+    $label_box->pack_start( $vol_label,   FALSE, FALSE, 5 );
+    $ctrl_box->pack_start( $vol_box,      TRUE, TRUE, 5 );
 
     $squelch_label->set_alignment(1, 0.5);
     $label_box->pack_start( $squelch_label,   FALSE, FALSE, 5 );
@@ -1186,7 +1187,10 @@ sub update_widgets {
         }
         my $ptt = $rig->get_ptt();
         $ptt_button->set_active($ptt);
-        $rig_vol_entry->set_value($vol);
+        if ($main::hamlib_initialized) {
+#           $vol_entry->set_value($vol);
+        }
+
         $vfo_freq_entry->set_value( $vfo->{'freq'} );
         # XXX: set $mode_entry to $vfo->{'mode'} (indexed)
         # XXX: set $width_entry to $vfo->{'width'} (indexed)
@@ -1225,8 +1229,8 @@ sub new {
         mem_load_button   => \$mem_load_button,
         mode_entry        => \$mode_entry,
         rf_gain_entry     => \$rf_gain_entry,
-        rig_vol_entry     => \$rig_vol_entry,
-        rig_vol_val       => \$rig_vol_val,
+        vol_entry         => \$vol_entry,
+        vol_val           => \$vol_val,
         ptt_button        => \$ptt_button,
         squelch_entry     => \$squelch_entry,
         vfo_freq_entry    => \$vfo_freq_entry,

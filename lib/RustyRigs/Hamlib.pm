@@ -231,6 +231,7 @@ sub next_vfo {
 my $last_ptt;
 my $last_mode;
 my $last_freq;
+my $last_vol = 0;
 
 # Read the state of the rig and apply it to the appropriate $vfos entry
 # XXX: This needs to read into $vfos then call $gtk_ui->update()
@@ -276,23 +277,16 @@ sub read_rig {
 
     # Get the RX volume
     my $raw_vol = $rig->get_level_f( $Hamlib::RIG_LEVEL_AF );
-    # Prevent volume jumping to 100% at startup
-    if ($raw_vol != 1) {
-       $volume = int($raw_vol) * 100;
-       if (defined $volume) {
-          if ($volume != 0 && $volume != 100) {
-             $main::log->Log("hamlib", "debug", "setting volume to $volume as requested by: " . ( caller(1) )[3]);
-             $self->{'volume'} = $volume;
-             my $rve = $main::gtk_ui->{'rig_vol_entry'};
-             my $rvv = $main::gtk_ui->{'rog_vol_val'};
-             $$rve->set_value($volume);
-             $$rvv->set_text($volume . "X");
-          }
-       }
-       else {
-          $main::log->Log("hamlib", "bug", "no volume");
-          $volume = 0;
-       }
+    $volume = int($raw_vol * 100);
+
+    if (defined $volume && ($last_vol != $volume)) {
+       $main::log->Log("rig", "info", "setting volume to $volume as requested by: " . ( caller(1) )[3]);
+       $self->{'volume'} = $volume;
+       my $rve = $main::gtk_ui->{'vol_entry'};
+       my $rvv = $main::gtk_ui->{'vol_val'};
+       $$rve->set_value($volume);
+       $$rvv->set_text($volume . "%");
+       $last_vol = $volume;
     }
 
     # XXX: Figure out which width table applies and find the appropriate width index then select it...

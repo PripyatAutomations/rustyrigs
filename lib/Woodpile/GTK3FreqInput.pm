@@ -25,40 +25,41 @@ sub set_value {
     # Split the value into integer and decimal parts
     my ($integer_part, $decimal_part) = split /\./, $value, 2;
 
-    # Check for overflow...
-    my $limit = $self->{'places'};
-    my $i_len = length($integer_part);
-    if ($i_len > $limit) {
-       die "FreqInput widget can't handle numbers longer than $limit long. Input |$integer_part| is $i_len long! Either increase the size when creating widget or truncate input! Called by " . ( caller(1) )[3] . "\n";
+    # Calculate the number of whole integer digits dynamically
+    my $limit = length($integer_part);
+
+    my $widget_limit = $self->{'places'};
+    if ($limit > $widget_limit) {
+       die "FreqInput widget can't handle numbers longer than $widget_limit long. Input |$integer_part| is $limit long! Either increase the size when creating widget or truncate input! Called by " . ( caller(1) )[3] . "\n";
     }
 
     # add leading zeros as needed
-    my $leading_zeros = $limit - $i_len;
+    my $leading_zeros = $widget_limit - $limit;
     $integer_part = '0' x $leading_zeros . $integer_part;
 
     # Deal with the whole part
-    while ($limit > 0) {
+    while ($widget_limit > 0) {
         my $digits = $self->{'digits'};
-        my $digit_item = $digits->{$limit};
+        my $digit_item = $digits->{$widget_limit};
         my $digit_entry = $digit_item->{'entry'};
         my $digit = substr($integer_part, 0, 1);
         $digit = 0 if (!defined $digit || $digit !~ /^\d$/);
         $digit_entry->set_text($digit);
         $integer_part = substr($integer_part, 1);
-        $limit--;
+        $widget_limit--;
     }
 
     # Update the decimal part if applicable
     if (defined $decimal_part && $self->{'decimals'} > 0) {
-        $limit = -$self->{'decimals'};
-        while ($limit > 0) {
+        $widget_limit = -$self->{'decimals'};
+        while ($widget_limit > 0) {
             my $digits = $self->{'digits'};
-            my $digit_item = $digits->{$limit};
+            my $digit_item = $digits->{$widget_limit};
             my $digit_entry = $digit_item->{'entry'};
             my $digit = chop $decimal_part;
             $digit = 0 if (!defined $digit || $digit !~ /^\d$/);
             $digit_entry->set_text($digit);
-            $limit--;
+            $widget_limit--;
         }
     } elsif ($self->{'decimals'} > 0) {
         # XXX: Zero them all out, if needed
@@ -90,6 +91,7 @@ sub set_digit {
 
     if ( $scale > 0 ) {
        my $new_freq = replace_nth_digit( $curr_freq, ($places - $scale), $newval );
+       print "set_digit: widget = " . Dumper( $widget ) . "\n";
        $widget->set_value( $new_freq );
        $main::rig->set_freq( $main::rig->get_vfo(), $new_freq );
        print "Setting $scale digit to $newval, resulting in new freq of $new_freq\n";
@@ -109,6 +111,7 @@ sub dec_digit {
     my $mult     = (10**$scale)/10;
     my $new_val = $freq - $mult;
 
+    print "dec_digit: widget = " . Dumper( $widget ) . "\n";
     $widget->set_value($new_val);
     $main::rig->set_freq($main::rig->get_vfo(), $new_val);
     return;
@@ -124,6 +127,7 @@ sub inc_digit {
     my $mult     = (10**$scale)/10;
     my $new_val = $freq + $mult;
 
+    print "inc_digit: widget = " . Dumper( $widget ) . "\n";
     $widget->set_value($new_val);
     $main::rig->set_freq($main::rig->get_vfo(), $new_val);
     return;
@@ -134,6 +138,7 @@ sub down_button {
      if ( $main::locked ) {
         return TRUE;
      }
+     print "down button: widget = " . Dumper( $widget ) . "\n";
      $widget->dec_digit( $scale );
      return;
 }
@@ -143,6 +148,7 @@ sub up_button {
      if ( $main::locked ) {
         return TRUE;
      }
+     print "up button: widget = " . Dumper( $widget ) . "\n";
      $widget->inc_digit( $scale );
      return;
 }
@@ -181,7 +187,7 @@ sub draw_digit {
          print "my scale: $scale\n";
          print "digit[$scale]: got keyval=" . $event->keyval . "\n";
 
-         if ($event->keyval >= 48 && $event->keyval <= 57) {
+         if ($event->keyval >= 48 && $event->keyval <= 57) {	  # 0 to 9
             my $digit_pressed = chr($event->keyval);		  # Convert keyval to the corresponding character
             print "digit[${scale}]: $digit_pressed entered\n";
             $self->set_digit($scale, $digit_pressed, $places, $decimals);
