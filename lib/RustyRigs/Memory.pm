@@ -54,8 +54,7 @@ sub show {
     main::set_settings_icon($w_mem_edit);
 
     # Place the window and size it
-    $w_mem_edit->set_default_size( $cfg->{'win_mem_edit_width'},
-        $cfg->{'win_mem_edit_height'} );
+    $w_mem_edit->set_default_size( 300, 300 );
     $w_mem_edit->move( $cfg->{'win_mem_edit_x'}, $cfg->{'win_mem_edit_y'} );
 
     my $w_state = $$cfg->{'win_mem_state'};
@@ -87,12 +86,10 @@ sub show {
     $w_mem_edit->signal_connect(
         'configure-event' => sub {
             my ( $widget, $event ) = @_;
-            my ( $width, $height ) = $widget->get_size();
+#            my ( $width, $height ) = $widget->get_size();
             my ( $x, $y )          = $widget->get_position();
             $tmp_cfg->{'win_mem_edit_x'}      = $x;
             $tmp_cfg->{'win_mem_edit_y'}      = $y;
-            $tmp_cfg->{'win_mem_edit_height'} = $height;
-            $tmp_cfg->{'win_mem_edit_width'}  = $width;
             $tmp_cfg->{'win_state'}           = $widget->get_state();
             $main::cfg_p->apply($tmp_cfg, FALSE);
             undef $tmp_cfg;

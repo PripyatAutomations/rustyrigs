@@ -171,36 +171,6 @@ if ($cfg_readonly) {
     $cfg->{'read_only'} = 1;
 }
 
-# Load CSS
-Gtk3::CssProvider->load_from_data('
-    * {
-        -GtkWidget-focus-line-width: 1;
-        -GtkWidget-focus-padding: 1;
-        -GtkWidget-outside-focus-line: true;
-        background-contrast: false;
-    }
-');
-
-## Load CSS
-#my $css_provider = Gtk3::CssProvider->new();
-#$css_provider->load_from_data('
-#    * {
-#        -GtkWidget-focus-line-width: 1;
-#        -GtkWidget-focus-padding: 1;
-#        -GtkWidget-outside-focus-line: true;
-#    }
-#');
-## Get the GdkX11Screen object
-#my $screen = Gtk3::Gdk::Screen->get_default();
-#
-## Apply the CSS provider to the GdkX11Screen
-#my $style_context = Gtk3::StyleContext->new();
-#$style_context->add_provider_for_screen($screen, $css_provider, $Gtk3::STYLE_PROVIDER_PRIORITY_APPLICATION);
-# - and/or -
-# Prefer dark theme? XXX: use_dark_theme
-#my $settings = Gtk3::Settings->get_default();
-#$settings->set('gtk-application-prefer-dark-theme', 1);
-
 # Switch to log file
 $log->open_logfile($$cfg->{'log_file'});
 

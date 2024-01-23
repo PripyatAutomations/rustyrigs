@@ -1,10 +1,22 @@
 # this will draw a GTK3 widget suitable for frequency entry
+# XXX: Need prev_digit/next_digit functions to return appropriate widget
+#
+# This is fairly ugly and could use a lot of cleanup...
 package Woodpile::GTK3FreqInput;
 use Gtk3;
 use Glib qw(TRUE FALSE);
 use strict;
 use warnings;
 use Data::Dumper;
+
+sub replace_nth_digit {
+    my ($number, $position, $new_digit) = @_;
+    my $number_str = sprintf("%.0f", $number);
+    substr($number_str, $position - 1, 1, $new_digit);
+    my $result = int($number_str);
+
+    return $result;
+}
 
 # Set the value to display
 sub set_value {
@@ -75,19 +87,11 @@ sub set_digit {
     my $vfos     = $RustyRigs::Hamlib::vfos;
     my $vfo      = $vfos->{$curr_vfo};
     my $curr_freq = $vfo->{'freq'};
-#    my $places   = $widget->{'digits'};
 
-    print "set_digit[$scale]: places=$places,dec=$decimals => $newval\n";
     if ($scale > 0) {
-       my $whole_freq_str = sprintf("%.0f", int($curr_freq));
-       my $curr_scaled_val = substr($whole_freq_str, ($places - $scale - 1), 1);
-       my $csv = int($curr_scaled_val) * (10**($scale - 1));
-       my $newval_scaled = $newval * (10**($scale -1));
-       my $new_freq = $curr_freq - $csv + $newval_scaled;
-
-       print "digit[$scale]: curr=$curr_scaled_val ($csv) yields newval: $newval_scaled => $new_freq\n";
-       print "changing frequency to: $new_freq (nvs: $newval_scaled)\n";
+       my $new_freq = replace_nth_digit( $curr_freq, ($places - $scale), $newval );
        $main::rig->set_freq($main::rig->get_vfo(), $new_freq);
+       print "Setting $scale digit to $newval, resulting in new freq of $new_freq\n";
     } else {
        print "we currently do not support decimal frequencies :(\n";
     }
@@ -102,9 +106,7 @@ sub dec_digit {
     my $vfo      = $vfos->{$curr_vfo};
     my $freq     = $vfo->{'freq'};
     my $mult     = (10**$scale)/10;
-#    my $new_val  = $widget->get_digit($scale) - $mult;
     my $new_val = $freq - $mult;
-#    print "dec: scale=$scale, mult=$mult, newval=$new_val, widget=" . Dumper($widget) . "\n";
     $main::rig->set_freq($main::rig->get_vfo(), $new_val);
     return;
 }
@@ -117,17 +119,32 @@ sub inc_digit {
     my $vfo      = $vfos->{$curr_vfo};
     my $freq     = $vfo->{'freq'};
     my $mult     = (10**$scale)/10;
-#    my $new_val  = $widget->get_digit($scale) + $mult;
     my $new_val = $freq + $mult;
-#    print "inc: scale=$scale, mult=$mult, newval=$new_val, widget=" . Dumper($widget) . "\n";
     $main::rig->set_freq($main::rig->get_vfo(), $new_val);
     return;
+}
+
+sub down_button {
+     my ( $widget, $scale ) = @_;
+     if ( $main::locked ) {
+        return TRUE;
+     }
+     $widget->dec_digit( $scale );
+     return;
+}
+
+sub up_button {
+     my ( $widget, $scale ) = @_;
+     if ( $main::locked ) {
+        return TRUE;
+     }
+     $widget->inc_digit( $scale );
+     return;
 }
 
 # Draw a single digit
 sub draw_digit {
    my ( $self, $scale, $default, $places, $decimals ) = @_;
-#   print "scale: $scale, default: $default, self: " . Dumper($self);
    my $box = Gtk3::Box->new('vertical', 0);
    my $up_btn = Gtk3::Button->new('+');
    my $dwn_btn = Gtk3::Button->new('-');
@@ -138,9 +155,7 @@ sub draw_digit {
    $digit->set_text($default);
    $digit->set_alignment(0.5); 
 
-   # Filter to only numeric values
    $digit->signal_connect(
-      # XXX: Divine how to figure out which digit we are and modify the freq appropriately
       changed => sub {
          my ( $widget ) = @_;
          my $text = $widget->get_text;
@@ -158,50 +173,31 @@ sub draw_digit {
       'key-press-event' => sub {
          my ($widget, $event) = @_;
 
-         # handle numeric inputs
+         print "my scale: $scale\n";
          print "digit[$scale]: got keyval=" . $event->keyval . "\n";
 
          if ($event->keyval >= 48 && $event->keyval <= 57) {
             my $digit_pressed = chr($event->keyval);		  # Convert keyval to the corresponding character
             print "digit[${scale}]: $digit_pressed entered\n";
             $self->set_digit($scale, $digit_pressed, $places, $decimals);
-            # Set focus onto the *next* widget
-#            $widget->grab_focus();
-            my $all_digits = $self->{'digits'};
-            my $next_digit = $all_digits->{$scale};
             return TRUE;
          }
-         # Check if UP key is pressed
          elsif ($event->keyval == 65362) {  # 65362 is the GDK keyval for UP key
             $self->inc_digit($scale);
             $widget->grab_focus();
             return TRUE;
          }
-         # Check if DOWN key is pressed
          elsif ($event->keyval == 65364) {  # 65364 is the GDK keyval for DOWN key
             $self->dec_digit($scale);
             $widget->grab_focus();
             return TRUE;
-         # Check if LEFT key is pressed
          }
          elsif ($event->keyval == 65361) {  # 65361 is the GDK keyval for LEFT key
             # Handle moving left between digits
-#            if ($scale <= $places && $scale >= -$decimals) {
-#               print "move to next ($scale)\n";
-#               my $nd = $scale - 1;
-#               my $all_digits = $self->{'digits'};
-#               my $next_digit = $all_digits->{$nd};
-#               my $next_widget = $next_digit->{'entry'};
-#               $next_widget->grab_focus();
-#            } else {
-#               print "no move (scale: $scale, places: $places, decimals: $decimals)\n";
-#            }
             return TRUE;
          }
-         # Check if RIGHT key is pressed
          elsif ($event->keyval == 65363) {  # 65363 is the GDK keyval for RIGHT key
             # Handle moving right between digits
-            # Add your logic here
             return TRUE;
          }
 
@@ -210,50 +206,23 @@ sub draw_digit {
       }
    );
 
-   # Handle DOWN button clicks
-   $dwn_btn->signal_connect(
-       activate => sub {
-           my ( $widget ) = @_;
-           if ($main::locked) {
-              return TRUE;
-           }
-#           print "activate down\n";
-           $self->dec_digit($scale);
-       }
-   );
-
-   $dwn_btn->signal_connect(
-       clicked => sub {
-           my ( $widget ) = @_;
-           if ($main::locked) {
-              return TRUE;
-           }
-#           print "clicked down\n";
-           $self->dec_digit($scale);
-       }
-   );
-
-   # Handle UP button clicks
-   $up_btn->signal_connect(
-       activate => sub {
-           my ( $widget ) = @_;
-           if ($main::locked) {
-              return TRUE;
-           }
-#           print "activate up\n";
-           $self->inc_digit($scale);
-       }
-   );
-   $up_btn->signal_connect(
-       clicked => sub {
-           my ( $widget ) = @_;
-           if ($main::locked) {
-              return TRUE;
-           }
-#           print "clicked up\n";
-           $self->inc_digit($scale);
-       }
-   );
+   # Ughh..
+   $dwn_btn->signal_connect( activate => sub {
+      my ( $widget ) = @_;
+      $widget->down_button($scale);
+   });
+   $dwn_btn->signal_connect( clicked => sub {
+      my ( $widget ) = @_;
+      $widget->down_button($scale);
+   });
+   $up_btn->signal_connect( activate => sub {
+      my ( $widget ) = @_;
+      $widget->up_button($scale);
+   });
+   $up_btn->signal_connect( clicked => sub {
+      my ( $widget ) = @_;
+      $widget->up_button($scale);
+   });
 
    $box->pack_start( $up_btn, FALSE, FALSE, 0 );
    $box->pack_start( $digit, FALSE, FALSE, 0 );
@@ -261,16 +230,13 @@ sub draw_digit {
 
    my $obj = {
       box => $box,
+      down => $dwn_btn,
       entry => $digit,
-      scale => $scale
+      scale => $scale,
+      up => $up_btn
    };
    return $obj;
 }
-
-#sub set_sensitive {
-#   my ( $widget, $val) = @_;
-#   print "freq input: set_sensitive($val)\n";
-#}
 
 sub new {
    my ( $class, $label, $places, $decimals, $default ) = @_;
@@ -288,14 +254,10 @@ sub new {
    my $box = Gtk3::Box->new( 'horizontal', 0 );
    
    my $obj = {
-      # Our GTK3 box
-      box => \$box,
-      # decimal places to keep
-      decimals => $decimals,
-      # whole places to keep
-      places   => $places,
-      # store the digits to display
-      digits   => { }
+      box => \$box,			# The outer box we return
+      decimals => $decimals,		# Decimal places
+      places   => $places,		# Whole # places
+      digits   => { }			# Individual digits
    };
 
    # Place one digit widget per desired place
@@ -308,9 +270,7 @@ sub new {
           $box->pack_start( $digitbox, FALSE, FALSE, 0 );
        }
        
-       # XXX: Decide if we need to place a comma here?
-#       if ($digit % 3) {
-#       }
+       # XXX: Every 3 digits, we should slightly change the background color to group digits
 
        $obj->{'digits'}{$digit} = $new_digit;
        $digit--;
@@ -318,10 +278,14 @@ sub new {
 
    # Add decimal digits, if desired
    if ($decimals > 0) {
-      # Place a DOT between the digits
-      my $dot = Gtk3::Label->new( "." );
-      # Vertically center this
-      $box->pack_start( $dot, FALSE, FALSE, 0 );
+      my $dot_box = Gtk3::Box->new( 'vertical', 0 );
+      my $dot_label = Gtk3::Label->new( "." );
+      $dot_label->set_hexpand( TRUE );     # Allow horizontal expansion
+      $dot_label->set_vexpand( TRUE );     # Allow vertical expansion
+      $dot_label->set_valign( 'center' );  # Vertically center the label
+      $dot_box->pack_start( $dot_label, TRUE, TRUE, 0 );
+      $box->pack_start( $dot_box, TRUE, TRUE, 0 );
+
       my $limit = -$decimals;
       while ( $digit > $limit ) {
          my $new_digit = $class->draw_digit( $digit, 0 );
@@ -341,10 +305,7 @@ sub new {
    $label_box->pack_start( $widget_label, TRUE, TRUE, 0 );
    $box->pack_start( $label_box, TRUE, TRUE, 0 );
 
-   # If a default value exists, set it on the widget
-   if ( defined $default ) {
-      $class->set_value( $default );
-   }
+   $class->set_value( $default ) if ( defined $default );
 
    bless $obj, $class if ( defined $obj );
    return $obj;

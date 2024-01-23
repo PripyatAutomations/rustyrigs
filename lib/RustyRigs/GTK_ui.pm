@@ -61,6 +61,7 @@ sub customize_css {
     my $screen = Gtk3::Gdk::Screen::get_default();
     my $style_context = Gtk3::StyleContext->new();
     $style_context->add_provider_for_screen($screen, $Gtk3::STYLE_PROVIDER_PRIORITY_APPLICATION);
+    return;
 }
 
 sub close_main_win {

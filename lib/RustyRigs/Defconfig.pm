@@ -157,8 +157,6 @@ our $def_cfg = {
     win_baresip_settings_x  => 0,
     win_baresip_settings_y  => 0,
     win_gridtools_placement => 'none',
-    win_gridtools_height    => 480,
-    win_gridtools_width     => 1024,
     win_gridtools_x         => 0,
     win_gridtools_y         => 0,
     win_logview_placement   => 'none',
@@ -168,13 +166,9 @@ our $def_cfg = {
     win_logview_y           => 0,
     win_mem_edit_x          => 1,
     win_mem_edit_y          => 1,
-    win_mem_edit_height     => 278,
-    win_mem_edit_width      => 479,
     win_settings_placement  => 'none',
     win_settings_x          => 183,
     win_settings_y          => 318,
-    win_settings_height     => 278,
-    win_settings_width      => 489
 };
 
 our $default_memories = {

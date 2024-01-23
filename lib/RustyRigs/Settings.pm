@@ -179,14 +179,12 @@ sub new {
             my ( $widget, $event ) = @_;
 
             # Retrieve the size and position information
-            my ( $width, $height ) = $widget->get_size();
+#            my ( $width, $height ) = $widget->get_size();
             my ( $x,     $y )      = $widget->get_position();
 
             # Save the data...
             $tmp_cfg->{'win_settings_x'}      = $x;
             $tmp_cfg->{'win_settings_y'}      = $y;
-            $tmp_cfg->{'win_settings_height'} = $height;
-            $tmp_cfg->{'win_settings_width'}  = $width;
             $tmp_cfg->{'win_settings_state'}  = $widget->get_state();
 
             # Return FALSE to allow the event to propagate
