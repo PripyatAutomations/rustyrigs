@@ -218,9 +218,11 @@ sub draw_digit {
             return TRUE;
          }
          elsif ($event->keyval == 65289) { # TAB key
-           my $top_level = $widget->get_toplevel;
-           $top_level->child_focus( 'tab-forward' );
-           return TRUE;
+            # We need to implement tab key such that it will jump to the next box instead of digit
+#           my $top_level = $widget->get_toplevel;
+#           $top_level->child_focus( 'tab-forward' );
+#           return TRUE;
+            return FALSE;               # at least let TAB pass through, for now...
          }
 
          # Propagate the event
