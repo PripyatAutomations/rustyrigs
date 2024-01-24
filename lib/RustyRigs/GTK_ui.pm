@@ -943,8 +943,7 @@ sub draw_main_win {
     $vfo_power_entry->set_tooltip_text( "Please Click and DRAG to change TX power");
     $vfo_power_entry->set_property('draw-value' => FALSE);
     my $vfo_power_box = Gtk3::Box->new('horizontal', 5);
-    $val = sprintf("%*sW", 3, $act_vfo->{'power'});
-    $vfo_power_val = Gtk3::Label->new("$val");
+    $vfo_power_val = Gtk3::Label->new( sprintf("%*sW", 3, $act_vfo->{'power'} ) );
     $vfo_power_val->set_alignment(1, 0.5);
     $vfo_power_box->pack_start($vfo_power_entry, TRUE, TRUE, 5);
     $vfo_power_box->pack_start($vfo_power_val, FALSE, TRUE, 5);
@@ -1063,10 +1062,10 @@ sub draw_main_win {
 
     $box->pack_start( $vfo_sel_button,  FALSE, FALSE, 5 );
     $box->pack_start( $$freq_box,       TRUE, TRUE, 5 );
+    $box->pack_start( $chan_box,        FALSE, FALSE, 5 );
     $box->pack_start( $ptt_button,      FALSE, FALSE, 5 );
     $box->pack_start( $meters_dock_box, TRUE,  TRUE,  5 );
     $box->pack_start( $toggle_box,      FALSE, FALSE, 5 );
-    $box->pack_start( $chan_box,        FALSE, FALSE, 5 );
 
     $label_box->pack_start( $vol_label,   FALSE, FALSE, 5 );
     $ctrl_box->pack_start( $vol_box,      TRUE, TRUE, 5 );
@@ -1196,6 +1195,7 @@ sub update_widgets {
         if ($vfo->{'power'} != 0) {
            $power_changing = TRUE;        
            $vfo_power_entry->set_value( $vfo->{'power'} );
+           $vfo_power_val->set_text( $vfo->{'power'} . 'W' );
            $power_changing = FALSE;
         }
 

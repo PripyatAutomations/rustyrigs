@@ -6,8 +6,10 @@ use strict;
 use warnings;
 use Data::Dumper;
 
-# XXX: This mustn't be a global.. but im tired of fighting this...
+# XXX: These mustn't be a global.. but im tired of fighting this today...
 my $master_digits;
+my $last_value;
+my $widget_box;
 
 # Replace a single digit in a whole number
 sub replace_nth_digit {
@@ -40,25 +42,31 @@ sub set_value {
     my $val_str = sprintf( "%.0f", $value );
     my $val_len = length( $val_str );
 
-    if ( $val_len > $vfo_digits ) {
-       die "FreqInput widget can't handle numbers longer than $vfo_digits long. Input |$val_str| is $val_len long! Either increase the size when creating widget or truncate input! Called by " . ( caller(1) )[3] . "\n";
-    }
+    if (!defined $last_value || $last_value != $value) {
+       print "set_value: $value\n";
 
-    # add leading zeros as needed
-    my $leading_zeros = $vfo_digits - $val_len;
-    my $pad = '0' x $leading_zeros;
-    my $int_str = $pad . $val_str;
+       if ( $val_len > $vfo_digits ) {
+          die "FreqInput widget can't handle numbers longer than $vfo_digits long. Input |$val_str| is $val_len long! Either increase the size when creating widget or truncate input! Called by " . ( caller(1) )[3] . "\n";
+       }
 
-    my $i = $vfo_digits;
-    while ( $i > 0 ) {
-        my $digits = $master_digits;
-        my $digit_item = $digits->{$i};
-        my $digit_entry = $digit_item->{'entry'};
-        my $curr_digit = substr($int_str, 0, 1);				# extract left most digit
-        $curr_digit = 0 if ( !defined $curr_digit || $curr_digit !~ /^\d$/) ;   # if no value, set to 0
-        $digit_entry->set_text( $curr_digit );                                  # set the digit
-        $int_str = substr( $int_str, 1 );                                       # trim first character off
-        $i--;
+       # add leading zeros as needed
+       my $leading_zeros = $vfo_digits - $val_len;
+       my $pad = '0' x $leading_zeros;
+       my $int_str = $pad . $val_str;
+
+       # Update the display
+       my $i = $vfo_digits;
+       while ( $i > 0 ) {
+           my $digits = $master_digits;
+           my $digit_item = $digits->{$i};
+           my $digit_entry = $digit_item->{'entry'};
+           my $curr_digit = substr($int_str, 0, 1);				   # extract left most digit
+           $curr_digit = 0 if ( !defined $curr_digit || $curr_digit !~ /^\d$/) ;   # if no value, set to 0
+           $digit_entry->set_text( $curr_digit );                                  # set the digit
+           $int_str = substr( $int_str, 1 );                                       # trim first character off
+           $i--;
+       }
+       $last_value = $value;
     }
     return;
 }
@@ -126,6 +134,16 @@ sub inc_digit {
     return;
 }
 
+sub shift_focus {
+    my ($widget, $direction) = @_;
+    
+    if ($direction eq 'forward') {
+        $widget->get_toplevel->child_focus('tab-forward');
+    } elsif ($direction eq 'backward') {
+        $widget->get_toplevel->child_focus('tab-backward');
+    }
+}
+
 # Draw a single digit widget
 sub draw_digit {
    my ( $self, $digit, $places, $default ) = @_;
@@ -157,13 +175,19 @@ sub draw_digit {
       'key-press-event' => sub {
          my ($widget, $event) = @_;
 
-         print "my digit: $digit\n";
          print "digit[$digit]: got keyval=" . $event->keyval . "\n";
 
          if ($event->keyval >= 48 && $event->keyval <= 57) {	  # 0 to 9
             my $digit_pressed = chr( $event->keyval );		  # Convert keyval to the corresponding character
-            print "digit[${digit}]: $digit_pressed entered\n";
-            $self->set_digit( $digit, $digit_pressed, $places );
+            my $cfg      = $main::cfg;
+            my $curr_vfo = $$cfg->{'active_vfo'};
+            my $vfos     = $RustyRigs::Hamlib::vfos;
+            my $vfo      = $vfos->{$curr_vfo};
+            my $freq     = $vfo->{'freq'};
+            my $new_freq = replace_nth_digit( $freq, $digit, $digit_pressed );
+            print "digit[${digit}]: $digit_pressed entered, new_freq: $new_freq\n";
+            $self->set_value( $new_freq );
+#            $self->set_digit( $digit, $digit_pressed, $places );
             return TRUE;
          }
          elsif ($event->keyval == 65362) {  # 65362 is the GDK keyval for UP key
@@ -178,10 +202,17 @@ sub draw_digit {
          }
          elsif ($event->keyval == 65361) {  # 65361 is the GDK keyval for LEFT key
             # Handle moving left between digits
+            shift_focus( $widget, 'backward' );
             return TRUE;
          }
          elsif ($event->keyval == 65363) {  # 65363 is the GDK keyval for RIGHT key
             # Handle moving right between digits
+            shift_focus( $widget, 'forward' );
+            return TRUE;
+         }
+         elsif ($event->keyval == 65288) {  # 65288 is the GDK keyval for BKSPC key
+            # XXX: Instead of clearing current widget, clear the last one
+            shift_focus( $widget, 'backward' );
             return TRUE;
          }
 
@@ -239,10 +270,12 @@ sub new {
 
    $places = 9 if (!defined $places);	# set a default
 
-   my $box = Gtk3::Box->new( 'horizontal', 0 );
+   my $outer_box = Gtk3::Box->new ( 'vertical', 0 );
+   $widget_box = Gtk3::Box->new( 'horizontal', 0 );
+   $outer_box->pack_start( $widget_box, TRUE, TRUE, 5 );
 
    my $obj = {
-      box => \$box,			# The outer box we return
+      box      => \$outer_box,	        # The outer box we return
       places   => $places,		# Whole # places
       digits   => { }			# Individual digits
    };
@@ -254,7 +287,7 @@ sub new {
        my $new_digit = $class->draw_digit( $i, $places, 0 );
        my $digitbox = $new_digit->{'box'};
        if (defined $digitbox) {
-          $box->pack_start( $digitbox, FALSE, FALSE, 0 );
+          $widget_box->pack_start( $digitbox, FALSE, FALSE, 0 );
        }
        
        # XXX: Every 3 digits, we should slightly change the background color to group digits
@@ -269,7 +302,7 @@ sub new {
    $widget_label->set_vexpand( TRUE );                  # Allow vertical expansion
    $widget_label->set_valign( 'center' );               # Vertically center the label
    $label_box->pack_start( $widget_label, TRUE, TRUE, 0 );
-   $box->pack_start( $label_box, TRUE, TRUE, 0 );
+   $outer_box->pack_start( $label_box, TRUE, TRUE, 0 );
 
    return $obj;
 }
