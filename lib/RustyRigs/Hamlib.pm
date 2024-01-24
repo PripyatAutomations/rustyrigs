@@ -244,8 +244,8 @@ sub read_rig {
     my $vfo;
     
     # figure out which VFO is active
-    $vfo = $vfos->{$curr_vfo} if ( defined $vfos && defined $curr_vfo && defined $vfos->{$curr_vfo} );
-    $vfo = 'A' if ( !defined $vfo );
+    $curr_vfo = 'A' if ( !defined $curr_vfo );
+    $vfo = $vfos->{$curr_vfo} if ( defined $vfos && defined $vfos->{$curr_vfo} );
 
     # XXX: Update the VFO select button if needed
 
