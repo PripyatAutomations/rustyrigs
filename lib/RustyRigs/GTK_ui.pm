@@ -600,18 +600,18 @@ sub draw_main_win {
     # rig volume
     my $vol_label =
       Gtk3::Label->new( "Volume % (" . $cfg->{'key_volume'} . ")" );
-    $vol_label->set_alignment(1, 0.5);
+    $vol_label->set_alignment( 1, 0.5 );
     $vol_entry = Gtk3::Scale->new_with_range( 'horizontal', 0, 100, 1 );
-    $vol_entry->set_digits(0);
-    $vol_entry->set_draw_value(TRUE);
-    $vol_entry->set_value_pos('right');
-    $vol_entry->set_tooltip_text("Set RX volume");
-    $vol_entry->set_property('draw-value' => FALSE);
-    my $vol_box = Gtk3::Box->new('horizontal', 5);
-    $vol_val = Gtk3::Label->new("    ");
-    $vol_val->set_alignment(1, 0.5);
-    $vol_box->pack_start($vol_entry, TRUE, TRUE, 5);
-    $vol_box->pack_start($vol_val, FALSE, TRUE, 5);
+    $vol_entry->set_digits( 0 );
+    $vol_entry->set_draw_value( TRUE );
+    $vol_entry->set_value_pos( 'right' );
+    $vol_entry->set_tooltip_text( "Set RX volume" );
+    $vol_entry->set_property( 'draw-value' => FALSE );
+    my $vol_box = Gtk3::Box->new( 'horizontal', 5 );
+    $vol_val = Gtk3::Label->new( "    " );
+    $vol_val->set_alignment( 1, 0. );
+    $vol_box->pack_start( $vol_entry, TRUE, TRUE, 5 );
+    $vol_box->pack_start ($vol_val, FALSE, TRUE, 5 );
 
     $vol_entry->signal_connect(
         button_press_event => sub {
@@ -637,17 +637,17 @@ sub draw_main_win {
             my $rig = $rig_p->{'rig'};
             my $rp = $main::rig_p->{'gui_applying_changes'};
             $$rp = TRUE;
-            my $vol = int($widget->get_value() + 0.5);
+            my $vol = int( $widget->get_value() + 0.5 );
 
             $rig_p->{'volume'} = $vol;
             my $tmp_vol = $vol / 100;
-            if ($main::hamlib_initialized && !$main::rig_p->is_busy()) {
-               my $vfo_name = RustyRigs::Hamlib::vfo_name($rig->get_vfo());
-               $main::log->Log("rig", "info", "Set volume to: $vol on VFO " . $vfo_name);
-               $rig->set_level($Hamlib::RIG_LEVEL_AF, $vol / 100);
-               my $tmp_vol = int($rig_p->{'volume'});
-               my $val = sprintf("%*s%%", 3, $tmp_vol);
-               $vol_val->set_label($val);
+            if ( $main::hamlib_initialized && !$main::rig_p->is_busy() ) {
+               my $vfo_name = RustyRigs::Hamlib::vfo_name( $rig->get_vfo() );
+               $main::log->Log( "rig", "info", "Set volume to: $vol on VFO " . $vfo_name );
+               $rig->set_level( $Hamlib::RIG_LEVEL_AF, $vol / 100 );
+               my $tmp_vol = int( $rig_p->{'volume'} );
+               my $val = sprintf( "%*s%%", 3, $tmp_vol );
+               $vol_val->set_label( $val );
             }
             $$rp = FALSE;
 
@@ -677,20 +677,20 @@ sub draw_main_win {
 
     my $squelch_label =
       Gtk3::Label->new( 'Squelch (' . $cfg->{'key_squelch'} . ')' );
-    $squelch_label->set_alignment(1, 0.5);
+    $squelch_label->set_alignment( 1, 0.5 );
     $squelch_entry = Gtk3::Scale->new_with_range( 'horizontal', 0, 20, 1 );
-    $squelch_entry->set_digits(0);
-    $squelch_entry->set_draw_value(TRUE);
-    $squelch_entry->set_value_pos('right');
+    $squelch_entry->set_digits( 0 );
+    $squelch_entry->set_draw_value( TRUE );
+    $squelch_entry->set_value_pos( 'right' );
     $squelch_entry->set_value( $act_vfo->{'squelch'} );
-    $squelch_entry->set_tooltip_text("Please Click and DRAG to change RF gain");
-    $squelch_entry->set_property('draw-value' => FALSE);
-    $squelch_entry->set_sensitive(0);
-    my $squelch_box = Gtk3::Box->new('horizontal', 5);
-    my $squelch_val = Gtk3::Label->new("  0%");
-    $squelch_val->set_alignment(1, 0.5);
-    $squelch_box->pack_start($squelch_entry, TRUE, TRUE, 5);
-    $squelch_box->pack_start($squelch_val, FALSE, TRUE, 5);
+    $squelch_entry->set_tooltip_text( "Adjust SQUELCH level" );
+    $squelch_entry->set_property( 'draw-value' => FALSE );
+    $squelch_entry->set_sensitive( 0 );
+    my $squelch_box = Gtk3::Box->new( 'horizontal', 5 );
+    my $squelch_val = Gtk3::Label->new( "  0%" );
+    $squelch_val->set_alignment( 1, 0.5 );
+    $squelch_box->pack_start( $squelch_entry, TRUE, TRUE, 5 );
+    $squelch_box->pack_start( $squelch_val, FALSE, TRUE, 5 );
 
     # XXX: ACCEL-Replace these with a global function
     $w_main_accel->connect(
@@ -704,7 +704,7 @@ sub draw_main_win {
     $squelch_entry->signal_connect(
         value_changed => sub {
             my ( $class ) = @_;
-            if (!$main::rig_p->is_busy()) {
+            if ( !$main::rig_p->is_busy() ) {
                my $curr_vfo = $cfg->{'active_vfo'};
                my $value    = $squelch_entry->get_value();
                $act_vfo->{'squelch'} = $value;
@@ -766,10 +766,9 @@ sub draw_main_win {
   # XXX: we need to TAB key presses in the drop downs and move to next widget...
     my $mode_label = Gtk3::Label->new( 'Mode (' . $cfg->{'key_mode'} . ')' );
     $mode_entry = Gtk3::ComboBoxText->new();
-    $mode_entry->set_tooltip_text(
-        "Modulation Mode. Some options my not be supported by your rig.");
-    foreach my $mode (@RustyRigs::Hamlib::hamlib_modes) {
-        $mode_entry->append_text($mode);
+    $mode_entry->set_tooltip_text( "Modulation Mode. Some options my not be supported by your rig." );
+    foreach my $mode ( @RustyRigs::Hamlib::hamlib_modes ) {
+        $mode_entry->append_text( $mode );
     }
 
     # XXX: ACCEL-Replace these with a global function
@@ -984,7 +983,7 @@ sub draw_main_win {
                    $change = $oldval - $value;
                }
 
-               $main::log->Log("ui", "debug", "change power: dragging: $dragging - change: $change. val $value oldval: $oldval hlval: $hlval");
+#               $main::log->Log("ui", "debug", "change power: dragging: $dragging - change: $change. val $value oldval: $oldval hlval: $hlval");
 
                if ( !$power_changing && $dragging < 2 ) {
                    $main::log->Log("gtkui", "bug", "rig_power widget dragging: $dragging < 2, not changing value");

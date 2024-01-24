@@ -135,12 +135,12 @@ sub inc_digit {
 }
 
 sub shift_focus {
-    my ($widget, $direction) = @_;
-    
+    my ($target, $direction) = @_;
+
     if ($direction eq 'forward') {
-        $widget->get_toplevel->child_focus('tab-forward');
+        $target->child_focus('tab-forward');
     } elsif ($direction eq 'backward') {
-        $widget->get_toplevel->child_focus('tab-backward');
+        $target->child_focus('tab-backward');
     }
 }
 
@@ -175,7 +175,7 @@ sub draw_digit {
       'key-press-event' => sub {
          my ($widget, $event) = @_;
 
-         print "digit[$digit]: got keyval=" . $event->keyval . "\n";
+#         print "digit[$digit]: got keyval=" . $event->keyval . "\n";
 
          if ($event->keyval >= 48 && $event->keyval <= 57) {	  # 0 to 9
             my $digit_pressed = chr( $event->keyval );		  # Convert keyval to the corresponding character
@@ -188,6 +188,8 @@ sub draw_digit {
             print "digit[${digit}]: $digit_pressed entered, new_freq: $new_freq\n";
 #            $self->set_value( $new_freq );
             $self->set_digit( $digit, $digit_pressed, $places );
+            # shift focus to the next widget
+            shift_focus( $widget_box, 'forward' );
             return TRUE;
          }
          elsif ($event->keyval == 65362) {  # 65362 is the GDK keyval for UP key
@@ -202,18 +204,23 @@ sub draw_digit {
          }
          elsif ($event->keyval == 65361) {  # 65361 is the GDK keyval for LEFT key
             # Handle moving left between digits
-            shift_focus( $widget, 'backward' );
+            shift_focus( $widget_box, 'backward' );
             return TRUE;
          }
          elsif ($event->keyval == 65363) {  # 65363 is the GDK keyval for RIGHT key
             # Handle moving right between digits
-            shift_focus( $widget, 'forward' );
+            shift_focus( $widget_box, 'forward' );
             return TRUE;
          }
          elsif ($event->keyval == 65288) {  # 65288 is the GDK keyval for BKSPC key
             # XXX: Instead of clearing current widget, clear the last one
-            shift_focus( $widget, 'backward' );
+            shift_focus( $widget_box, 'backward' );
             return TRUE;
+         }
+         elsif ($event->keyval == 65289) { # TAB key
+           my $top_level = $widget->get_toplevel;
+           $top_level->child_focus( 'tab-forward' );
+           return TRUE;
          }
 
          # Propagate the event
