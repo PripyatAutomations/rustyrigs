@@ -329,7 +329,6 @@ sub read_rig {
     # Apply the values #
     ####################
     my $vfe = $$gtk_ui->{'vfo_freq_entry'};
-    my $vfo = $vfos->{$curr_vfo};
     $$vfe->set_value( $vfo->{'freq'} );
     $vfo->{'mode'} = $textmode;
     if ( !defined $last_power || $last_power != $power ) {
