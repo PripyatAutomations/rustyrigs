@@ -603,7 +603,6 @@ sub draw_main_win {
     $vol_entry->set_digits(0);
     $vol_entry->set_draw_value(TRUE);
     $vol_entry->set_value_pos('right');
-    $vol_entry->set_value(0);
     $vol_entry->set_tooltip_text("Set RX volume");
     $vol_entry->set_property('draw-value' => FALSE);
     my $vol_box = Gtk3::Box->new('horizontal', 5);
@@ -1191,7 +1190,7 @@ sub update_widgets {
 #           $vol_entry->set_value($vol);
         }
 
-        $vfo_freq_entry->set_value( $vfo->{'freq'} );
+#        $vfo_freq_entry->set_value( $vfo->{'freq'} );
         # XXX: set $mode_entry to $vfo->{'mode'} (indexed)
         # XXX: set $width_entry to $vfo->{'width'} (indexed)
         $rf_gain_entry->set_value($vfo->{'rf_gain'});

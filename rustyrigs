@@ -57,6 +57,7 @@ our $log = Woodpile::Log->new( "debug" );
 our $cfg_readonly = FALSE;
 our $connected    = FALSE;
 our $locked       = FALSE;
+our $vfo_digits;
 
 # Channel memories
 our $channels;
@@ -165,6 +166,9 @@ RustyRigs::Cmdline::parse( \$cfg, \$cfg_file );
 # Load configuration
 $cfg_p = Woodpile::Config->new( \$log, \$cfg_file, \$def_cfg );
 $cfg   = \$cfg_p->{cfg};
+
+$vfo_digits => $$cfg->{'vfo_digits'};
+print "vfo_digits: " . Dumper($vfo_digits) . "\n";
 
 if ($cfg_readonly) {
     $log->Log( "core", "info", "using configuration read-only" );

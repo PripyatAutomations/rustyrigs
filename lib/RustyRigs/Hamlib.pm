@@ -284,7 +284,7 @@ sub read_rig {
        $self->{'volume'} = $volume;
        my $rve = $main::gtk_ui->{'vol_entry'};
        my $rvv = $main::gtk_ui->{'vol_val'};
-       $$rve->set_value($volume);
+       $rve->set_value($volume);
        $$rvv->set_text($volume . "%");
        $last_vol = $volume;
     }

@@ -145,6 +145,9 @@ our $def_cfg = {
     use_metric              => 0,	       # 1 will use metric (miles, etc)
     use_sip                 => 0,              # 1 will enable experimental baresip code
 
+    # misc
+    vfo_digits              => 8,              # digits to display on VFO
+
     # Default window properties
     win_border              => 10,
     win_height              => 1024,
