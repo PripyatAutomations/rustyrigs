@@ -637,7 +637,7 @@ sub draw_main_win {
             my $rig = $rig_p->{'rig'};
             my $rp = $main::rig_p->{'gui_applying_changes'};
             $$rp = TRUE;
-            my $vol = $widget->get_value();
+            my $vol = int($widget->get_value() + 0.5);
 
             $rig_p->{'volume'} = $vol;
             my $tmp_vol = $vol / 100;

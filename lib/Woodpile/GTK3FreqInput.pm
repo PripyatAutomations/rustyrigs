@@ -186,8 +186,8 @@ sub draw_digit {
             my $freq     = $vfo->{'freq'};
             my $new_freq = replace_nth_digit( $freq, $digit, $digit_pressed );
             print "digit[${digit}]: $digit_pressed entered, new_freq: $new_freq\n";
-            $self->set_value( $new_freq );
-#            $self->set_digit( $digit, $digit_pressed, $places );
+#            $self->set_value( $new_freq );
+            $self->set_digit( $digit, $digit_pressed, $places );
             return TRUE;
          }
          elsif ($event->keyval == 65362) {  # 65362 is the GDK keyval for UP key
@@ -302,7 +302,7 @@ sub new {
    $widget_label->set_vexpand( TRUE );                  # Allow vertical expansion
    $widget_label->set_valign( 'center' );               # Vertically center the label
    $label_box->pack_start( $widget_label, TRUE, TRUE, 0 );
-   $outer_box->pack_start( $label_box, TRUE, TRUE, 0 );
+   $widget_box->pack_start( $label_box, TRUE, TRUE, 0 );
 
    return $obj;
 }

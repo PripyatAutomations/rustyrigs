@@ -2,7 +2,7 @@
 * SIP stuff
   - Implement sip_volume to use baresip volume instead of rig speaker
 * FreqInput widget:
-  - support for auto moving to next digit when a digit is keyed in manually
+  - Fix typing in the first digit appearing in last digit!
   - while typing, suspend actions on the field and allow typing normally
 * Find/fix remaining UI bugs
 * Add preamp control

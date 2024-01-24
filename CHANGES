@@ -1,3 +1,9 @@
+2024-01-24
+	* Improved FreqInput to allow typing
+	  - Currently a bug prevents typing in the left-most digit, it appears in right most, why?
+	  - Now you can use arrows to navigate/adjust widget. Backspace will go back a digit
+	  - Entry via +/- buttons works
+
 2024-01-22
 	* SIP configuration dialog skeleton
 	* Added some padding around all widgets
