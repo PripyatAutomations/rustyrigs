@@ -88,7 +88,7 @@ sub set_digit {
     my $new_freq = replace_nth_digit( $curr_freq, $offset, $newval );
     $widget->set_value( $new_freq );
     $main::rig->set_freq( $main::rig->get_vfo(), $new_freq );
-    print "Setting $digit digit to $newval, resulting in new freq of $new_freq\n";
+    print "Setting $digit digit (offset: $offset) to $newval, resulting in new freq of $new_freq\n";
 
     return;
 }
