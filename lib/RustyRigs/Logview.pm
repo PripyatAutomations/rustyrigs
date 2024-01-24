@@ -130,8 +130,7 @@ sub new {
    }
 
    # Set width/height of teh window
-#   $window->set_default_size( $$cfg->{'win_logview_width'},  $$cfg->{'win_logview_height'} );
-   $window->set_default_size( 300, 300 );
+   $window->set_default_size( $$cfg->{'win_logview_width'},  $$cfg->{'win_logview_height'} );
 
 
    # If placement type is none, we should manually place the window at x,y
@@ -155,6 +154,8 @@ sub new {
            # Save the data...
            $tmp_cfg->{'win_logview_x'}      = $x;
            $tmp_cfg->{'win_logview_y'}      = $y;
+           $tmp_cfg->{'win_logview_height'}      = $height;
+           $tmp_cfg->{'win_logview_width'}      = $width;
            $main::cfg_p->apply($tmp_cfg, FALSE);
            undef $tmp_cfg;
 
