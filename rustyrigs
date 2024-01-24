@@ -156,7 +156,7 @@ sub toggle_locked {
 }
 
 sub save_config {
-    $cfg_p->save($cfg_file);
+    $cfg_p->save( $cfg, $cfg_file );
     return;
 }
 
