@@ -71,7 +71,8 @@ sub Log {
 sub set_log_level {
     my ( $class, $log_level ) = @_;
     my $ll = $class->{'log_level'};
-    if (!defined $ll) {
+
+    if ( !defined $ll ) {
        $ll = 'debug';
     }
     print "[core/notice] Changing log level from $ll to $log_level\n";
@@ -83,7 +84,7 @@ sub add_handler {
     ( my $self, my $handler ) = @_;
     my $log_msg;
     
-    if (lc($self->{'log_file'}) eq "none") {
+    if (lc( $self->{'log_file'} ) eq "none") {
        $log_msg = "log file is disabled";
     } else {
        $log_msg = "Maintaining logfile at " . $self->{'log_file'};
@@ -95,14 +96,13 @@ sub add_handler {
 
 sub open_logfile {
     my ( $class, $log_file ) = @_;
-    # support disabling logging
     my $log_fh;
 
-    if (defined $log_file && !(lc($log_file) eq "none")) {
-       open $log_fh, '>>', $log_file or warn "Unable to open $log_file: $!\n";
+    if ( defined $log_file && !( lc( $log_file ) eq "none" ) ) {
+        open $log_fh, '>>', $log_file or warn "Unable to open $log_file: $!\n";
+        print "Enabled logging to file at $log_file\n";
+        $class->{'log_fh'} = $log_fh;
     }
-    print "Enabled logging to file at $log_file\n";
-    $class->{'log_fh'} = $log_fh;
     $class->{'log_file'} = $log_file;
     return $class;
 }
@@ -115,7 +115,7 @@ sub new {
     };
     bless $self, $class;
 
-    $self->set_log_level($log_level);
+    $self->set_log_level( $log_level );
     return $self;
 }
 

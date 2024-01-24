@@ -168,7 +168,6 @@ $cfg_p = Woodpile::Config->new( \$log, \$cfg_file, \$def_cfg );
 $cfg   = \$cfg_p->{cfg};
 
 $vfo_digits => $$cfg->{'vfo_digits'};
-print "vfo_digits: " . Dumper($vfo_digits) . "\n";
 
 if ($cfg_readonly) {
     $log->Log( "core", "info", "using configuration read-only" );

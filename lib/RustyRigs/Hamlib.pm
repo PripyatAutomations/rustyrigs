@@ -209,7 +209,7 @@ sub next_vfo {
        $vfo = shift;
     }
     else {
-       $main::log->Log("hamlib", "bug", "not enough arguments to next_vfo");
+       $main::log->Log( "hamlib", "bug", "not enough arguments to next_vfo" );
        return;
     }
 
@@ -240,7 +240,7 @@ sub read_rig {
 
     $rigctld_applying_changes = TRUE;
     my $curr_hlvfo = $rig->get_vfo();
-    my $curr_vfo   = $$cfg->{active_vfo} = vfo_name($curr_hlvfo);
+    my $curr_vfo   = $$cfg->{active_vfo} = vfo_name( $curr_hlvfo );
     my $vfo = $vfos->{$curr_vfo};
 
     # XXX: Update the VFO select button if needed
@@ -261,15 +261,15 @@ sub read_rig {
 #   $width = $rig->passband_normal(Hamlib::rig_parse_mode($mode));
 #    print "-- passband_normal: $width\n";
 
-    if (!defined $last_mode || !($last_mode eq $textmode)) {
-       $main::log->Log("hamlib", "info", "Mode of VFO $curr_hlvfo: $mode ($textmode) at width $width");
+    if ( !defined $last_mode || !( $last_mode eq $textmode ) ) {
+       $main::log->Log( "hamlib", "info", "Mode of VFO $curr_hlvfo: $mode ($textmode) at width $width" );
     }
     $last_mode = $textmode;
 
     my $vme = $$gtk_ui->{'mode_entry'};
     my $mode_index = 0;
-    for my $i (0 .. $#RustyRigs::Hamlib::hamlib_modes) {
-        if ($RustyRigs::Hamlib::hamlib_modes[$i] eq $textmode) {
+    for my $i ( 0 .. $#RustyRigs::Hamlib::hamlib_modes ) {
+        if ( $RustyRigs::Hamlib::hamlib_modes[$i] eq $textmode ) {
             $mode_index = $i;
             last;
         }
@@ -277,15 +277,16 @@ sub read_rig {
 
     # Get the RX volume
     my $raw_vol = $rig->get_level_f( $Hamlib::RIG_LEVEL_AF );
-    $volume = int($raw_vol * 100);
+    $volume = int( $raw_vol * 100 );
 
     if (defined $volume && ($last_vol != $volume)) {
-       $main::log->Log("rig", "info", "setting volume to $volume as requested by: " . ( caller(1) )[3]);
+       $main::log->Log( "rig", "info", "setting volume to $volume as requested by: " . (caller(1))[3] );
        $self->{'volume'} = $volume;
        my $rve = $main::gtk_ui->{'vol_entry'};
        my $rvv = $main::gtk_ui->{'vol_val'};
-       $rve->set_value($volume);
-       $$rvv->set_text($volume . "%");
+       print "rve: " . Dumper( $rve ) . "\n";
+       $$rve->set_value( $volume );
+       $$rvv->set_text( $volume . "%" );
        $last_vol = $volume;
     }
 
@@ -336,21 +337,21 @@ sub read_rig {
     $$vpe->set_value( $power );
 
     # Set the icons appropriately & update the tooltip
-    if (!$ptt) {
-       if (!defined $last_ptt || $last_ptt != $ptt) {
-          $main::log->Log("hamlib", "debug", "PTT off");
+    if ( !$ptt ) {
+       if ( !defined $last_ptt || $last_ptt != $ptt ) {
+          $main::log->Log( "hamlib", "debug", "PTT off" );
        }
-       $main::icons->set_icon("idle");
+       $main::icons->set_icon( "idle" );
     } else {
-       if (!defined $last_ptt || $last_ptt != $ptt) {
-          $main::log->Log("hamlib", "debug", "PTT on");
+       if ( !defined $last_ptt || $last_ptt != $ptt ) {
+          $main::log->Log( "hamlib", "debug", "PTT on" );
        }
-       $main::icons->set_icon("transmit");
+       $main::icons->set_icon( "transmit" );
     }
     $last_ptt = $ptt;
 
     # XXX: Update the width widget, this probably belongs in update() instead
-    $main::gtk_ui->refresh_available_widths($width);
+    $main::gtk_ui->refresh_available_widths( $width );
     $main::gtk_ui->update_widgets();
     $rigctld_applying_changes = FALSE;
     return;
@@ -365,8 +366,8 @@ sub exec_read_rig {
     ( my $self ) = @_;
 
     # Don't read the rig while GUI is applying changes...
-    if ($gui_applying_changes) {
-       $main::log->Log("hamlib", "debug", "skipping read_rig as GUI update in progress");
+    if ( $gui_applying_changes ) {
+       $main::log->Log( "hamlib", "debug", "skipping read_rig as GUI update in progress" );
        return TRUE;
     }
     $main::gtk_ui->update_widgets();
@@ -425,45 +426,45 @@ sub mic_select {
     my $line_term = $$cfg->{'cat_line_term'};
 
     # default to yaesu's ';'
-    if (!defined $line_term) {
+    if ( !defined $line_term ) {
        $line_term = ';';
     }
 
-    if (!defined $mic) {
+    if ( !defined $mic ) {
        $mic = !$self->{'active_mic'};
     }
     $self->{'active_mic'} = $mic;
 
     # which mic? 1 for rear
     my $cat_cmds;
-    if ($mic) {
+    if ( $mic ) {
        $cat_cmds = $$cfg->{'cat_mic_rear'};
     } else {
        $cat_cmds = $$cfg->{'cat_mic_front'};
     }
     my $str_mic = $mic ? "back" : "front";
 
-    if (defined $cat_cmds) {
-       $main::log->Log("hamlib", "info", "Switching microphone to $str_mic ($mic)");
-       my @commands = split($line_term, $cat_cmds);
+    if ( defined $cat_cmds ) {
+       $main::log->Log( "hamlib", "info", "Switching microphone to $str_mic ($mic)" );
+       my @commands = split( $line_term, $cat_cmds );
 
-       foreach my $cmd (@commands) {
+       foreach my $cmd ( @commands ) {
            my ( $out, $out_len );
 
            # Trim trailing and leading spaces and append trailing ';'
            $cmd =~ s/^\s+|\s+$//g;
            $cmd = "${cmd}${line_term}";
            # send the command
-           $main::log->Log("hamlib", "debug", "Sending CAT command: $cmd");
+           $main::log->Log( "hamlib", "debug", "Sending CAT command: $cmd" );
            print "type: " .  reftype($rig) . " | ref: " . ref($rig) . "\n";
            # ***   RuntimeError Usage:
            # rig_send_raw(rig,send,send_len,reply,reply_len,term);
            # at /home/joseph/rustyrigs/lib/RustyRigs/Hamlib.pm line 464.
-#           Hamlib::Rig->rig_send_raw($rig, $cmd, length($cmd), $out, $out_len, $line_term);
-           $main::rig->rig_send_raw($cmd, length($cmd), $out, $out_len, $line_term);
+#           Hamlib::Rig->rig_send_raw( $rig, $cmd, length($cmd), $out, $out_len, $line_term );
+           $main::rig->rig_send_raw( $cmd, length($cmd), $out, $out_len, $line_term );
 
-           if (defined $out) {
-              $main::log->Log("hamlib", "debug", "Command returned '$out");
+           if ( defined $out ) {
+              $main::log->Log( "hamlib", "debug", "Command returned '$out" );
            }
        }
     } else {

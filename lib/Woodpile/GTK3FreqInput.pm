@@ -195,6 +195,7 @@ sub draw_digit {
         return TRUE;
      }
      print "down button: widget = " . Dumper( $widget ) . "\n";
+     print "self: ". Dumper($self) . "\n";
      $self->dec_digit( $digit );
    });
    $dwn_btn->signal_connect( clicked => sub {
@@ -203,6 +204,7 @@ sub draw_digit {
         return TRUE;
      }
      print "down button: widget = " . Dumper( $widget ) . "\n";
+     print "self: ". Dumper($self) . "\n";
      $self->dec_digit( $digit );
    });
    $up_btn->signal_connect( activate => sub {
