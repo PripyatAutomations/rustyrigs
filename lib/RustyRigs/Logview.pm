@@ -130,8 +130,8 @@ sub new {
    }
 
    # Set width/height of teh window
-   $window->set_default_size( $$cfg->{'win_logview_width'},
-       $$cfg->{'win_logview_height'} );
+#   $window->set_default_size( $$cfg->{'win_logview_width'},  $$cfg->{'win_logview_height'} );
+   $window->set_default_size( 300, 300 );
 
    my $w_state = $$cfg->{'win_logview_state'};
    if (defined $w_state) {
@@ -159,8 +159,6 @@ sub new {
            # Save the data...
            $tmp_cfg->{'win_logview_x'}      = $x;
            $tmp_cfg->{'win_logview_y'}      = $y;
-           $tmp_cfg->{'win_logview_height'} = $height;
-           $tmp_cfg->{'win_logview_width'}  = $width;
            $tmp_cfg->{'win_logview_state'} = $widget->get_state();
            $main::cfg_p->apply($tmp_cfg, FALSE);
            undef $tmp_cfg;

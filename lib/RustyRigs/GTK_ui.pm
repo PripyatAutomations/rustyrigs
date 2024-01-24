@@ -321,7 +321,7 @@ our $initial_bg_color;
 sub draw_main_win {
     my ( $self ) = @_;
 
-    $w_main = Gtk3::Window->new('toplevel');
+    $w_main = Gtk3::Window->new( 'toplevel' );
     my $rig_p = $main::rig_p;
     my $rig = $rig_p->{'rig'};
 
@@ -331,21 +331,20 @@ sub draw_main_win {
     }
     my $act_vfo = $vfos->{$curr_vfo};
 
-    $w_main->set_title("rustyrigs: Not connected");
-    $w_main->set_default_size( $cfg->{'win_width'}, $cfg->{'win_height'} );
+    $w_main->set_title( "rustyrigs: Not connected" );
+#    $w_main->set_default_size( $cfg->{'win_width'}, $cfg->{'win_height'} );
+    $w_main->set_default_size( 300, 300 );
     $w_main->set_border_width( $cfg->{'win_border'} );
-    $w_main->set_resizable(0);
+    $w_main->move( $cfg->{'win_x'}, $cfg->{'win_y'} );
+    $w_main->set_resizable( 0 );
 
     if ( $cfg->{'always_on_top'} ) {
         w_main_ontop(1);
     }
 
-    $w_main->set_default_size( $cfg->{'win_width'}, $cfg->{'win_height'} );
-    $w_main->move( $cfg->{'win_x'}, $cfg->{'win_y'} );
-
     my $w_state = $cfg->{'win_state'};
-    if (defined $w_state) {
-       $w_main->set_state($w_state);
+    if ( defined $w_state ) {
+       $w_main->set_state( $w_state );
     }
 
     ##############################
@@ -1146,8 +1145,6 @@ sub draw_main_win {
             $tmp_cfg->{'win_x'}      = $x;
             $tmp_cfg->{'win_y'}      = $y;
             $tmp_cfg->{'win_state'}  = $widget->get_state();
-            $tmp_cfg->{'win_height'} = $height;
-            $tmp_cfg->{'win_width'}  = $width;
 
             $main::cfg_p->apply($tmp_cfg, FALSE);
             # Return FALSE to allow the event to propagate
