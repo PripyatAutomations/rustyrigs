@@ -133,10 +133,6 @@ sub new {
 #   $window->set_default_size( $$cfg->{'win_logview_width'},  $$cfg->{'win_logview_height'} );
    $window->set_default_size( 300, 300 );
 
-   my $w_state = $$cfg->{'win_logview_state'};
-   if (defined $w_state) {
-      $window->set_state($w_state);
-   }
 
    # If placement type is none, we should manually place the window at x,y
    if ($lvp =~ m/none/) {
@@ -159,7 +155,6 @@ sub new {
            # Save the data...
            $tmp_cfg->{'win_logview_x'}      = $x;
            $tmp_cfg->{'win_logview_y'}      = $y;
-           $tmp_cfg->{'win_logview_state'} = $widget->get_state();
            $main::cfg_p->apply($tmp_cfg, FALSE);
            undef $tmp_cfg;
 

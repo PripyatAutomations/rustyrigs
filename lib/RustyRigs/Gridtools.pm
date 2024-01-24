@@ -167,11 +167,6 @@ sub new {
     $window->set_keep_above($on_top);
     $window->set_resizable(0);
 
-    my $w_state = $$cfg->{'win_gridtools_state'};
-    if (defined $w_state) {
-       $window->set_state($w_state);
-    }
-
     my $icon = $main::icons->get_icon('gridtools');
 
     if (defined $icon) {
@@ -335,11 +330,7 @@ sub new {
     # if configured as such, hide the window automatically
     my $gt_autohide = $$cfg->{'hide_gridtools_at_start'};
 
-    my $gt_win_state = $$cfg->{'win_gridtools_state'};
-
-    if (defined $gt_win_state) {
-       $window->set_state($gt_win_state);
-    } elsif ($gt_autohide) {
+    if ($gt_autohide) {
        $window->iconify();
     }
 
@@ -366,7 +357,6 @@ sub new {
             # Save the data...
             $tmp_cfg->{'win_gridtools_x'}      = $x;
             $tmp_cfg->{'win_gridtools_y'}      = $y;
-            $tmp_cfg->{'win_gridtools_state'} = $widget->get_state();
             $main::cfg_p->apply($tmp_cfg, FALSE);
             undef $tmp_cfg;
 

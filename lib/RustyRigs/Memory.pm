@@ -57,11 +57,6 @@ sub show {
     $w_mem_edit->set_default_size( 300, 300 );
     $w_mem_edit->move( $cfg->{'win_mem_edit_x'}, $cfg->{'win_mem_edit_y'} );
 
-    my $w_state = $$cfg->{'win_mem_state'};
-    if (defined $w_state) {
-       $w_mem_edit->set_state($w_state);
-    }
-
     my $save_button = Gtk3::Button->new_with_mnemonic('_Save Memory');
     $save_button->signal_connect( clicked => sub { $class->save(); } );
     $save_button->set_tooltip_text("Save memory");
@@ -90,7 +85,6 @@ sub show {
             my ( $x, $y )          = $widget->get_position();
             $tmp_cfg->{'win_mem_edit_x'}      = $x;
             $tmp_cfg->{'win_mem_edit_y'}      = $y;
-            $tmp_cfg->{'win_state'}           = $widget->get_state();
             $main::cfg_p->apply($tmp_cfg, FALSE);
             undef $tmp_cfg;
             return FALSE;

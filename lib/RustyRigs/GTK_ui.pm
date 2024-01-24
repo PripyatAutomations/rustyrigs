@@ -342,11 +342,6 @@ sub draw_main_win {
         w_main_ontop(1);
     }
 
-    my $w_state = $cfg->{'win_state'};
-    if ( defined $w_state ) {
-       $w_main->set_state( $w_state );
-    }
-
     ##############################
     # Capture the window signals #
     ##############################
@@ -1144,7 +1139,6 @@ sub draw_main_win {
             # Save the data...
             $tmp_cfg->{'win_x'}      = $x;
             $tmp_cfg->{'win_y'}      = $y;
-            $tmp_cfg->{'win_state'}  = $widget->get_state();
 
             $main::cfg_p->apply($tmp_cfg, FALSE);
             # Return FALSE to allow the event to propagate

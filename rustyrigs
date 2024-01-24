@@ -129,34 +129,34 @@ sub toggle_locked {
        $gtk_ui->{'width_entry'}
     );
 
-    if ($locked) {
-        foreach my $widget (@widgets) {
-            my $actual_widget = $$widget;
-            if ($actual_widget->can('set_editable')) {
-               $actual_widget->set_editable(0);
-            }
-            if ($actual_widget->can('set_sensitive')) {
-               $actual_widget->set_sensitive(0);
-            }
-        }
-    } else
-    {
-        foreach my $widget (@widgets) {
-            my $actual_widget = $$widget;
-            if ($actual_widget->can('set_editable')) {
-               $actual_widget->set_editable(1);
-            }
-            if ($actual_widget->can('set_sensitive')) {
-               $actual_widget->set_sensitive(1);
-            }
-        }
-    }
+#    if ($locked) {
+#        foreach my $widget (@widgets) {
+#            my $actual_widget = $$widget;
+#            if ($actual_widget->can('set_editable')) {
+#               $actual_widget->set_editable(0);
+#            }
+#            if ($actual_widget->can('set_sensitive')) {
+#               $actual_widget->set_sensitive(0);
+#            }
+#        }
+#    } else
+#    {
+#        foreach my $widget (@widgets) {
+#            my $actual_widget = $$widget;
+#            if ($actual_widget->can('set_editable')) {
+#               $actual_widget->set_editable(1);
+#            }
+#            if ($actual_widget->can('set_sensitive')) {
+#               $actual_widget->set_sensitive(1);
+#            }
+#        }
+#    }
     $log->Log( "ui", "debug", "Toggling \$locked to " . ($locked ? 'on' : 'off') . " by $origin" );
     return;
 }
 
 sub save_config {
-    $cfg_p->save( $cfg, $cfg_file );
+    $cfg_p->save( $$cfg, $cfg_file );
     return;
 }
 

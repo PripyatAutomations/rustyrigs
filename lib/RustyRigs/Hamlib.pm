@@ -241,7 +241,11 @@ sub read_rig {
     $rigctld_applying_changes = TRUE;
     my $curr_hlvfo = $rig->get_vfo();
     my $curr_vfo   = $$cfg->{active_vfo} = vfo_name( $curr_hlvfo );
-    my $vfo = $vfos->{$curr_vfo};
+    my $vfo;
+    
+    # figure out which VFO is active
+    $vfo = $vfos->{$curr_vfo} if ( defined $vfos && defined $curr_vfo && defined $vfos->{$curr_vfo} );
+    $vfo = 'A' if ( !defined $vfo );
 
     # XXX: Update the VFO select button if needed
 

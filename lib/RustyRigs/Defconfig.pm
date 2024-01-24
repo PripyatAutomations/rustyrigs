@@ -151,7 +151,6 @@ our $def_cfg = {
     # Default window properties
     win_border              => 10,
     win_visible             => 0,
-    win_state               => 'normal',
     win_x                   => 2252,
     win_y                   => 49,
     # center, mouse, center_always, center_on_parent, none (place at x,y below)
@@ -159,19 +158,16 @@ our $def_cfg = {
     win_baresip_settings_x  => 0,
     win_baresip_settings_y  => 0,
     win_gridtools_placement => 'none',
-    win_gridtools_state     => 'withdrawn',
     win_gridtools_x         => 0,
     win_gridtools_y         => 0,
     win_logview_placement   => 'none',
     win_logview_height      => 480,
     win_logview_width       => 1024,
-    win_logview_state       => "withdrawn",
     win_logview_x           => 0,
     win_logview_y           => 0,
     win_mem_edit_x          => 1,
     win_mem_edit_y          => 1,
     win_settings_placement  => 'none',
-    win_setting_state       => 'normal',
     win_settings_x          => 183,
     win_settings_y          => 318,
 };

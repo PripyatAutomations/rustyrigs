@@ -169,11 +169,6 @@ sub new {
        $w_settings->move( $cfg->{'win_settings_x'}, $cfg->{'win_settings_y'} );
     }
 
-    my $w_state = $cfg->{'win_settings_state'};
-    if (defined $w_state) {
-       $w_settings->set_state($w_state);
-    }
-
     $w_settings->signal_connect(
         'configure-event' => sub {
             my ( $widget, $event ) = @_;
@@ -185,7 +180,6 @@ sub new {
             # Save the data...
             $tmp_cfg->{'win_settings_x'}      = $x;
             $tmp_cfg->{'win_settings_y'}      = $y;
-            $tmp_cfg->{'win_settings_state'}  = $widget->get_state();
 
             # Return FALSE to allow the event to propagate
             return FALSE;
