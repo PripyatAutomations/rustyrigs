@@ -280,11 +280,10 @@ sub read_rig {
     $volume = int( $raw_vol * 100 );
 
     if (defined $volume && ($last_vol != $volume)) {
-       $main::log->Log( "rig", "info", "setting volume to $volume as requested by: " . (caller(1))[3] );
+#       $main::log->Log( "rig", "info", "setting volume to $volume as requested by: " . (caller(1))[3] );
        $self->{'volume'} = $volume;
        my $rve = $main::gtk_ui->{'vol_entry'};
        my $rvv = $main::gtk_ui->{'vol_val'};
-       print "rve: " . Dumper( $rve ) . "\n";
        $$rve->set_value( $volume );
        $$rvv->set_text( $volume . "%" );
        $last_vol = $volume;
