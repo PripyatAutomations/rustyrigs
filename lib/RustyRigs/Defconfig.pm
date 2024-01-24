@@ -151,8 +151,8 @@ our $def_cfg = {
     # Default window properties
     win_border              => 10,
     win_visible             => 0,
-    win_x                   => 2252,
-    win_y                   => 49,
+    win_x                   => 0,
+    win_y                   => 0,
     # center, mouse, center_always, center_on_parent, none (place at x,y below)
     win_baresip_settings_placement => 'none',
     win_baresip_settings_x  => 0,
