@@ -84,7 +84,7 @@ sub set_digit {
     if ( $digit > 0 ) {
        my $new_freq = replace_nth_digit( $curr_freq, ($places_i - $digit), $newval );
        print "set_digit: widget = " . Dumper( $widget ) . "\n";
-       $widget->set_value( $new_freq );
+       $self->set_value( $new_freq );
        $main::rig->set_freq( $main::rig->get_vfo(), $new_freq );
        print "Setting $digit digit to $newval, resulting in new freq of $new_freq\n";
     }
@@ -102,8 +102,8 @@ sub dec_digit {
     my $mult     = (10**$digit)/10;
     my $new_val = $freq - $mult;
 
-    print "dec_digit: widget = " . Dumper( $widget ) . "\n";
-    $widget->set_value( $new_val );
+    print "self: " . Dumper($self) . "\n";
+    $self->set_value( $new_val );
     $main::rig->set_freq($main::rig->get_vfo(), $new_val);
     return;
 }
@@ -194,7 +194,6 @@ sub draw_digit {
      if ( $main::locked ) {
         return TRUE;
      }
-     print "down button: widget = " . Dumper( $widget ) . "\n";
      print "self: ". Dumper($self) . "\n";
      $self->dec_digit( $digit );
    });
@@ -203,7 +202,6 @@ sub draw_digit {
      if ( $main::locked ) {
         return TRUE;
      }
-     print "down button: widget = " . Dumper( $widget ) . "\n";
      print "self: ". Dumper($self) . "\n";
      $self->dec_digit( $digit );
    });

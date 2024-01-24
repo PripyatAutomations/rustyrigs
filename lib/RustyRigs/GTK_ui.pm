@@ -959,7 +959,7 @@ sub draw_main_win {
 
     $vfo_power_entry->signal_connect(
         value_changed => sub {
-            if (!$main::rig_p->is_busy()) {
+            if ($main::hamlib_initialized && !$main::rig_p->is_busy()) {
                my $value  = int($vfo_power_entry->get_value() + 0.5);
                my $oldval = $act_vfo->{'power'};
                my $change = 0;
