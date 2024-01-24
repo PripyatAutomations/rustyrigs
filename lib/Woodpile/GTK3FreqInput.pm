@@ -6,6 +6,9 @@ use strict;
 use warnings;
 use Data::Dumper;
 
+# XXX: This mustn't be a global.. but im tired of fighting this...
+my $master_digits;
+
 # Replace a single digit in a whole number
 sub replace_nth_digit {
     my ( $number, $position, $new_digit ) = @_;
@@ -48,10 +51,10 @@ sub set_value {
 
     my $i = $vfo_digits;
     while ( $i > 0 ) {
-        my $digits = $self->{'digits'};
+        my $digits = $master_digits;
         my $digit_item = $digits->{$i};
         my $digit_entry = $digit_item->{'entry'};
-        my $curr_digit = substr($int_str, 0, 1);				# extra left most digit
+        my $curr_digit = substr($int_str, 0, 1);				# extract left most digit
         $curr_digit = 0 if ( !defined $curr_digit || $curr_digit !~ /^\d$/) ;   # if no value, set to 0
         $digit_entry->set_text( $curr_digit );                                  # set the digit
         $int_str = substr( $int_str, 1 );                                       # trim first character off
@@ -60,7 +63,7 @@ sub set_value {
     return;
 }
 
-# Get a single digit: Positive for whole, negative for decimal
+# Get a single digit: Positive for whole, negative for decimal (NYI)
 sub get_digit {
     my ( $self, $digit ) = @_;
     if ( !defined $digit ) {
@@ -81,13 +84,12 @@ sub set_digit {
     my $curr_freq = $vfo->{'freq'};
     my $places_i = int($places);
 
-    if ( $digit > 0 ) {
-       my $new_freq = replace_nth_digit( $curr_freq, ($places_i - $digit), $newval );
-       print "set_digit: widget = " . Dumper( $widget ) . "\n";
-       $widget>set_value( $new_freq );
-       $main::rig->set_freq( $main::rig->get_vfo(), $new_freq );
-       print "Setting $digit digit to $newval, resulting in new freq of $new_freq\n";
-    }
+    my $offset = ($places_i - $digit);
+    my $new_freq = replace_nth_digit( $curr_freq, $offset, $newval );
+    $widget->set_value( $new_freq );
+    $main::rig->set_freq( $main::rig->get_vfo(), $new_freq );
+    print "Setting $digit digit to $newval, resulting in new freq of $new_freq\n";
+
     return;
 }
 
@@ -99,6 +101,7 @@ sub dec_digit {
     my $vfos     = $RustyRigs::Hamlib::vfos;
     my $vfo      = $vfos->{$curr_vfo};
     my $freq     = $vfo->{'freq'};
+    print "digit: " . Dumper($digit) . ", widget: " . Dumper($widget) . "\n";
     my $mult     = (10**$digit)/10;
     my $new_val = $freq - $mult;
 
@@ -158,18 +161,18 @@ sub draw_digit {
          print "digit[$digit]: got keyval=" . $event->keyval . "\n";
 
          if ($event->keyval >= 48 && $event->keyval <= 57) {	  # 0 to 9
-            my $digit_pressed = chr($event->keyval);		  # Convert keyval to the corresponding character
+            my $digit_pressed = chr( $event->keyval );		  # Convert keyval to the corresponding character
             print "digit[${digit}]: $digit_pressed entered\n";
-            $self->set_digit($digit, $digit_pressed, $places);
+            $self->set_digit( $digit, $digit_pressed, $places );
             return TRUE;
          }
          elsif ($event->keyval == 65362) {  # 65362 is the GDK keyval for UP key
-            $self->inc_digit($self, $digit);
+            $self->inc_digit( $digit );
             $widget->grab_focus();
             return TRUE;
          }
          elsif ($event->keyval == 65364) {  # 65364 is the GDK keyval for DOWN key
-            $self->dec_digit($self, $digit);
+            $self->dec_digit( $digit );
             $widget->grab_focus();
             return TRUE;
          }
@@ -188,32 +191,32 @@ sub draw_digit {
    );
 
    $dwn_btn->signal_connect( activate => sub {
-     my ( $widget, $digit ) = @_;
+     my ( $widget ) = @_;
      if ( $main::locked ) {
         return TRUE;
      }
-     dec_digit( $self, $digit );
+     $self->dec_digit( $digit );
    });
    $dwn_btn->signal_connect( clicked => sub {
-     my ( $widget, $digit ) = @_;
+     my ( $widget ) = @_;
      if ( $main::locked ) {
         return TRUE;
      }
-     dec_digit( $self, $digit );
+     $self->dec_digit( $digit );
    });
    $up_btn->signal_connect( activate => sub {
-     my ( $widget, $digit ) = @_;
+     my ( $widget ) = @_;
      if ( $main::locked ) {
         return TRUE;
      }
-     inc_digit( $self, $digit );
+     $self->inc_digit( $digit );
    });
    $up_btn->signal_connect( clicked => sub {
-     my ( $widget, $digit ) = @_;
+     my ( $widget ) = @_;
      if ( $main::locked ) {
         return TRUE;
      }
-     inc_digit( $self, $digit );
+     $self->inc_digit( $digit );
    });
 
    $box->pack_start( $up_btn, FALSE, FALSE, 0 );
@@ -256,7 +259,7 @@ sub new {
        
        # XXX: Every 3 digits, we should slightly change the background color to group digits
 
-       $obj->{'digits'}{$i} = $new_digit;
+       $master_digits->{$i} = $obj->{'digits'}{$i} = $new_digit;
        $i--;
    }
 
