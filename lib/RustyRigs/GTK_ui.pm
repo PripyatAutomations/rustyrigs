@@ -1195,10 +1195,10 @@ sub update_widgets {
            $power_changing = TRUE;        
            $vfo_power_entry->set_value( $vfo->{'power'} );
            $vfo_power_val->set_text( $vfo->{'power'} . 'W' );
-           print "setting power widget to " . $vfo->{'power'} . "\n";
+#           print "setting power widget to " . $vfo->{'power'} . "\n";
            $power_changing = FALSE;
-        } else {
-           print "vfo power is 0\n";
+#        } else {
+#           print "vfo power is 0\n";
         }
 
         # Update the meters
