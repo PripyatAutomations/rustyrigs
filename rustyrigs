@@ -167,7 +167,7 @@ RustyRigs::Cmdline::parse( \$cfg, \$cfg_file );
 $cfg_p = Woodpile::Config->new( \$log, \$cfg_file, \$def_cfg );
 $cfg   = \$cfg_p->{cfg};
 
-$vfo_digits => $$cfg->{'vfo_digits'};
+#$vfo_digits => $$cfg->{'vfo_digits'};
 
 if ($cfg_readonly) {
     $log->Log( "core", "info", "using configuration read-only" );

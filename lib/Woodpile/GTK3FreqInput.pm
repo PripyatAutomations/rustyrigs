@@ -84,7 +84,7 @@ sub set_digit {
     if ( $digit > 0 ) {
        my $new_freq = replace_nth_digit( $curr_freq, ($places_i - $digit), $newval );
        print "set_digit: widget = " . Dumper( $widget ) . "\n";
-       $self->set_value( $new_freq );
+       $widget>set_value( $new_freq );
        $main::rig->set_freq( $main::rig->get_vfo(), $new_freq );
        print "Setting $digit digit to $newval, resulting in new freq of $new_freq\n";
     }
@@ -102,8 +102,7 @@ sub dec_digit {
     my $mult     = (10**$digit)/10;
     my $new_val = $freq - $mult;
 
-    print "self: " . Dumper($self) . "\n";
-    $self->set_value( $new_val );
+    $widget->set_value( $new_val );
     $main::rig->set_freq($main::rig->get_vfo(), $new_val);
     return;
 }
@@ -119,7 +118,6 @@ sub inc_digit {
     my $mult     = (10**$digit)/10;
     my $new_val = $freq + $mult;
 
-    print "inc_digit: widget = " . Dumper( $widget ) . "\n";
     $widget->set_value( $new_val );
     $main::rig->set_freq($main::rig->get_vfo(), $new_val);
     return;
@@ -194,32 +192,28 @@ sub draw_digit {
      if ( $main::locked ) {
         return TRUE;
      }
-     print "self: ". Dumper($self) . "\n";
-     $self->dec_digit( $digit );
+     dec_digit( $self, $digit );
    });
    $dwn_btn->signal_connect( clicked => sub {
      my ( $widget, $digit ) = @_;
      if ( $main::locked ) {
         return TRUE;
      }
-     print "self: ". Dumper($self) . "\n";
-     $self->dec_digit( $digit );
+     dec_digit( $self, $digit );
    });
    $up_btn->signal_connect( activate => sub {
      my ( $widget, $digit ) = @_;
      if ( $main::locked ) {
         return TRUE;
      }
-     print "up button: widget = " . Dumper( $widget ) . "\n";
-     $self->inc_digit( $digit );
+     inc_digit( $self, $digit );
    });
    $up_btn->signal_connect( clicked => sub {
      my ( $widget, $digit ) = @_;
      if ( $main::locked ) {
         return TRUE;
      }
-     print "up button: widget = " . Dumper( $widget ) . "\n";
-     $self->inc_digit( $digit );
+     inc_digit( $self, $digit );
    });
 
    $box->pack_start( $up_btn, FALSE, FALSE, 0 );

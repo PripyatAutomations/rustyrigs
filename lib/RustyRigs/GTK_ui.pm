@@ -30,6 +30,8 @@ our $dnr_entry;
 our $squelch_entry;
 our $vol_entry;
 our $vol_val;
+our $rf_gain_val;
+our $vfo_power_val;
 our $vfo_freq_entry;
 our $vfo_power_entry;
 our $vfo_sel_button;
@@ -865,7 +867,7 @@ sub draw_main_win {
     $rf_gain_entry->set_sensitive(0);
     $rf_gain_entry->set_property('draw-value' => FALSE);
     my $rf_gain_box = Gtk3::Box->new('horizontal', 5);
-    my $rf_gain_val = Gtk3::Label->new("  0%");
+    $rf_gain_val = Gtk3::Label->new("  0%");
     $rf_gain_val->set_alignment(1, 0.5);
     $rf_gain_box->pack_start($rf_gain_entry, TRUE, TRUE, 5);
     $rf_gain_box->pack_start($rf_gain_val, FALSE, TRUE, 0);
@@ -942,7 +944,7 @@ sub draw_main_win {
     $vfo_power_entry->set_property('draw-value' => FALSE);
     my $vfo_power_box = Gtk3::Box->new('horizontal', 5);
     $val = sprintf("%*sW", 3, $act_vfo->{'power'});
-    my $vfo_power_val = Gtk3::Label->new("$val");
+    $vfo_power_val = Gtk3::Label->new("$val");
     $vfo_power_val->set_alignment(1, 0.5);
     $vfo_power_box->pack_start($vfo_power_entry, TRUE, TRUE, 5);
     $vfo_power_box->pack_start($vfo_power_val, FALSE, TRUE, 5);
@@ -1186,17 +1188,16 @@ sub update_widgets {
         }
         my $ptt = $rig->get_ptt();
         $ptt_button->set_active($ptt);
-        if ($main::hamlib_initialized) {
-#           $vol_entry->set_value($vol);
-        }
-
-#        $vfo_freq_entry->set_value( $vfo->{'freq'} );
+        $vfo_freq_entry->set_value( $vfo->{'freq'} );
         # XXX: set $mode_entry to $vfo->{'mode'} (indexed)
         # XXX: set $width_entry to $vfo->{'width'} (indexed)
         $rf_gain_entry->set_value($vfo->{'rf_gain'});
-        $power_changing = TRUE;        
-        $vfo_power_entry->set_value( $vfo->{'power'} );
-        $power_changing = FALSE;
+
+        if ($vfo->{'power'} != 0) {
+           $power_changing = TRUE;        
+           $vfo_power_entry->set_value( $vfo->{'power'} );
+           $power_changing = FALSE;
+        }
 
         # Update the meters
 #        my $meters = $main::meters;

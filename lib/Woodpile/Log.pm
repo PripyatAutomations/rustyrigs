@@ -29,6 +29,7 @@ sub Log {
     my $buf;
 
     # XXX: We should do log levels per destination: logview, logfile, stdout
+    print "filter: $filter_level, log_level: $log_level\n";
     if ( $log_levels{$filter_level} < $log_levels{$log_level} ) {
         return 0;
     }
