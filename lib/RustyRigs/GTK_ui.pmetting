@@ -1168,6 +1168,8 @@ sub draw_main_win {
 }
 
 ######################################
+my $last_power = 0;
+
 sub update_widgets {
     my ( $self ) = @_;
 
@@ -1191,7 +1193,10 @@ sub update_widgets {
         # XXX: set $width_entry to $vfo->{'width'} (indexed)
         $rf_gain_entry->set_value($vfo->{'rf_gain'});
 
-        if ($vfo->{'power'} != 0) {
+        # Power
+        my $power = $vfo->{'power'};
+        if (!defined $last_power || $last_power != $power)
+        if ($power != 0) {
            $power_changing = TRUE;        
            $vfo_power_entry->set_value( $vfo->{'power'} );
            $vfo_power_val->set_text( $vfo->{'power'} . 'W' );
@@ -1200,6 +1205,7 @@ sub update_widgets {
         } else {
            print "vfo power is 0\n";
         }
+        $last_power = $power;
 
         # Update the meters
 #        my $meters = $main::meters;

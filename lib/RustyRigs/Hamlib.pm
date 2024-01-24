@@ -230,9 +230,9 @@ sub next_vfo {
 # of how many times we poll the rig... Don't export these...
 my $last_ptt;
 my $last_mode;
-my $last_freq;
+my $last_freq = 0;
 my $last_vol = 0;
-
+my $last_power = 0;
 # Read the state of the rig and apply it to the appropriate $vfos entry
 # XXX: This needs to read into $vfos then call $gtk_ui->update()
 sub read_rig {
@@ -329,11 +329,16 @@ sub read_rig {
     # Apply the values #
     ####################
     my $vfe = $$gtk_ui->{'vfo_freq_entry'};
-    $$vfe->set_value( $vfos->{$curr_vfo}{'freq'} );
-    $vfos->{$curr_vfo}{'mode'} = $textmode;
-    $$vme->set_active( $mode_index );
-    my $vpe = $$gtk_ui->{'vfo_power_entry'};
-    $$vpe->set_value( $power );
+    my $vfo = $vfos->{$curr_vfo};
+    $$vfe->set_value( $vfo->{'freq'} );
+    $vfo->{'mode'} = $textmode;
+    if ( !defined $last_power || $last_power != $power ) {
+       $vfo->{'power'} = $power;
+       $$vme->set_active( $mode_index );
+       my $vpe = $$gtk_ui->{'vfo_power_entry'};
+       $$vpe->set_value( $power );
+       $last_power = $power;
+   }
 
     # Set the icons appropriately & update the tooltip
     if ( !$ptt ) {

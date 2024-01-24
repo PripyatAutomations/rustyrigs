@@ -1,4 +1,3 @@
-* ensure labels in new multi-column controls are being updated appropriately
 * SIP stuff
   - Implement sip_volume to use baresip volume instead of rig speaker
 * FreqInput widget:
