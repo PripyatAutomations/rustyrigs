@@ -390,8 +390,8 @@ sub draw_main_win {
     my $key_ptt = $cfg->{'key_ptt'};
     $ptt_button = Gtk3::ToggleButton->new_with_label("PTT ($key_ptt)");
     $initial_bg_color = $ptt_button->get_style_context->get_background_color('normal');
-    $ptt_button->override_background_color('normal', Gtk3::Gdk::RGBA->new(0.0, 0.3, 0.0, 1.0));
-    $ptt_button->override_background_color('active', Gtk3::Gdk::RGBA->new(0.5, 0.0, 0.0, 1.0));
+    # normal  active  prelight  selected  insensitive  inconsistent  focused  backdrop  dir-ltr  dir-rtl  link  visited  checked  drop-active
+    $ptt_button->override_background_color('checked',      Gtk3::Gdk::RGBA->new( 0.7, 0.0, 0.0, 1.0) );
     $ptt_button->signal_connect(
         toggled => sub {
             my ( $self ) = @_;
