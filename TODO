@@ -1,15 +1,22 @@
+* Implement support for rigctl via websockets over http/quic
+  - Reuse bits from remotepi html5 interface / use bits form here to complete it
+  - Create client library for transporting
+* VOX controls with visibility controlled by Use VOX toggle (cfg:use_vox)
 * SIP stuff
   - Implement sip_volume to use baresip volume instead of rig speaker
 * FreqInput widget:
   - Fix typing in the first digit appearing in last digit!
+    - This appears to be related to the fact we immediately write out to hamlib.
+      Using some caching + delay before writing the rig should fix this and the latency problems
+      when running without flrig
   - while typing, suspend actions on the field and allow typing normally
 * Find/fix remaining UI bugs
 * Add preamp control
 * Add mic gain control
 * Add signal bar to SWR widget
 * Tune button (ON/OFF/AUTO)
+* Add dialog to spawn modems/etc attached to the audio pipes
 * Add speech for blind users
-* VOX controls with visibility controlled by Use VOX toggle (cfg:use_vox)
 * Clean up read_rig to update $vfos->{$curr_vfo} and call gtk_ui->update()
 * Move GTK GUI update code from Hamlib.pm to update() in GTK_ui.pm
 * Fix bug where gridtools is shown when main is hidden/show even when hide_gridtools_too is false

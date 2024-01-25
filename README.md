@@ -41,6 +41,10 @@ Things that are broken but should be fixed soon:
 	For now, you might need to restart for many settings to apply.
 	- This is in work as we move things to rr_gtk_ui::apply()
 
+Right now this seems to only work reasonably if you run rigctld connected to
+flrig as such:
+	rigctld -m 4 -P RIG -t 4532 -o &
+
 
 Good luck!
 ~ rustyaxe

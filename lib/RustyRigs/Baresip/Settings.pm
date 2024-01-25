@@ -15,6 +15,8 @@ sub DESTROY {
 sub save {
    my ( $self ) = @_;
    
+   # apply and save
+   $main::cfg_p->apply($tmp_cfg, TRUE);
    $w_sip_settings->destroy();
    return;
 }

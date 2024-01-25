@@ -1,4 +1,4 @@
 #!/bin/bash
 PORT=4532
 echo "starting rigctld listening on port $PORT"
-rigctld -m 4 -P RIG -t ${PORT} &
+rigctld -m 4 -P RIG -t ${PORT} -o &

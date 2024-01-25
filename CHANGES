@@ -1,4 +1,5 @@
 2024-01-24
+	* Various bugs removed
 	* Fixed various label updates and started working on reducing unneeded updates/writes
 	* Improved FreqInput to allow typing
 	  - Currently a bug prevents typing in the left-most digit, it appears in right most, why?
