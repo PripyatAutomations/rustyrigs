@@ -1060,31 +1060,31 @@ sub draw_main_win {
     $box->pack_start( $meters_dock_box, TRUE,  TRUE,  5 );
     $box->pack_start( $toggle_box,      FALSE, FALSE, 5 );
 
-    $label_box->pack_start( $vol_label,   FALSE, FALSE, 5 );
+    $label_box->pack_start( $vol_label,   TRUE, FALSE, 5 );
     $ctrl_box->pack_start( $vol_box,      TRUE, TRUE, 5 );
 
     $squelch_label->set_alignment(1, 0.5);
-    $label_box->pack_start( $squelch_label,   FALSE, FALSE, 5 );
+    $label_box->pack_start( $squelch_label,   TRUE, FALSE, 5 );
     $ctrl_box->pack_start( $squelch_box,      TRUE, TRUE, 5 );
 
     $rf_gain_label->set_alignment(1, 0.5);
-    $label_box->pack_start( $rf_gain_label,   FALSE, FALSE, 5 );
+    $label_box->pack_start( $rf_gain_label,   TRUE, FALSE, 5 );
     $ctrl_box->pack_start( $rf_gain_box  ,    TRUE, TRUE, 5 );
 
     $dnr_label->set_alignment(1, 0.5);
-    $label_box->pack_start( $dnr_label,       FALSE, FALSE, 5 );
+    $label_box->pack_start( $dnr_label,       TRUE, FALSE, 5 );
     $ctrl_box->pack_start( $dnr_box,          TRUE, TRUE, 5 );
 
     $vfo_power_label->set_alignment(1, 0.5);
-    $label_box->pack_start( $vfo_power_label, FALSE, FALSE, 5 );
+    $label_box->pack_start( $vfo_power_label, TRUE, FALSE, 5 );
     $ctrl_box->pack_start( $vfo_power_box,    TRUE, TRUE, 5 );
 
     $mode_label->set_alignment(1, 0.5);
-    $label_box->pack_start( $mode_label,      FALSE, FALSE, 5 );
+    $label_box->pack_start( $mode_label,      TRUE, FALSE, 5 );
     $ctrl_box->pack_start( $mode_entry,       TRUE, TRUE, 5 );
 
     $width_label->set_alignment(1, 0.5);
-    $label_box->pack_start( $width_label,     FALSE, FALSE, 5 );
+    $label_box->pack_start( $width_label,     TRUE, FALSE, 5 );
     $ctrl_box->pack_start( $width_entry,      TRUE, TRUE, 5 );
 
     my $controls_box = Gtk3::Box->new( 'horizontal', 5 );
