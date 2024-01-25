@@ -129,9 +129,9 @@ sub toggle_locked {
        $gtk_ui->{'width_entry'}
     );
 
-#    if ( $lock_volume_too ) {
+    if ( $lock_volume_too ) {
        push @widgets, $gtk_ui->{'vol_entry'};
-#    }
+    }
 
     if ($locked) {
         foreach my $widget (@widgets) {

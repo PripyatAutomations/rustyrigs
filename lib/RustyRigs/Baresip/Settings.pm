@@ -174,7 +174,7 @@ sub new {
    $save_button->set_can_focus( 1 );
    $win_accel->connect(
        ord('S'),  $$cfg->{'shortcut_key'},
-       'visible', sub { $$cfg, $class->save($tmp_cfg); }
+       'visible', sub { $class->save($tmp_cfg); }
    );
    my $cancel_button = Gtk3::Button->new( '_Cancel' );
    $cancel_button->set_tooltip_text( "Discard changes" );

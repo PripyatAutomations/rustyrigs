@@ -142,6 +142,7 @@ sub shift_focus {
     } elsif ($direction eq 'backward') {
         $target->child_focus('tab-backward');
     }
+    return;
 }
 
 # Draw a single digit widget

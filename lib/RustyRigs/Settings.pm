@@ -709,7 +709,7 @@ sub new {
     $rig_addr_entry->grab_focus();
 
     my $self = {
-        tmp_cfg    => \$tmp_cfg,
+        tmp_cfg => \$tmp_cfg,
     };
     bless $self, $class;
     return $self;
