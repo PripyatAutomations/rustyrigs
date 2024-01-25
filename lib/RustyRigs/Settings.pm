@@ -435,6 +435,23 @@ sub new {
     );
     $start_locked_toggle->set_can_focus(1);
 
+    my $lock_volume_too_toggle = Gtk3::CheckButton->new();
+    $lock_volume_too_toggle->set_label('Lock volume too?');
+    $lock_volume_too_toggle->set_active( $cfg->{'lock_volume_too'} );
+    $lock_volume_too_toggle->signal_connect(
+        'toggled' => sub {
+            my $button = shift;
+
+            if ( $button->get_active() ) {
+                $tmp_cfg->{'lock_volume_too'} = 1;
+            }
+            else {
+                $tmp_cfg->{'lock_volume_too'} = 0;
+            }
+        }
+    );
+    $lock_volume_too_toggle->set_can_focus(1);
+
     my $window_options_box   = Gtk3::Box->new( 'vertical', 5 );
     my $window_options_label = Gtk3::Label->new('Window Behaviour');
     $window_options_box->pack_start( $window_options_label, FALSE, FALSE, 0 );
@@ -674,6 +691,7 @@ sub new {
     $main_box->pack_start( $rotator_toggle, FALSE, FALSE, 0 );
     $main_box->pack_start( $metric_toggle, FALSE, FALSE, 0 );
     $main_box->pack_start( $start_locked_toggle, FALSE, FALSE, 0 );
+    $main_box->pack_start( $lock_volume_too_toggle, FALSE, FALSE, 0 );
     $config_box->pack_start( $main_box, FALSE, FALSE, 0 );
     $config_box->pack_start( $window_options_box,  FALSE, FALSE, 0 );
     $config_box->pack_start( $meters_button,   FALSE, FALSE, 0 );

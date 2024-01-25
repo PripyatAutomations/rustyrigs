@@ -61,6 +61,7 @@ our $def_cfg = {
     key_vfo             => 'V',
     key_volume          => 'K',
     key_width           => 'Z',
+    lock_volume_too     => 0,                     # 1 will lock volume too
     log_file		=> "none",	  	  # put none here to disable log file
     log_level           => "debug",
     meters_in_main      => 1,			  # 1 will show meters in main window

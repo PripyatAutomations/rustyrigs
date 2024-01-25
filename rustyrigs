@@ -98,6 +98,7 @@ sub restart {
 
 sub toggle_locked {
     my ( $origin, $lv ) = @_;
+    my $lock_volume_too = $$cfg->{'lock_volume_too'};
 
     if ( defined $lv ) {
         $locked = $lv;
@@ -122,12 +123,15 @@ sub toggle_locked {
        $gtk_ui->{'ptt_button'},
        $gtk_ui->{'mode_entry'},
 #       $gtk_ui->{'rf_gain_entry'},
-       $gtk_ui->{'rig_vol_entry'},
        $gtk_ui->{'vfo_freq_entry'},
        $gtk_ui->{'vfo_power_entry'},
 #       $gtk_ui->{'vfo_sel_button'},
        $gtk_ui->{'width_entry'}
     );
+
+#    if ( $lock_volume_too ) {
+       push @widgets, $gtk_ui->{'vol_entry'};
+#    }
 
     if ($locked) {
         foreach my $widget (@widgets) {
