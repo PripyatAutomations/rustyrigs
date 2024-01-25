@@ -1,4 +1,5 @@
 2024-01-24
+	* Added Logview button to main window; it and grid tools button will become toggles
         * Added lock_volume_too setting
 	* Made PTT button turn RED when active, LOCK button too - so they're obvious - cfg:ui_active_button
 	* Various bugs removed

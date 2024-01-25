@@ -1,28 +1,31 @@
-* Implement support for rigctl via websockets over http/quic
-  - Reuse bits from remotepi html5 interface / use bits form here to complete it
-  - Create client library for transporting
-* VOX controls with visibility controlled by Use VOX toggle (cfg:use_vox)
-* SIP stuff
-  - Implement sip_volume to use baresip volume instead of rig speaker
+* Make the Gridtools button hide/show (not just iconify) the window... Same for logview
+* Reduce the amount of rig command sent if possible
+* Find/fix remaining UI bugs
 * FreqInput widget:
   - Fix typing in the first digit appearing in last digit!
     - This appears to be related to the fact we immediately write out to hamlib.
       Using some caching + delay before writing the rig should fix this and the latency problems
       when running without flrig
   - while typing, suspend actions on the field and allow typing normally
-* Find/fix remaining UI bugs
+* Tune button (ON/OFF/AUTO)
+  - Not sure if this can be implemented
+* SIP stuff
+  - Implement sip_volume to use baresip volume instead of rig speaker
+* Add QRZ lookup dialog for basic call info
+  - Button to paste grid into gridtools dialog
+* VOX controls with visibility controlled by Use VOX toggle (cfg:use_vox)
+* Support for multiple VFOs is not yet usable, clean up and fix it
 * Add preamp control
 * Add mic gain control
+* Add a settings dialog for configuring key bindings?
+* Implement ncurses or similar TUI
+  - Apply same keybindings to TUI
+* Add speech for blind users
 * Add signal bar to SWR widget
-* Tune button (ON/OFF/AUTO)
 * Add dialog to spawn modems/etc attached to the audio pipes
   - figure out a way to integrate rnnoise/vst/ladspa plugins into the mic stream for audio processing by script
-* Add speech for blind users
-* Clean up read_rig to update $vfos->{$curr_vfo} and call gtk_ui->update()
 * Move GTK GUI update code from Hamlib.pm to update() in GTK_ui.pm
 * Fix bug where gridtools is shown when main is hidden/show even when hide_gridtools_too is false
-* Make the Gridtools button hide/show (not just iconify) the window...
-* Reduce the amount of rig command sent if possible
 * Add more verification/error checking
   - gridtools - Confirm if grids are valid or not
   - FreqInput - Add upper/lower bounds from querying hamlib
@@ -33,13 +36,9 @@
 * More keyboard controls! make it so you can type to search the boxes
 * Add some holdoff before actually sending commands to the rig, in case of further changes
   - This should (re)start a timer that must elapse before write_rig() is called
-* Support for multiple VFOs is not yet usable
 * Combined meter view for RX/TX in one line
   - Toggle on click with full view
-* Add a settings dialog for configuring key bindings?
-* Add QRZ lookup dialog for basic call info
-  - Button to paste grid into gridtools dialog
-* Implement ncurses or similar TUI
-* Add a WSJT-X listener for displaying the messages from WSJT-X
-  - Add support to re-sending them to other addresses?
 * Maybe move the FM stuff to the right of the rest? or maybe a floating window?
+* Implement support for rigctl via websockets over http/quic
+  - Reuse bits from remotepi html5 interface / use bits form here to complete it
+  - Create client library for transporting

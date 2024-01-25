@@ -302,7 +302,8 @@ sub refresh_available_widths {
     return;
 }
 
-sub open_gridtools {
+# XXX: make this toggle instead of just show
+sub toggle_gridtools {
     if (defined $main::gridtools) {
        my $gt_win = $main::gridtools->{'window'};
        $$gt_win->deiconify();
@@ -312,6 +313,23 @@ sub open_gridtools {
        $main::gridtools = RustyRigs::Gridtools->new();
        my $gt_win = $main::gridtools->{'window'};
        $$gt_win->present();
+    }
+    return;
+}
+
+
+sub toggle_logview {
+    if (defined $main::logview) {
+       my $lv = $main::logview;
+       my $lw = $lv->{'window'};
+       $$lw->deiconify();
+       $$lw->present();
+    }
+    else {
+       $main::logview = RustyRigs::Logview->new();
+       my $lv = $main::logview;
+       my $lw = $lv->{'window'};
+       $$lw->present();
     }
     return;
 }
@@ -1119,13 +1137,24 @@ sub draw_main_win {
     );
     $settings_button->set_tooltip_text("Settings editor");
 
-    my $gridtools_button = Gtk3::Button->new('Gridsquare Tools');
+    my $tool_box = Gtk3::Box->new( 'horizontal', 5);
+    my $gridtools_button = Gtk3::Button->new('Grid Tools');
     $gridtools_button->signal_connect(
         clicked => sub {
-            open_gridtools();
+            toggle_gridtools();
         }
     );
     $gridtools_button->set_tooltip_text("Show gridsquare tools");
+    $tool_box->pack_start( $gridtools_button, TRUE, TRUE, 1 );
+
+    my $logview_button = Gtk3::Button->new('Log Viewer');
+    $logview_button->signal_connect(
+        clicked => sub {
+            toggle_logview();
+        }
+    );
+    $logview_button->set_tooltip_text("Show Logview window");
+    $tool_box->pack_start( $logview_button, TRUE, TRUE, 1 );
 
     my $quit_button = Gtk3::Button->new_with_mnemonic('_Quit');
     $quit_button->signal_connect( clicked => \&close_main_win );
@@ -1134,7 +1163,7 @@ sub draw_main_win {
     # Add widgets and insert the box in the window
     $box->pack_start( $hide_button,     FALSE, FALSE, 5 );
     $box->pack_start( $settings_button, FALSE, FALSE, 5 );
-    $box->pack_start( $gridtools_button, FALSE, FALSE, 5 );
+    $box->pack_start( $tool_box,        FALSE, FALSE, 5 );
     $box->pack_start( $quit_button,     FALSE, FALSE, 5 );
     $w_main->add($box);
 
