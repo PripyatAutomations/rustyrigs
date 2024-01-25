@@ -106,6 +106,7 @@ our $def_cfg = {
     thresh_temp_max     => 140,            # degF
     thresh_volt_min     => 12.8,
     thresh_volt_max     => 15,
+    ui_button_active    => '#900000',      # Active button background color
     ui_alc_alarm_bg     => '#707070',	   # alarm color
     ui_alc_bg           => '#707070',      # ALC meter bg color
     ui_alc_fg           => '#70f070',      # ALC meter active color

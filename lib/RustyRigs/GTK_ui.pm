@@ -342,6 +342,10 @@ sub draw_main_win {
         w_main_ontop(1);
     }
 
+    # try to use configured (ui_button_active) color, if not set or invalid, use a RED
+    my $active_button_bg = Woodpile::Gtk::hex_to_gdk_rgba( $cfg->{"ui_button_active"} );
+    $active_button_bg =  Gtk3::Gdk::RGBA->new( 0.7, 0.0, 0.0, 1.0) if ( !defined $active_button_bg );
+
     ##############################
     # Capture the window signals #
     ##############################
@@ -391,7 +395,8 @@ sub draw_main_win {
     $ptt_button = Gtk3::ToggleButton->new_with_label("PTT ($key_ptt)");
     $initial_bg_color = $ptt_button->get_style_context->get_background_color('normal');
     # normal  active  prelight  selected  insensitive  inconsistent  focused  backdrop  dir-ltr  dir-rtl  link  visited  checked  drop-active
-    $ptt_button->override_background_color('checked',      Gtk3::Gdk::RGBA->new( 0.7, 0.0, 0.0, 1.0) );
+    $ptt_button->override_background_color('checked', $active_button_bg );
+      
     $ptt_button->signal_connect(
         toggled => sub {
             my ( $self ) = @_;
@@ -1024,12 +1029,14 @@ sub draw_main_win {
 
     # Create a toggle button to represent the lock state
     my $key_lock = $cfg->{'key_lock'};
-    $lock_button = Gtk3::ToggleButton->new_with_label("Lock ($key_lock)");
+    $lock_button = Gtk3::ToggleButton->new_with_label(" Lock ($key_lock)" );
+    $lock_button->override_background_color( 'checked', $active_button_bg );
+
     # lock things
     my $auto_lock = $cfg->{'start_locked'};
-    if ($auto_lock) {
-        $lock_button->set_active($main::locked);
-        main::toggle_locked("startup", TRUE);
+    if ( $auto_lock ) {
+        $lock_button->set_active( $main::locked );
+        main::toggle_locked( "startup", TRUE );
     }
     $lock_button->signal_connect(
         toggled => sub {
@@ -1044,8 +1051,8 @@ sub draw_main_win {
         sub {
             my ( $self ) = @_;
             my $val = $lock_button->get_active();
-            main::toggle_locked("hotkey", !$main::locked);
-            $lock_button->set_active(!$val);
+            main::toggle_locked( "hotkey", !$main::locked );
+            $lock_button->set_active( !$val );
         }
     );
 

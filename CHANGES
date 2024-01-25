@@ -1,5 +1,5 @@
 2024-01-24
-	* Made PTT button turn RED when active
+	* Made PTT button turn RED when active, LOCK button too - so they're obvious - cfg:ui_active_button
 	* Various bugs removed
 	* Fixed various label updates and started working on reducing unneeded updates/writes
 	* Improved FreqInput to allow typing
