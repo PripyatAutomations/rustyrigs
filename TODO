@@ -16,6 +16,7 @@
 * Add signal bar to SWR widget
 * Tune button (ON/OFF/AUTO)
 * Add dialog to spawn modems/etc attached to the audio pipes
+  - figure out a way to integrate rnnoise/vst/ladspa plugins into the mic stream for audio processing by script
 * Add speech for blind users
 * Clean up read_rig to update $vfos->{$curr_vfo} and call gtk_ui->update()
 * Move GTK GUI update code from Hamlib.pm to update() in GTK_ui.pm
