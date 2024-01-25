@@ -395,7 +395,7 @@ sub draw_main_win {
     $ptt_button = Gtk3::ToggleButton->new_with_label("PTT ($key_ptt)");
     $initial_bg_color = $ptt_button->get_style_context->get_background_color('normal');
     # normal  active  prelight  selected  insensitive  inconsistent  focused  backdrop  dir-ltr  dir-rtl  link  visited  checked  drop-active
-    $ptt_button->override_background_color('checked', $active_button_bg );
+    $ptt_button->override_background_color( 'checked', $active_button_bg );
       
     $ptt_button->signal_connect(
         toggled => sub {
@@ -893,18 +893,18 @@ sub draw_main_win {
     my $dnr_label =
       Gtk3::Label->new( 'DSP NR (' . $cfg->{'key_dnr'} . ')' );
     $dnr_entry = Gtk3::Scale->new_with_range( 'horizontal', 0, 15, 1 );
-    $dnr_entry->set_digits(0);
-    $dnr_entry->set_draw_value(TRUE);
-    $dnr_entry->set_value_pos('right');
+    $dnr_entry->set_digits( 0 );
+    $dnr_entry->set_draw_value( TRUE );
+    $dnr_entry->set_value_pos( 'right' );
     $dnr_entry->set_value( $act_vfo->{'dnr'} );
-    $dnr_entry->set_tooltip_text("DSP Noise Reduction");
-    $dnr_entry->set_sensitive(0);
-    $dnr_entry->set_property('draw-value' => FALSE);
-    my $dnr_box = Gtk3::Box->new('horizontal', 5);
-    my $dnr_val = Gtk3::Label->new("  0%");
-    $dnr_val->set_alignment(1, 0.5);
-    $dnr_box->pack_start($dnr_entry, TRUE, TRUE, 5);
-    $dnr_box->pack_start($dnr_val, FALSE, TRUE, 5);
+    $dnr_entry->set_tooltip_text("DSP Noise Reduction" );
+    $dnr_entry->set_sensitive( 0 );
+    $dnr_entry->set_property( 'draw-value' => FALSE );
+    my $dnr_box = Gtk3::Box->new( 'horizontal', 5 );
+    my $dnr_val = Gtk3::Label->new( "  0%" );
+    $dnr_val->set_alignment( 1, 0.5 );
+    $dnr_box->pack_start( $dnr_entry, TRUE, TRUE, 5 );
+    $dnr_box->pack_start( $dnr_val, FALSE, TRUE, 5 );
 
     # XXX: ACCEL-Replace these with a global function
     $w_main_accel->connect(
@@ -918,7 +918,7 @@ sub draw_main_win {
     $dnr_entry->signal_connect(
         value_changed => sub {
             my ( $class ) = @_;
-            if (!$main::rig_p->is_busy()) {
+            if ( !$main::rig_p->is_busy() ) {
                my $curr_vfo = $cfg->{'active_vfo'};
                my $value    = $dnr_entry->get_value();
                $act_vfo->{'dnr'} = $value;
@@ -935,16 +935,16 @@ sub draw_main_win {
         'horizontal',            $act_vfo->{'min_power'},
         $act_vfo->{'max_power'}, $act_vfo->{'power_step'}
     );
-    $vfo_power_entry->set_digits(0);
-    $vfo_power_entry->set_draw_value(TRUE);
-    $vfo_power_entry->set_value_pos('right');
-    $vfo_power_entry->set_tooltip_text( "Please Click and DRAG to change TX power");
-    $vfo_power_entry->set_property('draw-value' => FALSE);
-    my $vfo_power_box = Gtk3::Box->new('horizontal', 5);
+    $vfo_power_entry->set_digits( 0 );
+    $vfo_power_entry->set_draw_value( TRUE );
+    $vfo_power_entry->set_value_pos( 'right' );
+    $vfo_power_entry->set_tooltip_text( "Please Click and DRAG to change TX power" );
+    $vfo_power_entry->set_property( 'draw-value' => FALSE );
+    my $vfo_power_box = Gtk3::Box->new( 'horizontal', 5 );
     $vfo_power_val = Gtk3::Label->new( sprintf("%*sW", 3, $act_vfo->{'power'} ) );
-    $vfo_power_val->set_alignment(1, 0.5);
-    $vfo_power_box->pack_start($vfo_power_entry, TRUE, TRUE, 5);
-    $vfo_power_box->pack_start($vfo_power_val, FALSE, TRUE, 5);
+    $vfo_power_val->set_alignment( 1, 0.5 );
+    $vfo_power_box->pack_start( $vfo_power_entry, TRUE, TRUE, 5 );
+    $vfo_power_box->pack_start( $vfo_power_val, FALSE, TRUE, 5 );
 
     # XXX: ACCEL-Replace these with a global function
     $w_main_accel->connect(
@@ -958,8 +958,8 @@ sub draw_main_win {
 
     $vfo_power_entry->signal_connect(
         value_changed => sub {
-            if ($main::hamlib_initialized && !$main::rig_p->is_busy()) {
-               my $value  = int($vfo_power_entry->get_value() + 0.5);
+            if ( $main::hamlib_initialized && !$main::rig_p->is_busy() ) {
+               my $value  = int( $vfo_power_entry->get_value() + 0.5 );
                my $oldval = $act_vfo->{'power'};
                my $change = 0;
                my $step   = $act_vfo->{'power_step'};
@@ -984,8 +984,8 @@ sub draw_main_win {
 
 #               $main::log->Log("ui", "debug", "change power: dragging: $dragging - change: $change. val $value oldval: $oldval hlval: $hlval");
 
-               if ( !$power_changing && $dragging < 2 ) {
-                   $main::log->Log("gtkui", "bug", "rig_power widget dragging: $dragging < 2, not changing value");
+               if ( !$power_changing && $dragging < 2  ) {
+                   $main::log->Log( "gtkui", "bug", "rig_power widget dragging: $dragging < 2, not changing value" );
                    return FALSE;
                }
 
@@ -994,14 +994,14 @@ sub draw_main_win {
                    my $rp = $main::rig_p->{'gui_applying_changes'};
                    $$rp = TRUE;
                    $act_vfo->{'power'} = $value;
-                   $main::log->Log("gtkui", "info", "applying power: $value (change: $change, hlval: $hlval)");
+                   $main::log->Log( "gtkui", "info", "applying power: $value (change: $change, hlval: $hlval)" );
                    my $rig = $main::rig;
-                   $rig->set_level($Hamlib::RIG_LEVEL_RFPOWER, $hlval);
-                   $vfo_power_val->set_text($value . "W");
+                   $rig->set_level( $Hamlib::RIG_LEVEL_RFPOWER, $hlval );
+                   $vfo_power_val->set_text( $value . "W" );
                    $$rp = FALSE;
                }
                else {    # reject change otherwise
-                   $main::log->Log("gtkui", "core", "rig_power widget: rejecting power change $change in excess of limit $max_change");
+                   $main::log->Log( "gtkui", "core", "rig_power widget: rejecting power change $change in excess of limit $max_change" );
                    return FALSE;
                }
                $power_changing = FALSE;
@@ -1013,7 +1013,7 @@ sub draw_main_win {
     $vfo_power_entry->signal_connect(
         'motion-notify-event' => sub {
             my $rig_p = $main::rig_p;
-            if (defined $rig_p && !$rig_p->is_busy()) {
+            if ( defined $rig_p && !$rig_p->is_busy() ) {
                my ( $widget, $event ) = @_;
                $dragging = 2;
                return FALSE;
@@ -1029,18 +1029,21 @@ sub draw_main_win {
 
     # Create a toggle button to represent the lock state
     my $key_lock = $cfg->{'key_lock'};
-    $lock_button = Gtk3::ToggleButton->new_with_label(" Lock ($key_lock)" );
+    $lock_button = Gtk3::ToggleButton->new_with_label( " Lock ($key_lock)" );
     $lock_button->override_background_color( 'checked', $active_button_bg );
 
     # lock things
     my $auto_lock = $cfg->{'start_locked'};
+    my $lock_volume_too = $cfg->{'lock_volume_too'};
+
     if ( $auto_lock ) {
         $lock_button->set_active( $main::locked );
+        $vol_entry->set_active( 1 ) if ( $lock_volume_too );
         main::toggle_locked( "startup", TRUE );
     }
     $lock_button->signal_connect(
         toggled => sub {
-            main::toggle_locked("button", $lock_button->get_active());
+            main::toggle_locked( "button", $lock_button->get_active() );
         }
     );
 
