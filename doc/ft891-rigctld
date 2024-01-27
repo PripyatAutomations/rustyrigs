@@ -1,0 +1,1 @@
+rigctld -m 1036 -P RIG -p /dev/ttyUSB0  -s 38400
