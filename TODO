@@ -1,3 +1,5 @@
+* Fix the dragging check around POWER slider and see how to make it keyboard friendly
+  - right now it insists on the slider being dragged, to prevent accidental power excursions
 * Make the Gridtools button hide/show (not just iconify) the window... Same for logview
   - Also maybe we should add an option to toggle allowing to close the window vs only iconify
 * Reduce the amount of rig command sent if possible
