@@ -1116,9 +1116,6 @@ sub draw_main_win {
 
     # Add the Buttons
     ##################
-    my $hide_button = Gtk3::Button->new_with_mnemonic('_Hide');
-    $hide_button->signal_connect( clicked => \&w_main_hide );
-    $hide_button->set_tooltip_text("Minimize to the system try");
 
     my $settings_button = Gtk3::Button->new_with_mnemonic('_Settings');
     $settings_button->signal_connect(
@@ -1147,15 +1144,20 @@ sub draw_main_win {
     $logview_button->set_tooltip_text("Show Logview window");
     $tool_box->pack_start( $logview_button, TRUE, TRUE, 1 );
 
+    my $hide_button = Gtk3::Button->new_with_mnemonic('_Hide');
+    $hide_button->signal_connect( clicked => \&w_main_hide );
+    $hide_button->set_tooltip_text("Minimize to the system try");
     my $quit_button = Gtk3::Button->new_with_mnemonic('_Quit');
     $quit_button->signal_connect( clicked => \&close_main_win );
     $quit_button->set_tooltip_text("Exit the program");
+    my $hidequit_box = Gtk3::Box->new( 'horizontal', 5);
+    $hidequit_box->pack_start( $hide_button, TRUE, TRUE, 5 );
+    $hidequit_box->pack_start( $quit_button, TRUE, TRUE, 5 );
 
     # Add widgets and insert the box in the window
-    $box->pack_start( $hide_button,     FALSE, FALSE, 5 );
     $box->pack_start( $settings_button, FALSE, FALSE, 5 );
     $box->pack_start( $tool_box,        FALSE, FALSE, 5 );
-    $box->pack_start( $quit_button,     FALSE, FALSE, 5 );
+    $box->pack_start( $hidequit_box,    FALSE, FALSE, 5 );
     $w_main->add($box);
 
     $w_main->signal_connect(

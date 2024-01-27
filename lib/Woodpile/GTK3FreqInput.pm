@@ -148,6 +148,8 @@ sub shift_focus {
 # Draw a single digit widget
 sub draw_digit {
    my ( $self, $digit, $places, $default ) = @_;
+   my $cfg = $main::cfg;
+
    my $box = Gtk3::Box->new('vertical', 0);
    my $up_btn = Gtk3::Button->new('+');
    my $dwn_btn = Gtk3::Button->new('-');
@@ -157,6 +159,7 @@ sub draw_digit {
    $digit_entry->set_max_length(1);
    $digit_entry->set_text($default);
    $digit_entry->set_alignment(0.5); 
+   $digit_entry->set_width_chars(4);
 
    $digit_entry->signal_connect(
       changed => sub {
@@ -264,6 +267,24 @@ sub draw_digit {
    $box->pack_start( $digit_entry, FALSE, FALSE, 0 );
    $box->pack_start( $dwn_btn, FALSE, FALSE, 0 );
 
+   # Figure out which digit group this digit is in from it's digit value
+   my $ghz = $$cfg->{'ui_freqinput_ghz_bg'};
+   my $mhz = $$cfg->{'ui_freqinput_mhz_bg'};
+   my $khz = $$cfg->{'ui_freqinput_khz_bg'};
+   my $hz = $$cfg->{'ui_freqinput_hz_bg'};
+
+   my $bg = $hz;
+   if ( $digit >= 10 ) {
+      $bg = $ghz;
+   } elsif ( $digit >= 7 ) {
+      $bg = $mhz;
+   } elsif ( $digit >= 4 ) {
+      $bg = $khz;
+   }
+
+   my $color = Woodpile::Gtk::hex_to_gdk_rgba( $bg );
+   $digit_entry->override_background_color('normal', $color);
+   # build the object
    my $obj = {
       box => $box,
       down => $dwn_btn,
@@ -297,7 +318,7 @@ sub new {
        my $new_digit = $class->draw_digit( $i, $places, 0 );
        my $digitbox = $new_digit->{'box'};
        if (defined $digitbox) {
-          $widget_box->pack_start( $digitbox, FALSE, FALSE, 0 );
+          $widget_box->pack_start( $digitbox, FALSE, FALSE, 5 );
        }
        
        # XXX: Every 3 digits, we should slightly change the background color to group digits
