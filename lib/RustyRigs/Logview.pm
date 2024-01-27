@@ -70,15 +70,15 @@ sub save_log {
 }
 
 sub upload_to_termbin {
-    my ( $self, $log_buffer ) = @_;
+    my ($self, $log_buffer) = @_;
     my $cfg = $main::cfg;
     my $timeout = $$cfg->{'termbin_timeout'};
-    $timeout = 60 if ( !$timeout );
-    my $url;	# result URL
+    $timeout = 60 if (!$timeout);
+    my $url;    # result URL
 
-    if ( !defined( $log_buffer ) ) {
-       print "upload_to_termbin requires a log_buffer\n";
-       return;
+    if (!defined($log_buffer)) {
+        print "upload_to_termbin requires a log_buffer\n";
+        return;
     }
 
     my $win = $self->{'window'};
@@ -90,57 +90,60 @@ sub upload_to_termbin {
         "Upload may take a minute..."
     );
 
+
     # Connect the response signal to close the dialog
     $dialog->signal_connect(response => sub {
         my ($dialog, $response_id) = @_;
         $dialog->destroy();
-        eval {
-            # Set a 30 second timeout on the socket operations
-            local $SIG{ALRM} = sub { die "Timeout\n" };
-            alarm $timeout;
-
-            my $socket = IO::Socket::INET->new(
-                PeerAddr => 'termbin.com',
-                PeerPort => 9999,
-                Proto    => 'tcp',
-            );
-            die "Could not create socket: $!" unless $socket;
-
-            # Upload the log     
-            my $buffer = join( "", @log_buffer );
-            my $app_name = $main::app_name;
-            my $app_version = $main::app_ver;
-            my $datestamp = strftime( "%Y/%m/%d %H:%M:%S", localtime );
-            print $socket "Log exported by $app_name ($app_version) at $datestamp\n";
-            print $socket $buffer;
-            print $socket "\r\n\r\n";
-
-            # Get the server's response
-            my $response = <$socket>;
-
-            # Extract the URL from the response
-            if ( $response =~ m/^(https?:\/\/\S+)/ ) {
-                $url = $1;
-                print "Your logfile has been uploaded to termbin and can be viewed at the following URL: $url\n";
-            } else {
-                print "Failed to get Termbin URL\n";
-            }
-
-            alarm 0;	# clear alarm
-        };
-
-        if ( $@ ) {
-            if ( $@ eq "Timeout\n" ) {
-                print "Timed out after $timeout seconds\n";
-            } else {
-                $main::log->Log( "core", "err", "Unknown error in Logview::upload_to_termin -- $@" );
-            }
-        }
     });
 
-    $main::log->Log( "core", "notice", "Uploaded log successfully to $url" );
-    # Show the dialog
-    $dialog->show_all();
+    eval {
+        # Set a 30-second timeout on the socket operations
+        local $SIG{ALRM} = sub { die "Timeout\n" };
+        alarm $timeout;
+
+        # Show the dialog
+        $dialog->show_all();
+
+        my $socket = IO::Socket::INET->new(
+            PeerAddr => 'termbin.com',
+            PeerPort => 9999,
+            Proto    => 'tcp',
+        );
+        die "Could not create socket: $!" unless $socket;
+
+        # Upload the log     
+        my $buffer = join("", @log_buffer);
+        my $app_name = $main::app_name;
+        my $app_version = $main::app_version;
+        my $datestamp = strftime("%Y/%m/%d %H:%M:%S", localtime);
+        print $socket "Log exported by $app_name ($app_version) at $datestamp\n";
+        print $socket $buffer;
+        print $socket "\r\n\r\n";
+
+        # Get the server's response
+        my $response = <$socket>;
+
+        # Extract the URL from the response
+        if ($response =~ m/^(https?:\/\/\S+)/) {
+            $url = $1;
+            $main::log->Log("core", "notice", "Uploaded log successfully to $url");
+        } else {
+            print "Failed to get Termbin URL\n";
+        }
+
+        $dialog->destroy();
+        alarm 0;    # clear alarm
+    };
+
+    if ($@) {
+        if ($@ eq "Timeout\n") {
+            print "Timed out after $timeout seconds\n";
+        } else {
+            $main::log->Log("core", "err", "Unknown error in Logview::upload_to_termin -- $@");
+        }
+    }
+
     return $url;
 }
 

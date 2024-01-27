@@ -249,7 +249,7 @@ sub new {
     # my qth box
     my $qth_box = Gtk3::Box->new('horizontal', 5);
     # My gridsquare
-    my $qth_label = Gtk3::Label->new('My QTH');
+    my $qth_label = Gtk3::Label->new(' My QTH');
     $qth_entry = Gtk3::Entry->new();
     $qth_entry->set_text( uc($cfg->{'my_qth'}) );
     $qth_entry->set_tooltip_text("Maidenhead gridsquare of the rig");
@@ -323,6 +323,10 @@ sub new {
     my $core_debug_label = Gtk3::Label->new('Core log level');
     $core_debug = Gtk3::ComboBoxText->new();
     $core_debug->set_tooltip_text("Select the core log level");
+    my $core_debug_box = Gtk3::Box->new( 'horizontal', 5 );
+    $core_debug_box->pack_start( $core_debug_label, TRUE, TRUE, 5 );
+    $core_debug_box->pack_start( $core_debug,       TRUE, TRUE, 5 );
+
     my $curr_cl_dbg = -1;
     my $i           = 0;
     for my $cl_dbg_opt ( keys %Woodpile::Log::log_levels ) {
@@ -347,6 +351,10 @@ sub new {
     my $hamlib_debug_label = Gtk3::Label->new('Hamlib log level');
     $hamlib_debug = Gtk3::ComboBoxText->new();
     $hamlib_debug->set_tooltip_text("Select the logging level of hamlib");
+    my $hamlib_debug_box = Gtk3::Box->new( 'horizontal', 5 );
+    $hamlib_debug_box->pack_start( $hamlib_debug_label, TRUE, TRUE, 5 );
+    $hamlib_debug_box->pack_start( $hamlib_debug,       TRUE, TRUE, 5 );
+
     $i = 0;
     my $cur_hl_dbg = -1;
     for my $hl_dbg_opt ( keys %RustyRigs::Hamlib::hamlib_debug_levels ) {
@@ -681,10 +689,8 @@ sub new {
     $main_box->pack_start( $poll_interval_entry, FALSE, FALSE, 0 );
     $main_box->pack_start( $poll_tray_label,     FALSE, FALSE, 0 );
     $main_box->pack_start( $poll_tray_entry,     FALSE, FALSE, 0 );
-    $main_box->pack_start( $core_debug_label,    FALSE, FALSE, 0 );
-    $main_box->pack_start( $core_debug,          FALSE, FALSE, 0 );
-    $main_box->pack_start( $hamlib_debug_label,  FALSE, FALSE, 0 );
-    $main_box->pack_start( $hamlib_debug,        FALSE, FALSE, 0 );
+    $main_box->pack_start( $core_debug_box,      FALSE, FALSE, 0 );
+    $main_box->pack_start( $hamlib_debug_box,    FALSE, FALSE, 0 );
     $main_box->pack_start( $amp_toggle, FALSE, FALSE, 0 );
     $main_box->pack_start( $rotator_toggle, FALSE, FALSE, 0 );
     $main_box->pack_start( $metric_toggle, FALSE, FALSE, 0 );

@@ -46,3 +46,7 @@
   - Reuse bits from remotepi html5 interface / use bits form here to complete it
   - Create client library for transporting
 * Try to sort out the keybindings into a more consistent/intuitive arrangement
+* Maybe add some sort of stand alone program which can connect audio from a web sdr instead of remote rig?
+   - WebSDR
+   - KiwiSDR
+   - OpenWebRX

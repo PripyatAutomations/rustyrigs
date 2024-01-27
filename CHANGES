@@ -1,5 +1,6 @@
 2024-01-27
-	* Added background color selection for digit grouping in FreqInputs
+	* Fixed some bugs in logview and settings dialogs
+	* Added digit grouping with adjustable background colors
 	* changes in progress to baresip wrapper
 	* Work on logview
           - added buttons for clear/upload to termbin/hide/close

@@ -34,9 +34,9 @@ sub save {
 
 # Function to handle color selection
 sub color_picker {
-    my ($parent_window, $default_color) = @_;
+    my ($parent_window, $name, $default_color) = @_;
 
-    my $color_dialog = Gtk3::ColorSelectionDialog->new('Choose Color');
+    my $color_dialog = Gtk3::ColorSelectionDialog->new("Choose Color: $name");
     $color_dialog->set_modal(1);
     $color_dialog->present();
     $color_dialog->set_transient_for($parent_window);
@@ -167,11 +167,11 @@ sub new {
          button_press_event => sub {
             my ($self, $event) = @_;
             if ($event->type eq 'button-press') {
-               my $def_color = Woodpile::hex_to_gdk_rgba($m_bg);
-               my $color = color_picker($color_win, $def_color);
+               my $def_color = Woodpile::Gtk::hex_to_gdk_rgba($m_bg);
+               my $color = color_picker($color_win, "${m_name} background", $def_color);
                if ($color) {
                   $self->set_text($color->to_string());
-                  $tmp_cfg->{'ui_' . $m_name . '_bg'} = Woodpile::gdk_rgb_to_hex($color);
+                  $tmp_cfg->{'ui_' . $m_name . '_bg'} = Woodpile::Gtk::gdk_rgb_to_hex($color);
                }
             }
          }
@@ -198,11 +198,11 @@ sub new {
          button_press_event => sub {
             my ($self, $event) = @_;
             if ($event->type eq 'button-press') {
-               my $def_color = Woodpile::hex_to_gdk_rgba($m_bg);
-               my $color = color_picker($color_win, $def_color);
+               my $def_color = Woodpile::Gtk::hex_to_gdk_rgba($m_bg);
+               my $color = color_picker($color_win, "${m_name} ALARM", $def_color);
                if ($color) {
                   $self->set_text($color->to_string());
-                  $tmp_cfg->{'ui_' . $m_name . '_alarm_bg'} = Woodpile::gdk_rgb_to_hex($color);;
+                  $tmp_cfg->{'ui_' . $m_name . '_alarm_bg'} = Woodpile::Gtk::gdk_rgb_to_hex($color);;
                }
             }
          }
@@ -229,11 +229,11 @@ sub new {
          button_press_event => sub {
             my ($self, $event) = @_;
             if ($event->type eq 'button-press') {
-               my $def_color = Woodpile::hex_to_gdk_rgba($m_bg);
-               my $color = color_picker($color_win, $def_color);
+               my $def_color = Woodpile::Gtk::hex_to_gdk_rgba($m_bg);
+               my $color = color_picker($color_win, "${m_name} foreground", $def_color);
                if ($color) {
                   $self->set_text($color->to_string());
-                  $tmp_cfg->{'ui_' . $m_name . '_fg'} = Woodpile::gdk_rgb_to_hex($color);
+                  $tmp_cfg->{'ui_' . $m_name . '_fg'} = Woodpile::Gtk::gdk_rgb_to_hex($color);
                }
             }
          }
@@ -243,7 +243,7 @@ sub new {
 
       # text color
       my $text_box = Gtk3::Box->new('horizontal', 5);
-      my $text_label = Gtk3::Label->new("Text:");
+      my $text_label = Gtk3::Label->new("Text");
       $text_box->pack_start($text_label, TRUE, TRUE, 0);
 
       my $text_input = Gtk3::Entry->new();
@@ -260,11 +260,11 @@ sub new {
          button_press_event => sub {
             my ($self, $event) = @_;
             if ($event->type eq 'button-press') {
-               my $def_color = Woodpile::hex_to_gdk_rgba($m_bg);
-               my $color = color_picker($color_win, $def_color);
+               my $def_color = Woodpile::Gtk::hex_to_gdk_rgba($m_bg);
+               my $color = color_picker($color_win, "${m_name} text input", $def_color);
                if ($color) {
                   $self->set_text($color->to_string());
-                  $tmp_cfg->{'ui_' . $m_name . '_text'} = Woodpile::gdk_rgb_to_hex($color);
+                  $tmp_cfg->{'ui_' . $m_name . '_text'} = Woodpile::Gtk::gdk_rgb_to_hex($color);
                }
             }
          }
@@ -333,7 +333,6 @@ sub new {
    $color_win->show_all();
 
    my $us_tmp_cfg = $RustyRigs::Settings::tmp_cfg;
-   print "utc: " . Dumper($us_tmp_cfg) . "\n";
 
    my $self = {
       us_tmp_cfg => \$us_tmp_cfg,

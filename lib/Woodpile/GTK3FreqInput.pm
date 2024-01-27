@@ -1,4 +1,5 @@
 # this will draw a GTK3 widget suitable for frequency entry
+# XXX: Add error checking and some defaults to this, so can be used in other projects
 package Woodpile::GTK3FreqInput;
 use Gtk3;
 use Glib qw(TRUE FALSE);
@@ -43,8 +44,6 @@ sub set_value {
     my $val_len = length( $val_str );
 
     if (!defined $last_value || $last_value != $value) {
-       print "set_value: $value\n";
-
        if ( $val_len > $vfo_digits ) {
           die "FreqInput widget can't handle numbers longer than $vfo_digits long. Input |$val_str| is $val_len long! Either increase the size when creating widget or truncate input! Called by " . ( caller(1) )[3] . "\n";
        }
@@ -109,7 +108,6 @@ sub dec_digit {
     my $vfos     = $RustyRigs::Hamlib::vfos;
     my $vfo      = $vfos->{$curr_vfo};
     my $freq     = $vfo->{'freq'};
-    print "digit: " . Dumper($digit) . ", widget: " . Dumper($widget) . "\n";
     my $mult     = (10**$digit)/10;
     my $new_val = $freq - $mult;
 
@@ -234,35 +232,42 @@ sub draw_digit {
       }
    );
 
-   $dwn_btn->signal_connect( activate => sub {
-     my ( $widget ) = @_;
-     if ( $main::locked ) {
-        return TRUE;
-     }
-     $self->dec_digit( $digit );
-   });
+#   $dwn_btn->signal_connect( activate => sub {
+#       my ( $widget ) = @_;
+#       if ( $main::locked ) {
+#          return TRUE;
+#       }
+#       $self->dec_digit( $digit );
+#   });
    $dwn_btn->signal_connect( clicked => sub {
-     my ( $widget ) = @_;
-     if ( $main::locked ) {
-        return TRUE;
-     }
-     $self->dec_digit( $digit );
+       my ( $widget ) = @_;
+       if ( $main::locked ) {
+          return TRUE;
+       }
+       $self->dec_digit( $digit );
    });
-   $up_btn->signal_connect( activate => sub {
-     my ( $widget ) = @_;
-     if ( $main::locked ) {
-        return TRUE;
-     }
-     $self->inc_digit( $digit );
-   });
+#   $up_btn->signal_connect( activate => sub {
+#       my ( $widget ) = @_;
+#       if ( $main::locked ) {
+#          return TRUE;
+#       }
+#       $self->inc_digit( $digit );
+#   });
    $up_btn->signal_connect( clicked => sub {
-     my ( $widget ) = @_;
-     if ( $main::locked ) {
-        return TRUE;
-     }
-     $self->inc_digit( $digit );
+       my ( $widget ) = @_;
+       if ( $main::locked ) {
+          return TRUE;
+       }
+       $self->inc_digit( $digit );
    });
-
+   $dwn_btn->signal_connect( 'focus-in-event' => sub {
+       print "back (D)\n";
+       $digit_entry->focus();
+   });
+   $up_btn->signal_connect( 'focus-in-event' => sub {
+       print "back (U)\n";
+       $digit_entry->focus();
+   });
    $box->pack_start( $up_btn, FALSE, FALSE, 0 );
    $box->pack_start( $digit_entry, FALSE, FALSE, 0 );
    $box->pack_start( $dwn_btn, FALSE, FALSE, 0 );
