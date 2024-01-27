@@ -19,6 +19,7 @@ use FindBin;
 # project settings
 our $app_name         = 'rustyrigs';
 our $app_descr        = "GTK frontend for rigctld";
+our $app_version      = "20240127";
 our $default_cfg_file = $ENV{"HOME"} . "/.config/${app_name}.yaml";
 our $cfg_file         = $default_cfg_file;
 

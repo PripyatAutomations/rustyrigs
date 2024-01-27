@@ -53,9 +53,10 @@ sub save_log {
         if ( defined $fh ) {
            my $buffer = join( "", @log_buffer );
            my $app_name = $main::app_name;
+           my $app_version = $main::app_ver;
            my $datestamp = strftime( "%Y/%m/%d %H:%M:%S", localtime );
 
-           print $fh "Log exported by $app_name at $datestamp\n";
+           print $fh "Log exported by $app_name ($app_version) at $datestamp\n";
            print $fh $buffer . "\n";
         } else {
            print "unable to open log file $save_file: $!\n";
@@ -70,7 +71,9 @@ sub save_log {
 
 sub upload_to_termbin {
     my ( $self, $log_buffer ) = @_;
-    my $timeout = 10;
+    my $cfg = $main::cfg;
+    my $timeout = $$cfg->{'termbin_timeout'};
+    $timeout = 60 if ( !$timeout );
     my $url;	# result URL
 
     if ( !defined( $log_buffer ) ) {
@@ -106,8 +109,9 @@ sub upload_to_termbin {
             # Upload the log     
             my $buffer = join( "", @log_buffer );
             my $app_name = $main::app_name;
+            my $app_version = $main::app_ver;
             my $datestamp = strftime( "%Y/%m/%d %H:%M:%S", localtime );
-            print $socket "Log exported by $app_name at $datestamp\n";
+            print $socket "Log exported by $app_name ($app_version) at $datestamp\n";
             print $socket $buffer;
             print $socket "\r\n\r\n";
 
@@ -117,7 +121,7 @@ sub upload_to_termbin {
             # Extract the URL from the response
             if ( $response =~ m/^(https?:\/\/\S+)/ ) {
                 $url = $1;
-                print "Termbin URL: $url\n";
+                print "Your logfile has been uploaded to termbin and can be viewed at the following URL: $url\n";
             } else {
                 print "Failed to get Termbin URL\n";
             }

@@ -71,6 +71,8 @@ our $def_cfg = {
     poll_interval       => 250,                   # every 1/4 sec
     poll_tray_every     => 4,                     # at 1/3th the rate of normal (every 1 sec)
     res_dir             => "./res",
+    qrz_user            => "N0CALL",       # username on qrz.com
+    qrz_api_key         => "none",
     scrollback_lines    => 200,		   # number of lines to hold in logview buffer
     sip_au_indev        => "pipewire",	   # microphone device
     sip_au_outdev       => "pipewire",     # headphone/speaker device
@@ -95,6 +97,7 @@ our $def_cfg = {
     show_elev_in_gridtools => 1,	   # show elevation control in grid tools?
     start_locked        => 1,		   # 1 will start with controls locked
     stay_hidden         => 0,
+    termbin_timeout     => 60,             # timeout for termbin uploads in seconds
     thresh_alc_min      => 0,
     thresh_alc_max      => 1,
     thresh_comp_min     => 0,
@@ -146,6 +149,7 @@ our $def_cfg = {
     use_rotator             => 0,              # 1 will enable rotator support
     use_metric              => 0,	       # 1 will use metric (miles, etc)
     use_sip                 => 0,              # 1 will enable experimental baresip code
+    use_qrz                 => 0,              # 1 will enable QRZ lookups
 
     # misc
     vfo_digits              => 8,              # digits to display on VFO

@@ -1,4 +1,5 @@
 * Make the Gridtools button hide/show (not just iconify) the window... Same for logview
+  - Also maybe we should add an option to toggle allowing to close the window vs only iconify
 * Reduce the amount of rig command sent if possible
 * Find/fix remaining UI bugs
 * FreqInput widget:
