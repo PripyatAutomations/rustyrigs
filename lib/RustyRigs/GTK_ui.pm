@@ -334,6 +334,26 @@ sub toggle_logview {
     return;
 }
 
+# XXX: move to Hamlib.pm
+sub apply_volume {
+    my ( $vol ) = @_;
+    my $rig_p = $main::rig_p;
+    my $rig = $rig_p->{'rig'};
+    $rig_p->{'volume'} = $vol;
+
+    my $rp = $main::rig_p->{'gui_applying_changes'};
+    $$rp = TRUE;
+    if ( $main::hamlib_initialized && !$main::rig_p->is_busy() ) {
+       my $vfo_name = RustyRigs::Hamlib::vfo_name( $rig->get_vfo() );
+       $rig->set_level( $Hamlib::RIG_LEVEL_AF, $vol / 100);
+       my $tmp_vol = int( $rig_p->{'volume'} );
+       my $val = sprintf( "%*s%%", 3, $vol );
+       $vol_val->set_label( $val );
+    }
+    $$rp = FALSE;
+    return;
+}
+
 # initial bg color of the PTT button, so we can set it red during TX
 our $initial_bg_color;
 sub draw_main_win {
@@ -631,42 +651,14 @@ sub draw_main_win {
     $vol_box->pack_start ($vol_val, FALSE, TRUE, 5 );
 
     $vol_entry->signal_connect(
-        button_press_event => sub {
-            my $rp = $main::rig_p->{'gui_applying_changes'};
-            $$rp = TRUE;
-            return FALSE;
-        }
-    );
-    $vol_entry->signal_connect(
-        button_release_event => sub {
-            my $rp = $main::rig_p->{'gui_applying_changes'};
-            $$rp = FALSE;
-            return FALSE;
-        }
-    );
-    $vol_entry->signal_connect(
         value_changed => sub {
             my ( $widget ) = @_;
             if (time - $started < 2) {
                return;
             }
-            my $rig_p = $main::rig_p;
-            my $rig = $rig_p->{'rig'};
-            my $rp = $main::rig_p->{'gui_applying_changes'};
-            $$rp = TRUE;
             my $vol = int( $widget->get_value() + 0.5 );
 
-            $rig_p->{'volume'} = $vol;
-            my $tmp_vol = $vol / 100;
-            if ( $main::hamlib_initialized && !$main::rig_p->is_busy() ) {
-               my $vfo_name = RustyRigs::Hamlib::vfo_name( $rig->get_vfo() );
-               $main::log->Log( "rig", "info", "Set volume to: $vol on VFO " . $vfo_name );
-               $rig->set_level( $Hamlib::RIG_LEVEL_AF, $vol / 100 );
-               my $tmp_vol = int( $rig_p->{'volume'} );
-               my $val = sprintf( "%*s%%", 3, $tmp_vol );
-               $vol_val->set_label( $val );
-            }
-            $$rp = FALSE;
+            apply_volume($vol);
 
             return FALSE;
         }
@@ -692,8 +684,7 @@ sub draw_main_win {
         }
     );
 
-    my $squelch_label =
-      Gtk3::Label->new( 'Squelch (' . $cfg->{'key_squelch'} . ')' );
+    my $squelch_label = Gtk3::Label->new( 'Squelch (' . $cfg->{'key_squelch'} . ')' );
     $squelch_label->set_alignment( 1, 0.5 );
     $squelch_entry = Gtk3::Scale->new_with_range( 'horizontal', 0, 20, 1 );
     $squelch_entry->set_digits( 0 );
