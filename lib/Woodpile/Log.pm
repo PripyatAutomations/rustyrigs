@@ -76,16 +76,33 @@ sub set_log_level {
 }
 
 sub add_handler {
-    ( my $self, my $handler ) = @_;
+    my ( $self, $handler ) = @_;
     my $log_msg;
     
-    if (lc( $self->{'log_file'} ) eq "none") {
+    if ( lc( $self->{'log_file'} ) eq "none" ) {
        $log_msg = "log file is disabled";
     } else {
        $log_msg = "Maintaining logfile at " . $self->{'log_file'};
     }
     $self->Log( "core", "notice", "Enabled external log handler. $log_msg" );
     $self->{'handler'} = $handler;
+    return;
+}
+
+sub clear_handler {
+    my ( $self ) = @_;
+
+    my $log_msg;
+    
+    if ( lc( $self->{'log_file'} ) eq "none" ) {
+       $log_msg = "log file is disabled";
+    } else {
+       $log_msg = "Maintaining logfile at " . $self->{'log_file'};
+    }
+
+    $self->Log( "core", "notice", "Clearing external log handler. $log_msg" );
+    undef $self->{'handler'};
+
     return;
 }
 

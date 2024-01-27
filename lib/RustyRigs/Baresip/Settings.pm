@@ -169,6 +169,7 @@ sub new {
    my $audev_box = Gtk3::Box->new( 'horizontal', 5 );
    my $audev_label_box = Gtk3::Box->new( 'vertical', 5 );
    my $audev_ctrl_box = Gtk3::Box->new( 'vertical', 5 );
+
    my $sip_volume_entry = Gtk3::CheckButton->new();
    my $sip_volume_dummy = Gtk3::Label->new();
    $sip_volume_entry->set_label( 'Use SIP volume?' );
@@ -176,6 +177,7 @@ sub new {
    $audev_ctrl_box->pack_start( $sip_volume_dummy, TRUE, TRUE, 0 );
    $audev_box->pack_start( $audev_label_box, TRUE, TRUE, 0 );
    $audev_box->pack_start( $audev_ctrl_box, TRUE, TRUE, 0 );
+
    my $audev_in_label = Gtk3::Label->new( 'input device' );
    my $audev_in_entry = Gtk3::Entry->new();
    my $audev_out_label = Gtk3::Label->new( 'output device' );

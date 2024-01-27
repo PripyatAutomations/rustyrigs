@@ -14,6 +14,7 @@ use POSIX       qw(strftime);
 
 # XXX: move this into the Logview object
 my @log_buffer;
+my $window;
 
 sub save_log {
     my ( $self ) = @_;
@@ -213,6 +214,14 @@ sub DESTROY {
    return;
 }
 
+sub close_logview {
+    ( my $class ) = @_;
+    # Don't forget to tell Woodpile::Log we no longer are around...
+    $main::log->clear_handler();
+    $window->destroy();
+    return TRUE;
+}
+
 sub new {
    my ( $class, $log ) = @_;
    my $cfg = $main::cfg;
@@ -225,7 +234,7 @@ sub new {
       $lvp = 'none';
    }
 
-   my $window = Gtk3::Window->new(
+   $window = Gtk3::Window->new(
       'toplevel',
       decorated => TRUE,
       destroy_with_parent => TRUE,
@@ -282,12 +291,7 @@ sub new {
        }
    );
 
-   $window->signal_connect(
-       delete_event => sub {
-           ( my $class ) = @_;
-           return FALSE;
-       }
-   );
+   $window->signal_connect( delete_event => \&close_logview );
    $window->signal_connect( window_state_event   => \&window_state );
 
    # Outer box
@@ -320,7 +324,7 @@ sub new {
    $button_box->pack_start( $close_button, TRUE, TRUE, 5 );
 
    $clear_button->signal_connect( 'clicked' => sub {
-      my ( $self ) = @_;
+      my ( $widget ) = @_;
 
       # clear the log buffer
       splice(@log_buffer, 0, scalar(@log_buffer));
@@ -331,27 +335,23 @@ sub new {
       return;
    });
 
-   $close_button->signal_connect( 'clicked' => sub {
-      my ( $self ) = @_;
-      $window->destroy();
-      return;
-   });
+   $close_button->signal_connect( 'clicked' => \&close_logview );
 
    $hide_button->signal_connect( 'clicked' => sub {
-      my ( $self ) = @_;
+      my ( $widget ) = @_;
       $window->iconify();
       return;
    });
 
    $save_button->signal_connect( 'clicked' => sub {
-      my ( $self ) = @_;
+      my ( $widget ) = @_;
       save_log();
       return;
    });
 
    $upload_button->signal_connect( 'clicked' => sub {
-      my ( $self ) = @_;
-      my $log_url = upload_to_termbin( $self, @log_buffer );
+      my ( $widget ) = @_;
+      my $log_url = upload_to_termbin( $widget, @log_buffer );
       return;
    });
 

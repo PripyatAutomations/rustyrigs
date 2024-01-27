@@ -886,7 +886,7 @@ sub draw_main_win {
     $rf_gain_val = Gtk3::Label->new("  0%");
     $rf_gain_val->set_alignment(1, 0.5);
     $rf_gain_box->pack_start($rf_gain_entry, TRUE, TRUE, 5);
-    $rf_gain_box->pack_start($rf_gain_val, FALSE, TRUE, 0);
+    $rf_gain_box->pack_start($rf_gain_val, FALSE, TRUE, 5);
 
     # XXX: ACCEL-Replace these with a global function
     $w_main_accel->connect(

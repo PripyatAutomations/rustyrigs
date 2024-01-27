@@ -42,3 +42,4 @@
 * Implement support for rigctl via websockets over http/quic
   - Reuse bits from remotepi html5 interface / use bits form here to complete it
   - Create client library for transporting
+* Try to sort out the keybindings into a more consistent/intuitive arrangement
