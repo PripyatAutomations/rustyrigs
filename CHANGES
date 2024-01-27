@@ -1,3 +1,9 @@
+2024-01-27
+	* changes in progress to baresip wrapper
+	* Work on logview
+          - added buttons for clear/upload to termbin/hide/close
+          - allow closing the log window rather than just iconifying
+
 2024-01-24
 	* Added Logview button to main window; it and grid tools button will become toggles
         * Added lock_volume_too setting
@@ -38,8 +44,9 @@
 	* Implemented more knobs
 
 2024-01-16
-	* For now, we restart the program when settings in the dialog are changed
-	  - This could be changed, but for now this works pretty well.
+	* For now, we must restart the program when settings in the dialog are changed
+	  - This could be changed, but for now this works pretty well and avoids a lot of duplication
+	  - When we move everything to a single apply function, this will be easier, but still may not be effort to fully implement (hamlib bit in particular)
 	* hide rotator buttons in gridtools if use_rotator unset
 	* more cleanup
 	* fixed logview scrolling

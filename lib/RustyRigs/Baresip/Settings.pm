@@ -105,6 +105,23 @@ sub new {
        }
    );
 
+   my $use_sip_toggle = Gtk3::CheckButton->new();
+   $use_sip_toggle->set_label('Use SIP?');
+   $use_sip_toggle->set_active( $$cfg->{'use_sip'} );
+   $use_sip_toggle->set_can_focus(1);
+   $use_sip_toggle->signal_connect(
+       'toggled' => sub {
+           my ( $button ) = @_;
+
+           if ( $button->get_active() ) {
+               $tmp_cfg->{'use_sip'} = 1;
+           }
+           else {
+               $tmp_cfg->{'use_sip'} = 1;
+           }
+       }
+   );
+
    my $sip_label = Gtk3::Label->new( 'SIP Server' );
    my $sip_label_box = Gtk3::Box->new( 'vertical', 5 );
    my $sip_ctrl_box = Gtk3::Box->new( 'vertical', 5 );
@@ -191,6 +208,7 @@ sub new {
    ##########
    $sip_box->pack_start( $sip_label_box, FALSE, FALSE, 0 );
    $sip_box->pack_start( $sip_ctrl_box, FALSE, FALSE, 0 );
+   $config_box->pack_start( $use_sip_toggle, FALSE, FALSE, 5);
    $config_box->pack_start( $sip_label, TRUE, TRUE, 0 );
    $config_box->pack_start( $sip_box, TRUE, TRUE, 0 );
    $config_box->pack_start( $audev_label, TRUE, TRUE, 0 );

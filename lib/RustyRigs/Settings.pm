@@ -631,17 +631,15 @@ sub new {
 
     # Create a button for SIP settings
     my $sip_button;
-    if ($cfg->{'use_sip'} || defined $tmp_cfg->{'use_sip'}) {
-        $sip_button = Gtk3::Button->new('S_IP (VoIP) Setup');
-        $sip_button->set_tooltip_text("SIP (VoIP) settings");
-        $sip_button->set_can_focus(1);
-        $sip_button->signal_connect( 'activate' => sub { (my $self) = @_; $class->sip_settings(); } );
-        $sip_button->signal_connect( 'clicked'  => sub { (my $self) = @_; $class->sip_settings(); } );
-        $w_settings_accel->connect(
-            ord('U'),  $cfg->{'shortcut_key'},
-            'visible', sub { $sip_button->grab_focus(); }
-        );
-    }
+    $sip_button = Gtk3::Button->new('S_IP (VoIP) Setup');
+    $sip_button->set_tooltip_text("SIP (VoIP) settings");
+    $sip_button->set_can_focus(1);
+    $sip_button->signal_connect( 'activate' => sub { (my $self) = @_; $class->sip_settings(); } );
+    $sip_button->signal_connect( 'clicked'  => sub { (my $self) = @_; $class->sip_settings(); } );
+    $w_settings_accel->connect(
+        ord('U'),  $cfg->{'shortcut_key'},
+        'visible', sub { $sip_button->grab_focus(); }
+    );
 
     ###########
     # We want Save and Cancel next to each other, so use a box to wrap

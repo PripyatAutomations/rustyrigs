@@ -505,7 +505,7 @@ sub draw_main_win {
             else {
                 $tmp_cfg->{'use_sip'} = 1;
             }
-            $main::cfg_p->apply($tmp_cfg, FALSE);
+            $main::cfg_p->apply($tmp_cfg, TRUE);
         }
     );
     $toggle_box->pack_start( $use_sip_toggle, FALSE, FALSE, 5);
@@ -1147,7 +1147,7 @@ sub draw_main_win {
     $gridtools_button->set_tooltip_text("Show gridsquare tools");
     $tool_box->pack_start( $gridtools_button, TRUE, TRUE, 1 );
 
-    my $logview_button = Gtk3::Button->new('Log Viewer');
+    my $logview_button = Gtk3::Button->new('L_og Viewer');
     $logview_button->signal_connect(
         clicked => sub {
             toggle_logview();

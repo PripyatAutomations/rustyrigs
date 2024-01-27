@@ -1,3 +1,4 @@
+# A window to show logging output that normally ends up on stdout
 package Woodpile::Log;
 use strict;
 use warnings;
@@ -5,9 +6,7 @@ use Sys::Hostname;
 use Data::Dumper;
 use POSIX       qw(strftime);
 use Time::HiRes qw(gettimeofday tv_interval usleep);
-my $app_name = 'rustyrigs';
-
-our $cfg;
+my $app_name = $main::app_name;
 
 # Log levels for messages
 our %log_levels = (
@@ -25,7 +24,6 @@ our %log_levels = (
 sub Log {
     my ( $self, $log_type, $log_level ) = @_;
     my $filter_level = $self->{log_level};
-
     my $buf;
 
     # XXX: We should do log levels per destination: logview, logfile, stdout
@@ -39,33 +37,29 @@ sub Log {
     if ( !defined $lvl ) {
         $lvl = "UNKNOWN";
     }
-    ####
     $buf = $datestamp . " [$log_type/$log_level]";
 
-    # skip first 3 arguments
-    shift;
-    shift;
-    shift;
-    foreach my $arg (@_) {
+    # skip first 3 arguments, as we captured them above
+    shift; shift; shift;
+    foreach my $arg ( @_ ) {
        $buf .= " " . $arg;
     }
     $buf .= "\n";
 
     # send to the log file, always, if open
-    if (defined $self->{'log_fh'}) {
-       print { $self->{'log_fh'} } $buf;
+    my $log_fh = $self->{'log_fh'};
+    if ( $log_fh ) {
+       print $log_fh $buf;
     }
 
     # If we've established a log output handler, send it there
-    if (defined $self->{'handler'}) {
-       my $i = $self->{'handler'};
-       $i->append($buf);
+    my $hndlr = $self->{'handler'};
+    if ( defined $hndlr ) {
+       $hndlr->append( $buf );
     }
 
-    # if we're debugging, or no handler send it to stdout
-#    if (!defined $self->{'handler'} || $lvl eq 'debug') {
-       print $buf;
-#    }
+    # Also to stdout
+    print $buf;
     return;
 }
 
@@ -90,7 +84,7 @@ sub add_handler {
     } else {
        $log_msg = "Maintaining logfile at " . $self->{'log_file'};
     }
-    $self->Log("core", "notice", "Enabled external log handler. $log_msg");
+    $self->Log( "core", "notice", "Enabled external log handler. $log_msg" );
     $self->{'handler'} = $handler;
     return;
 }
