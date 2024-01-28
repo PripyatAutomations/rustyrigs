@@ -276,11 +276,11 @@ sub draw_digit {
    my $label_txt;
    if ( $digit == 11 ) {
       $label_txt = "GHz";
-   } elsif ( $digit == 8 ) {
+   } elsif ( $digit == 7 ) {
       $label_txt = "MHz";
-   } elsif ( $digit == 5 ) {
+   } elsif ( $digit == 4 ) {
       $label_txt = "KHz";
-   } elsif ( $digit == 2 ) {
+   } elsif ( $digit == 1 ) {
       $label_txt = "Hz";
    } else {
       $label_txt = "";
@@ -342,12 +342,22 @@ sub new {
 
        # retrieve the box that we will display
        my $digitbox = $new_digit->{'box'};
+
        if (defined $digitbox) {
           $widget_box->pack_start( $digitbox, FALSE, FALSE, 5 );
        }
 
        # Store the whole object
        $master_digits->{$i} = $obj->{'digits'}{$i} = $new_digit;
+       # place dots if possible
+       if ( ( $i - 1 ) % 3 == 0 && $i != $places && $i != 1 ) {
+           print "places: $places - i: $i\n";
+           my $dot_label = Gtk3::Label->new( "\x{00B7}" );
+           $dot_label->set_hexpand( 1 );
+           $dot_label->set_vexpand( 1 );
+           $dot_label->set_valign( 'center' );
+           $widget_box->pack_start( $dot_label, FALSE, FALSE, 0 );
+       }
        $i--;
    }
 

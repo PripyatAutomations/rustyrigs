@@ -19,6 +19,8 @@
   - Finish implementing scan mode
     - double click or long click? the up or down to engage
     - rate is set by the slide next to the input
+    - set triggered button to ui_button_active color
+    - end on ??? Click in window? click in vfo? keypress?
 * Tune button (ON/OFF/AUTO)
   - Not sure if this can be implemented
 * SIP stuff
