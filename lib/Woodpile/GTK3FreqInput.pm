@@ -59,8 +59,8 @@ sub set_value {
            my $digits = $master_digits;
            my $digit_item = $digits->{$i};
            my $digit_entry = $digit_item->{'entry'};
-           my $curr_digit = substr($int_str, 0, 1);				   # extract left most digit
-           $curr_digit = 0 if ( !defined $curr_digit || $curr_digit !~ /^\d$/) ;   # if no value, set to 0
+           my $curr_digit = substr( $int_str, 0, 1 );				   # extract left most digit
+           $curr_digit = 0 if ( !defined $curr_digit || $curr_digit !~ /^\d$/ );   # if no value, set to 0
            $digit_entry->set_text( $curr_digit );                                  # set the digit
            $int_str = substr( $int_str, 1 );                                       # trim first character off
            $i--;
@@ -148,16 +148,16 @@ sub draw_digit {
    my ( $self, $digit, $places, $default ) = @_;
    my $cfg = $main::cfg;
 
-   my $box = Gtk3::Box->new('vertical', 0);
-   my $up_btn = Gtk3::Button->new('+');
-   my $dwn_btn = Gtk3::Button->new('-');
-   $up_btn->set_can_focus(FALSE);
-   $dwn_btn->set_can_focus(FALSE);
+   my $box = Gtk3::Box->new( 'vertical', 0 );
+   my $up_btn = Gtk3::Button->new( '+' );
+   my $dwn_btn = Gtk3::Button->new( '-' );
+   $up_btn->set_can_focus( FALSE );
+   $dwn_btn->set_can_focus( FALSE );
    my $digit_entry = Gtk3::Entry->new();
-   $digit_entry->set_max_length(1);
-   $digit_entry->set_text($default);
-   $digit_entry->set_alignment(0.5); 
-   $digit_entry->set_width_chars(4);
+   $digit_entry->set_max_length( 1 );
+   $digit_entry->set_text( $default );
+   $digit_entry->set_alignment( 0.5 ); 
+   $digit_entry->set_width_chars( 4 );
 
    $digit_entry->signal_connect(
       changed => sub {
@@ -179,7 +179,7 @@ sub draw_digit {
 
 #         print "digit[$digit]: got keyval=" . $event->keyval . "\n";
 
-         if ($event->keyval >= 48 && $event->keyval <= 57) {	  # 0 to 9
+         if ( $event->keyval >= 48 && $event->keyval <= 57 ) {	  # 0 to 9
             my $digit_pressed = chr( $event->keyval );		  # Convert keyval to the corresponding character
             my $cfg      = $main::cfg;
             my $curr_vfo = $$cfg->{'active_vfo'};
@@ -272,11 +272,28 @@ sub draw_digit {
    $box->pack_start( $digit_entry, FALSE, FALSE, 0 );
    $box->pack_start( $dwn_btn, FALSE, FALSE, 0 );
 
+   # add the group labels
+   my $label_txt;
+   if ( $digit == 11 ) {
+      $label_txt = "GHz";
+   } elsif ( $digit == 8 ) {
+      $label_txt = "MHz";
+   } elsif ( $digit == 5 ) {
+      $label_txt = "KHz";
+   } elsif ( $digit == 2 ) {
+      $label_txt = "Hz";
+   } else {
+      $label_txt = "";
+   }
+   my $group_label = Gtk3::Label->new( $label_txt );
+   $box->pack_start( $group_label, TRUE, TRUE, 0 );
+
    # Figure out which digit group this digit is in from it's digit value
    my $ghz = $$cfg->{'ui_freqinput_ghz_bg'};
    my $mhz = $$cfg->{'ui_freqinput_mhz_bg'};
    my $khz = $$cfg->{'ui_freqinput_khz_bg'};
-   my $hz = $$cfg->{'ui_freqinput_hz_bg'};
+   my $hz  = $$cfg->{'ui_freqinput_hz_bg'};
+
 
    my $bg = $hz;
    if ( $digit >= 10 ) {
@@ -289,6 +306,7 @@ sub draw_digit {
 
    my $color = Woodpile::Gtk::hex_to_gdk_rgba( $bg );
    $digit_entry->override_background_color('normal', $color);
+
    # build the object
    my $obj = {
       box => $box,
@@ -317,28 +335,32 @@ sub new {
    };
    bless $obj, $class if ( defined $obj );
 
-   # Place one digit widget per desired place
+   # Draw each digit widget
    my $i = $places;
    while ($i > 0) {
        my $new_digit = $class->draw_digit( $i, $places, 0 );
+
+       # retrieve the box that we will display
        my $digitbox = $new_digit->{'box'};
        if (defined $digitbox) {
           $widget_box->pack_start( $digitbox, FALSE, FALSE, 5 );
        }
-       
-       # XXX: Every 3 digits, we should slightly change the background color to group digits
 
+       # Store the whole object
        $master_digits->{$i} = $obj->{'digits'}{$i} = $new_digit;
        $i--;
    }
 
-   my $label_box = Gtk3::Box->new( 'vertical', 0 );
+   my $repeat_box = Gtk3::Box->new( 'vertical', 0 );
+   my $repeat_entry = Gtk3::Scale->new_with_range( 'vertical', 1, 10, 1 );
+   my $repeat_pad = Gtk3::Label->new( '' );
+   $repeat_entry->set_inverted( 1 );
+   $repeat_entry->set_draw_value( 0 );;
+   my $repeat_label = Gtk3::Label->new( 'fast' );
+   $repeat_box->pack_start( $repeat_entry, TRUE, TRUE, 5 );
+   $repeat_box->pack_start( $repeat_pad,  FALSE, TRUE, 5 );
    my $widget_label = Gtk3::Label->new( $label );
-   $widget_label->set_hexpand( TRUE );                  # Allow horizontal expansion
-   $widget_label->set_vexpand( TRUE );                  # Allow vertical expansion
-   $widget_label->set_valign( 'center' );               # Vertically center the label
-   $label_box->pack_start( $widget_label, TRUE, TRUE, 0 );
-   $widget_box->pack_start( $label_box, TRUE, TRUE, 0 );
+   $widget_box->pack_start( $repeat_box, TRUE, TRUE, 0 );
 
    return $obj;
 }

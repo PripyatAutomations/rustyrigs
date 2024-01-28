@@ -1,8 +1,14 @@
+**** Add support for forcing front/rear mic when using SIP
 * Fix the dragging check around POWER slider and see how to make it keyboard friendly
   - right now it insists on the slider being dragged, to prevent accidental power excursions
 * Make the Gridtools button hide/show (not just iconify) the window... Same for logview
   - Also maybe we should add an option to toggle allowing to close the window vs only iconify
 * Reduce the amount of rig command sent if possible
+  - Instead of polling every control each time, just check PTT and one or two levels
+    - Put the controls to poll into an array
+    - Increment the counter as polled, wrapping at the end
+    - Decide how many to poll per iteration based on the delay, so that controls
+      always are polled at least once per tray update
 * Find/fix remaining UI bugs
 * FreqInput widget:
   - Fix typing in the first digit appearing in last digit!
@@ -10,6 +16,9 @@
       Using some caching + delay before writing the rig should fix this and the latency problems
       when running without flrig
   - while typing, suspend actions on the field and allow typing normally
+  - Finish implementing scan mode
+    - double click or long click? the up or down to engage
+    - rate is set by the slide next to the input
 * Tune button (ON/OFF/AUTO)
   - Not sure if this can be implemented
 * SIP stuff
@@ -25,6 +34,7 @@
   - Apply same keybindings to TUI
 * Add speech for blind users
 * Add signal bar to SWR widget
+* Add dropdown to change loglevel in Logview window (maybe just a temporary filter instead of global?)
 * Add dialog to spawn modems/etc attached to the audio pipes
   - figure out a way to integrate rnnoise/vst/ladspa plugins into the mic stream for audio processing by script
 * Move GTK GUI update code from Hamlib.pm to update() in GTK_ui.pm

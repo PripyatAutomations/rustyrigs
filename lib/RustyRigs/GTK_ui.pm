@@ -62,7 +62,7 @@ sub customize_css {
     # Apply the CSS provider
     my $screen = Gtk3::Gdk::Screen::get_default();
     my $style_context = Gtk3::StyleContext->new();
-    $style_context->add_provider_for_screen($screen, $Gtk3::STYLE_PROVIDER_PRIORITY_APPLICATION);
+    $style_context->add_provider_for_screen( $screen, $Gtk3::STYLE_PROVIDER_PRIORITY_APPLICATION );
     return;
 }
 
@@ -135,7 +135,7 @@ sub w_main_fm_toggle {
     else {
         $fm_box->hide();
     }
-    Woodpile::autosize_height($w_main, $box);
+    Woodpile::autosize_height( $w_main, $box );
     return;
 }
 
@@ -143,28 +143,30 @@ sub w_main_hide {
     my ( $self ) = @_;
 
     $cfg->{'win_visible'} = 0;
-    $w_main->set_visible(0);
+    $w_main->set_visible( 0 );
 
     my $hide_lv_too = $cfg->{'hide_logview_too'};
 
-    if ($hide_lv_too) {
+    if ( $hide_lv_too ) {
        my $lv = $main::logview;
        my $lw = $lv->{'window'};
+
        # If logview exists, hide it
-       if (defined $lw) {
-          $$lw->set_visible(0);
+       if ( defined $lw ) {
+          $$lw->set_visible( 0 );
           $$lw->iconify();
-          $$lw->get_window->set_skip_taskbar_hint(TRUE);
+          $$lw->get_window->set_skip_taskbar_hint( TRUE );
        }
     }
 
     my $hide_gt_too = $cfg->{'hide_gridtools_too'};
-    if ($hide_gt_too) {
+
+    if ( $hide_gt_too ) {
        my $gt = $main::gridtools;
        my $gw = $gt->{'window'};
-       $$gw->set_visible(0);
+       $$gw->set_visible( 0 );
        $$gw->iconify();
-       $$gw->get_window->set_skip_taskbar_hint(TRUE);
+       $$gw->get_window->set_skip_taskbar_hint( TRUE );
     }
     return FALSE;
 }
@@ -178,16 +180,16 @@ sub w_main_show {
 
     my $hide_lv_too = $cfg->{'hide_logview_too'};
 
-    if ($hide_lv_too) {
+    if ( $hide_lv_too ) {
        my $lv = $main::logview;
 
        # Raise logview with main window, if configured to do so
-       if (defined $lv) {
+       if ( defined $lv ) {
           my $w = $lv->{'window'};
-          if (defined $w) {
-             $$w->set_visible(1);
+          if ( defined $w ) {
+             $$w->set_visible( 1 );
              $$w->deiconify();
-             $$w->get_window->set_skip_taskbar_hint(FALSE);
+             $$w->get_window->set_skip_taskbar_hint( FALSE );
           }
        }
     }
@@ -195,13 +197,13 @@ sub w_main_show {
     $w_main->move( $cfg->{'win_x'}, $cfg->{'win_y'} );
     w_main_fm_toggle();
 
-    if ($cfg->{'hide_gridtools_too'}) {
+    if ( $cfg->{'hide_gridtools_too'} ) {
        my $gt = $main::gridtools;
        my $gw = $gt->{'window'};
-       if (defined $gw) {
+       if ( defined $gw ) {
           $$gw->deiconify();
-          $$gw->set_visible(1);
-          $$gw->get_window->set_skip_taskbar_hint(FALSE);
+          $$gw->set_visible( 1 );
+          $$gw->get_window->set_skip_taskbar_hint( FALSE );
        }
     }
 
@@ -235,7 +237,7 @@ sub switch_vfo {
 
     $log->Log( "vfo", "info", "Switching to VFO $vfo" );
     $vfo_sel_button->set_label( "Active VFO: "
-          . $main::rig_p->next_vfo($vfo) . " ("
+          . $main::rig_p->next_vfo( $vfo ) . " ("
           . $cfg->{'key_vfo'}
           . ")" );
     $cfg->{active_vfo} = $vfo;
@@ -244,11 +246,12 @@ sub switch_vfo {
 
 sub w_main_ontop {
     my $val = shift;
-    if ( !defined($val) ) {
+
+    if ( !defined( $val ) ) {
         $val = 0;
     }
 
-    $w_main->set_keep_above($val);
+    $w_main->set_keep_above( $val );
     return;
 }
 
@@ -273,38 +276,38 @@ sub refresh_available_widths {
 #    }
 
     if ( $vfo->{'mode'} eq "FM" ) {
-        foreach my $value (@RustyRigs::Hamlib::vfo_widths_fm) {
+        foreach my $value ( @RustyRigs::Hamlib::vfo_widths_fm ) {
             $width_entry->append_text($value);
         }
         $rv = Woodpile::find_offset( \@RustyRigs::Hamlib::vfo_widths_fm, $val );
     }
     elsif ( $vfo->{'mode'} =~ m/AM/ ) {
-        foreach my $value (@RustyRigs::Hamlib::vfo_widths_am) {
-            $width_entry->append_text($value);
+        foreach my $value ( @RustyRigs::Hamlib::vfo_widths_am ) {
+            $width_entry->append_text( $value );
         }
         $rv = Woodpile::find_offset( \@RustyRigs::Hamlib::vfo_widths_am, $val );
     }
     elsif ( $vfo->{'mode'} =~ qr/(D-[UL]|USB|LSB)/ ) {
-        foreach my $value (@RustyRigs::Hamlib::vfo_widths_ssb) {
-            $width_entry->append_text($value);
+        foreach my $value ( @RustyRigs::Hamlib::vfo_widths_ssb ) {
+            $width_entry->append_text( $value );
         }
         $rv = Woodpile::find_offset( \@RustyRigs::Hamlib::vfo_widths_ssb, $val );
     }
     elsif ( $vfo->{'mode'} =~ m/C4FM/ ) {
-        $width_entry->append_text(12500);
+        $width_entry->append_text( 12500 );
         $rv = 0;
     }
     if ( $rv == -1 ) {
         $rv = 0;
     }
 #    $log->Log( "ui", "debug", "refresh avail widths: VFO $curr_vfo, mode " . $vfo->{'mode'} . " val: $val (rv: $rv)" );
-    $width_entry->set_active($rv);
+    $width_entry->set_active( $rv );
     return;
 }
 
 # XXX: make this toggle instead of just show
 sub toggle_gridtools {
-    if (defined $main::gridtools) {
+    if ( defined $main::gridtools ) {
        my $gt_win = $main::gridtools->{'window'};
        $$gt_win->deiconify();
        $$gt_win->present();
@@ -403,8 +406,8 @@ sub draw_main_win {
     # VFO choser:
     $vfo_sel_button =
       Gtk3::Button->new( "Active VFO: " . $curr_vfo . " (" . $cfg->{'key_vfo'} . ")" );
-    $vfo_sel_button->set_tooltip_text("Toggle active VFO");
-    $vfo_sel_button->set_sensitive(0);
+    $vfo_sel_button->set_tooltip_text( "Toggle active VFO" );
+    $vfo_sel_button->set_sensitive( 0 );
 
     $vfo_sel_button->signal_connect(
         clicked => sub {
@@ -430,8 +433,8 @@ sub draw_main_win {
     # PTT and controls
     # Create a toggle button to represent the lock state
     my $key_ptt = $cfg->{'key_ptt'};
-    $ptt_button = Gtk3::ToggleButton->new_with_label("PTT ($key_ptt)");
-    $initial_bg_color = $ptt_button->get_style_context->get_background_color('normal');
+    $ptt_button = Gtk3::ToggleButton->new_with_label( "PTT ($key_ptt)" );
+    $initial_bg_color = $ptt_button->get_style_context->get_background_color( 'normal' );
     # normal  active  prelight  selected  insensitive  inconsistent  focused  backdrop  dir-ltr  dir-rtl  link  visited  checked  drop-active
     $ptt_button->override_background_color( 'checked', $active_button_bg );
       
@@ -439,8 +442,8 @@ sub draw_main_win {
         toggled => sub {
             my ( $self ) = @_;
             my $val = $ptt_button->get_active();
-            $main::log->Log("hamlib", "info", "PTT set to $val");
-            $main::rig->set_ptt($Hamlib::RIG_VFO_A, $val);
+            $main::log->Log( "hamlib", "info", "PTT set to $val" );
+            $main::rig->set_ptt( $Hamlib::RIG_VFO_A, $val );
         }
     );
     $w_main_accel->connect(
@@ -450,9 +453,9 @@ sub draw_main_win {
         sub {
             my ( $self ) = @_;
             
-            if (!$main::locked) {
+            if ( !$main::locked ) {
                my $val = $ptt_button->get_active();
-               $ptt_button->set_active(!$val);
+               $ptt_button->set_active( !$val );
             }
         }
     );
@@ -473,20 +476,20 @@ sub draw_main_win {
        $main::log->Log("gtkui", "bug", "BUG!!! Undocked meters not yet implemented");
     }
 
-    my $toggle_box = Gtk3::Box->new('horizontal', 5);
+    my $toggle_box = Gtk3::Box->new( 'horizontal', 5 );
     my $mic_toggle = Gtk3::CheckButton->new();
-    $mic_toggle->set_label('Use rear mic?');
+    $mic_toggle->set_label( 'Use rear mic?' );
     $mic_toggle->set_active( $cfg->{'mic_select'} );
-    $mic_toggle->set_can_focus(1);
+    $mic_toggle->set_can_focus( 1 );
     $mic_toggle->signal_connect(
         'toggled' => sub {
             my ( $button ) = @_;
 
             if ( $button->get_active() ) {
-                $main::rig_p->mic_select(1);
+                $main::rig_p->mic_select( 1 );
             }
             else {
-                $main::rig_p->mic_select(0);
+                $main::rig_p->mic_select( 0 );
             }
         }
     );
@@ -495,13 +498,13 @@ sub draw_main_win {
     my $vox_toggle = Gtk3::CheckButton->new();
     $vox_toggle->set_label('Use VOX?');
     $vox_toggle->set_active( $cfg->{'mic_select'} );
-    $vox_toggle->set_can_focus(1);
+    $vox_toggle->set_can_focus( 1 );
     $vox_toggle->signal_connect(
         'toggled' => sub {
             my ( $button ) = @_;
             my $val = $button->get_active();
             $main::log->Log("gtkui", "debug", "vox_toggle ($val) nyi!");
-            if ($val) {
+            if ( $val ) {
 #                $main::rig_p->vox_select(1);
             }
             else {
@@ -512,9 +515,9 @@ sub draw_main_win {
     $toggle_box->pack_start( $vox_toggle, FALSE, FALSE, 5);
 
     my $use_sip_toggle = Gtk3::CheckButton->new();
-    $use_sip_toggle->set_label('Use SIP?');
+    $use_sip_toggle->set_label( 'Use SIP?' );
     $use_sip_toggle->set_active( $cfg->{'use_sip'} );
-    $use_sip_toggle->set_can_focus(1);
+    $use_sip_toggle->set_can_focus( 1 );
     $use_sip_toggle->signal_connect(
         'toggled' => sub {
             my ( $button ) = @_;
@@ -525,7 +528,7 @@ sub draw_main_win {
             else {
                 $tmp_cfg->{'use_sip'} = 1;
             }
-            $main::cfg_p->apply($tmp_cfg, TRUE);
+            $main::cfg_p->apply( $tmp_cfg, TRUE );
         }
     );
     $toggle_box->pack_start( $use_sip_toggle, FALSE, FALSE, 5);
@@ -541,8 +544,8 @@ sub draw_main_win {
     # Show the channel choser combobox
     my $chan_combo = Gtk3::ComboBox->new();
     $chan_combo->set_model( RustyRigs::Memory::get_list() );
-    $chan_combo->set_active(1);
-    $chan_combo->set_entry_text_column(1);
+    $chan_combo->set_active( 1 );
+    $chan_combo->set_entry_text_column( 1 );
     my $render1 = Gtk3::CellRendererText->new();
     $chan_combo->pack_start( $render1, FALSE );
     $chan_combo->add_attribute( $render1, text => 0 );
@@ -552,7 +555,7 @@ sub draw_main_win {
     my $render3 = Gtk3::CellRendererText->new();
     $chan_combo->pack_start( $render3, FALSE );
     $chan_combo->add_attribute( $render3, text => 2 );
-    $chan_combo->set_sensitive(0);
+    $chan_combo->set_sensitive( 0 );
 
     $chan_box->pack_start( $chan_combo, FALSE, FALSE, 5 );
 
@@ -568,10 +571,9 @@ sub draw_main_win {
     my $mem_btn_box = Gtk3::Box->new( 'horizontal', 5 );
 
     # Memory load button
-    $mem_load_button =
-      Gtk3::Button->new( "Load Chan (" . $cfg->{'key_mem_load'} . ")" );
+    $mem_load_button = Gtk3::Button->new( "Load Chan (" . $cfg->{'key_mem_load'} . ")" );
     $mem_load_button->set_tooltip_text("(re)load the channel memory");
-    $mem_load_button->set_sensitive(0);
+    $mem_load_button->set_sensitive( 0 );
 
     $mem_load_button->signal_connect(
         clicked => sub {
@@ -587,7 +589,7 @@ sub draw_main_win {
     $mem_write_button =
       Gtk3::Button->new( "Save Chan (" . $cfg->{'key_mem_write'} . ")" );
     $mem_write_button->set_tooltip_text("write the channel memory");
-    $mem_write_button->set_sensitive(0);
+    $mem_write_button->set_sensitive( 0 );
 
     $mem_write_button->signal_connect(
         clicked => sub {
@@ -609,10 +611,9 @@ sub draw_main_win {
     );
 
     # Memory edit button
-    $mem_edit_button =
-      Gtk3::Button->new( "Edit Chan (" . $cfg->{'key_mem_edit'} . ")" );
+    $mem_edit_button = Gtk3::Button->new( "Edit Chan (" . $cfg->{'key_mem_edit'} . ")" );
     $mem_edit_button->set_tooltip_text("Add or Edit Memory slot");
-    $mem_edit_button->set_sensitive(0);
+    $mem_edit_button->set_sensitive( 0 );
 
     $mem_edit_button->signal_connect(
         clicked => sub {
@@ -635,8 +636,7 @@ sub draw_main_win {
 
     ################################
     # rig volume
-    my $vol_label =
-      Gtk3::Label->new( "Volume % (" . $cfg->{'key_volume'} . ")" );
+    my $vol_label = Gtk3::Label->new( "Volume % (" . $cfg->{'key_volume'} . ")" );
     $vol_label->set_alignment( 1, 0.5 );
     $vol_entry = Gtk3::Scale->new_with_range( 'horizontal', 0, 100, 1 );
     $vol_entry->set_digits( 0 );
@@ -658,7 +658,7 @@ sub draw_main_win {
             }
             my $vol = int( $widget->get_value() + 0.5 );
 
-            apply_volume($vol);
+            apply_volume( $vol );
 
             return FALSE;
         }
@@ -795,12 +795,12 @@ sub draw_main_win {
         changed => sub {
             my ( $class ) = @_;
 
-            if (!$main::rig_p->is_busy()) {
+            if ( !$main::rig_p->is_busy() ) {
                my $selected_item = $mode_entry->get_active_text();
                $log->Log( "ui", "debug", "Mode Selected: $selected_item" );
                my $curr_vfo = $cfg->{'active_vfo'};
                my $mode     = uc( $act_vfo->{'mode'} );
-               $vfos->{$curr_vfo}{'mode'} = uc($selected_item);
+               $vfos->{$curr_vfo}{'mode'} = uc( $selected_item );
                # Figure out which mode was picked
                my $hl_mode;
                if ($selected_item eq 'CW') {
@@ -830,8 +830,7 @@ sub draw_main_win {
         }
     );
 
-    my $width_label =
-      Gtk3::Label->new( 'Width (hz) (' . $cfg->{'key_width'} . ')' );
+    my $width_label = Gtk3::Label->new( 'Width (hz) (' . $cfg->{'key_width'} . ')' );
     $width_entry = Gtk3::ComboBoxText->new();
     $width_entry->set_tooltip_text("Modulation bandwidth");
 
@@ -851,7 +850,8 @@ sub draw_main_win {
     $width_entry->signal_connect(
         changed => sub {
             my ( $class ) = @_;
-            if (!$main::rig_p->is_busy()) {
+
+            if ( !$main::rig_p->is_busy() ) {
                my $selected_item = $width_entry->get_active_text();
                if ( defined($selected_item) ) {
                    $log->Log( "ui", "debug", "Width Selected: $selected_item\n" )
@@ -863,21 +863,20 @@ sub draw_main_win {
         }
     );
 
-    my $rf_gain_label =
-      Gtk3::Label->new( 'RF Gain / Atten. (' . $cfg->{'key_rf_gain'} . ')' );
+    my $rf_gain_label = Gtk3::Label->new( 'RF Gain / Atten. (' . $cfg->{'key_rf_gain'} . ')' );
     $rf_gain_entry = Gtk3::Scale->new_with_range( 'horizontal', -40, 40, 1 );
-    $rf_gain_entry->set_digits(0);
-    $rf_gain_entry->set_draw_value(TRUE);
-    $rf_gain_entry->set_value_pos('right');
+    $rf_gain_entry->set_digits( 0 );
+    $rf_gain_entry->set_draw_value( TRUE );
+    $rf_gain_entry->set_value_pos( 'right' );
     $rf_gain_entry->set_value( $act_vfo->{'rf_gain'} );
-    $rf_gain_entry->set_tooltip_text("Please Click and DRAG to change RF gain");
-    $rf_gain_entry->set_sensitive(0);
-    $rf_gain_entry->set_property('draw-value' => FALSE);
-    my $rf_gain_box = Gtk3::Box->new('horizontal', 5);
-    $rf_gain_val = Gtk3::Label->new("  0%");
-    $rf_gain_val->set_alignment(1, 0.5);
-    $rf_gain_box->pack_start($rf_gain_entry, TRUE, TRUE, 5);
-    $rf_gain_box->pack_start($rf_gain_val, FALSE, TRUE, 5);
+    $rf_gain_entry->set_tooltip_text( "Please Click and DRAG to change RF gain" );
+    $rf_gain_entry->set_sensitive( 0 );
+    $rf_gain_entry->set_property( 'draw-value' => FALSE );
+    my $rf_gain_box = Gtk3::Box->new( 'horizontal', 5 );
+    $rf_gain_val = Gtk3::Label->new( "  0%" );
+    $rf_gain_val->set_alignment( 1, 0.5 );
+    $rf_gain_box->pack_start( $rf_gain_entry, TRUE, TRUE, 5 );
+    $rf_gain_box->pack_start( $rf_gain_val, FALSE, TRUE, 5 );
 
     # XXX: ACCEL-Replace these with a global function
     $w_main_accel->connect(
@@ -938,8 +937,7 @@ sub draw_main_win {
     # Variable to track if the scale is being dragged
     my $dragging = 0;
 
-    my $vfo_power_label =
-      Gtk3::Label->new( 'Power (Watts) (' . $cfg->{'key_power'} . ')' );
+    my $vfo_power_label = Gtk3::Label->new( 'Power (Watts) (' . $cfg->{'key_power'} . ')' );
     $vfo_power_entry = Gtk3::Scale->new_with_range(
         'horizontal',            $act_vfo->{'min_power'},
         $act_vfo->{'max_power'}, $act_vfo->{'power_step'}
@@ -1073,36 +1071,36 @@ sub draw_main_win {
     my $ctrl_box = Gtk3::Box->new( 'vertical', 5 );
 
     $box->pack_start( $vfo_sel_button,  FALSE, FALSE, 5 );
-    $box->pack_start( $$freq_box,       TRUE, TRUE, 5 );
+    $box->pack_start( $$freq_box,       TRUE,  TRUE,  5 );
     $box->pack_start( $chan_box,        FALSE, FALSE, 5 );
     $box->pack_start( $ptt_button,      FALSE, FALSE, 5 );
     $box->pack_start( $meters_dock_box, TRUE,  TRUE,  5 );
     $box->pack_start( $toggle_box,      FALSE, FALSE, 5 );
 
-    $label_box->pack_start( $vol_label,   TRUE, FALSE, 5 );
-    $ctrl_box->pack_start( $vol_box,      TRUE, TRUE, 5 );
+    $label_box->pack_start( $vol_label, TRUE,  FALSE, 5 );
+    $ctrl_box->pack_start( $vol_box,    TRUE,  TRUE,  5 );
 
-    $squelch_label->set_alignment(1, 0.5);
+    $squelch_label->set_alignment( 1, 0.5 );
     $label_box->pack_start( $squelch_label,   TRUE, FALSE, 5 );
     $ctrl_box->pack_start( $squelch_box,      TRUE, TRUE, 5 );
 
-    $rf_gain_label->set_alignment(1, 0.5);
+    $rf_gain_label->set_alignment( 1, 0.5 );
     $label_box->pack_start( $rf_gain_label,   TRUE, FALSE, 5 );
     $ctrl_box->pack_start( $rf_gain_box  ,    TRUE, TRUE, 5 );
 
-    $dnr_label->set_alignment(1, 0.5);
+    $dnr_label->set_alignment( 1, 0.5 );
     $label_box->pack_start( $dnr_label,       TRUE, FALSE, 5 );
     $ctrl_box->pack_start( $dnr_box,          TRUE, TRUE, 5 );
 
-    $vfo_power_label->set_alignment(1, 0.5);
+    $vfo_power_label->set_alignment( 1, 0.5 );
     $label_box->pack_start( $vfo_power_label, TRUE, FALSE, 5 );
     $ctrl_box->pack_start( $vfo_power_box,    TRUE, TRUE, 5 );
 
-    $mode_label->set_alignment(1, 0.5);
+    $mode_label->set_alignment( 1, 0.5 );
     $label_box->pack_start( $mode_label,      TRUE, FALSE, 5 );
     $ctrl_box->pack_start( $mode_entry,       TRUE, TRUE, 5 );
 
-    $width_label->set_alignment(1, 0.5);
+    $width_label->set_alignment( 1, 0.5 );
     $label_box->pack_start( $width_label,     TRUE, FALSE, 5 );
     $ctrl_box->pack_start( $width_entry,      TRUE, TRUE, 5 );
 
@@ -1117,39 +1115,39 @@ sub draw_main_win {
     # Add the Buttons
     ##################
 
-    my $settings_button = Gtk3::Button->new_with_mnemonic('_Settings');
+    my $settings_button = Gtk3::Button->new_with_mnemonic( '_Settings' );
     $settings_button->signal_connect(
         clicked => sub {
             $settings = RustyRigs::Settings->new( $cfg, \$w_main );
         }
     );
-    $settings_button->set_tooltip_text("Settings editor");
+    $settings_button->set_tooltip_text( "Settings editor" );
 
-    my $gridtools_button = Gtk3::Button->new('Grid Tools');
+    my $gridtools_button = Gtk3::Button->new( 'Grid Tools' );
     $gridtools_button->signal_connect(
         clicked => sub {
             toggle_gridtools();
         }
     );
-    $gridtools_button->set_tooltip_text("Show gridsquare tools");
+    $gridtools_button->set_tooltip_text( "Show gridsquare tools" );
 
-    my $logview_button = Gtk3::Button->new('L_og Viewer');
+    my $logview_button = Gtk3::Button->new( 'L_og Viewer' );
     $logview_button->signal_connect(
         clicked => sub {
             toggle_logview();
         }
     );
-    $logview_button->set_tooltip_text("Show Logview window");
+    $logview_button->set_tooltip_text( "Show Logview window" );
 
     #############
 
-    my $hide_button = Gtk3::Button->new_with_mnemonic('_Hide');
+    my $hide_button = Gtk3::Button->new_with_mnemonic( '_Hide' );
     $hide_button->signal_connect( clicked => \&w_main_hide );
-    $hide_button->set_tooltip_text("Minimize to the system try");
+    $hide_button->set_tooltip_text( "Minimize to the system try" );
 
     my $quit_button = Gtk3::Button->new_with_mnemonic('_Quit');
     $quit_button->signal_connect( clicked => \&close_main_win );
-    $quit_button->set_tooltip_text("Exit the program");
+    $quit_button->set_tooltip_text( "Exit the program" );
 
     my $button_box = Gtk3::Box->new( 'horizontal', 5 );
     my $butleft_box = Gtk3::Box->new( 'vertical', 5 );
@@ -1162,7 +1160,7 @@ sub draw_main_win {
     $button_box->pack_start( $butleft_box,       TRUE, TRUE, 5 );
     $button_box->pack_start( $butright_box,      TRUE, TRUE, 5 );
     $box->pack_start( $button_box, TRUE, TRUE, 5 );
-    $w_main->add($box);
+    $w_main->add( $box );
 
     $w_main->signal_connect(
         'configure-event' => sub {
@@ -1189,7 +1187,7 @@ sub draw_main_win {
     if ( $cfg->{'stay_hidden'} ) {
         my $vis = $cfg->{'win_visible'};
         $log->Log( "ui", "info", "stay hidden mode enabled: visible=$vis" );
-        $w_main->set_visible($vis);
+        $w_main->set_visible( $vis );
     }
     return;
 }
@@ -1208,17 +1206,17 @@ sub update_widgets {
         my $rig = $rig_p->{'rig'};
         my $stats = $vfo->{'stats'};
         my $vol = $rig_p->{'volume'};
-        if (!defined $vol) {
+        if ( !defined $vol ) {
            $vol = 0;
         }
         my $ptt = $rig->get_ptt();
-        $ptt_button->set_active($ptt);
+        $ptt_button->set_active( $ptt );
         $vfo_freq_entry->set_value( $vfo->{'freq'} );
         # XXX: set $mode_entry to $vfo->{'mode'} (indexed)
         # XXX: set $width_entry to $vfo->{'width'} (indexed)
-        $rf_gain_entry->set_value($vfo->{'rf_gain'});
+        $rf_gain_entry->set_value( $vfo->{'rf_gain'} );
 
-        if ($vfo->{'power'} != 0) {
+        if ( $vfo->{'power'} != 0 ) {
            $power_changing = TRUE;        
            $vfo_power_entry->set_value( $vfo->{'power'} );
            $vfo_power_val->set_text( $vfo->{'power'} . 'W' );

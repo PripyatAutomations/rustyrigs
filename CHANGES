@@ -1,6 +1,10 @@
 2024-01-27
 	* Fixed some bugs in logview and settings dialogs
 	* Added digit grouping with adjustable background colors
+	* Added labels for groups (ghz, mhz, khz, hz) under each group
+	* misc work on FreqInput
+	  - added digit group labels
+	  - start of work on making buttons repeating if held (speed slider to right)
 	* changes in progress to baresip wrapper
 	* Work on logview
           - added buttons for clear/upload to termbin/hide/close
