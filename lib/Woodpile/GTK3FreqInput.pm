@@ -324,12 +324,21 @@ sub new {
 
    $places = 9 if (!defined $places);	# set a default
 
-   my $outer_box = Gtk3::Box->new ( 'vertical', 0 );
+   my $outer_box = Gtk3::Box->new( 'vertical', 0 );
    $widget_box = Gtk3::Box->new( 'horizontal', 0 );
+   my $seek_box = Gtk3::Box->new( 'horizontal', 0 );
+   my $seek_bar = Gtk3::Scale->new_with_range( 'horizontal', 1, 100, 0.1 );
+   my $seek_label = Gtk3::Label->new( 'seek' );
+   $seek_box->pack_start( $seek_label, FALSE, FALSE, 5 );
+   $seek_box->pack_start( $seek_bar, TRUE, TRUE, 5 );
+   $seek_bar->set_draw_value( 0 );
+   $seek_bar->set_tooltip_text( "Quickly seek across the VFO's range" );
+   $outer_box->pack_start( $seek_box, TRUE, TRUE, 5 );
    $outer_box->pack_start( $widget_box, TRUE, TRUE, 5 );
 
    my $obj = {
       box      => \$outer_box,	        # The outer box we return
+      seekbar  => \$seek_bar,		# the quick-seek bar
       places   => $places,		# Whole # places
       digits   => { }			# Individual digits
    };
@@ -349,7 +358,8 @@ sub new {
 
        # Store the whole object
        $master_digits->{$i} = $obj->{'digits'}{$i} = $new_digit;
-       # place dots if possible
+
+       # place dots if possible between groups
        if ( ( $i - 1 ) % 3 == 0 && $i != $places && $i != 1 ) {
            print "places: $places - i: $i\n";
            my $dot_label = Gtk3::Label->new( "\x{00B7}" );
@@ -365,12 +375,13 @@ sub new {
    my $repeat_entry = Gtk3::Scale->new_with_range( 'vertical', 1, 10, 1 );
    my $repeat_pad = Gtk3::Label->new( '' );
    $repeat_entry->set_inverted( 1 );
-   $repeat_entry->set_draw_value( 0 );;
+   $repeat_entry->set_draw_value( 0 );
+   $repeat_entry->set_tooltip_text( "Scan/repeat speed" );
    my $repeat_label = Gtk3::Label->new( 'fast' );
    $repeat_box->pack_start( $repeat_entry, TRUE, TRUE, 5 );
    $repeat_box->pack_start( $repeat_pad,  FALSE, TRUE, 5 );
    my $widget_label = Gtk3::Label->new( $label );
-   $widget_box->pack_start( $repeat_box, TRUE, TRUE, 0 );
+   $widget_box->pack_start( $repeat_box, TRUE, TRUE, 5 );
 
    return $obj;
 }
