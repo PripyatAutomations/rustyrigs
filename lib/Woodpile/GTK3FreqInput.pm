@@ -274,7 +274,7 @@ sub draw_digit {
 
    # add the group labels
    my $label_txt;
-   if ( $digit == 11 ) {
+   if ( $digit == 10 ) {
       $label_txt = "GHz";
    } elsif ( $digit == 7 ) {
       $label_txt = "MHz";
@@ -338,6 +338,7 @@ sub new {
 
    my $obj = {
       box      => \$outer_box,	        # The outer box we return
+      digit_box => \$widget_box,        # digits
       seekbar  => \$seek_bar,		# the quick-seek bar
       places   => $places,		# Whole # places
       digits   => { }			# Individual digits
@@ -371,17 +372,17 @@ sub new {
        $i--;
    }
 
-   my $repeat_box = Gtk3::Box->new( 'vertical', 0 );
-   my $repeat_entry = Gtk3::Scale->new_with_range( 'vertical', 1, 10, 1 );
-   my $repeat_pad = Gtk3::Label->new( '' );
-   $repeat_entry->set_inverted( 1 );
-   $repeat_entry->set_draw_value( 0 );
-   $repeat_entry->set_tooltip_text( "Scan/repeat speed" );
-   my $repeat_label = Gtk3::Label->new( 'fast' );
-   $repeat_box->pack_start( $repeat_entry, TRUE, TRUE, 5 );
-   $repeat_box->pack_start( $repeat_pad,  FALSE, TRUE, 5 );
-   my $widget_label = Gtk3::Label->new( $label );
-   $widget_box->pack_start( $repeat_box, TRUE, TRUE, 5 );
+#   my $repeat_box = Gtk3::Box->new( 'vertical', 0 );
+#   my $repeat_entry = Gtk3::Scale->new_with_range( 'vertical', 1, 10, 1 );
+#   my $repeat_pad = Gtk3::Label->new( '' );
+#   $repeat_entry->set_inverted( 1 );
+#   $repeat_entry->set_draw_value( 0 );
+#   $repeat_entry->set_tooltip_text( "Scan/repeat speed" );
+#   my $repeat_label = Gtk3::Label->new( 'fast' );
+#   $repeat_box->pack_start( $repeat_entry, TRUE, TRUE, 5 );
+#   $repeat_box->pack_start( $repeat_pad,  FALSE, TRUE, 5 );
+#   my $widget_label = Gtk3::Label->new( $label );
+#   $widget_box->pack_start( $repeat_box, TRUE, TRUE, 5 );
 
    return $obj;
 }

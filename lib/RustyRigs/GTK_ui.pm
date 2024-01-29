@@ -427,7 +427,8 @@ sub draw_main_win {
     );
 
     # New widget with 5 whole digits, 3 decimal
-    $vfo_freq_entry = Woodpile::GTK3FreqInput->new("Hz", 8, 0);
+    my $freq_digits = $cfg->{'vfo_digits'};
+    $vfo_freq_entry = Woodpile::GTK3FreqInput->new("Hz", $freq_digits, 0);
     $freq_box = $vfo_freq_entry->{'box'};
 
     # PTT and controls

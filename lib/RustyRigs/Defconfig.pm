@@ -156,8 +156,7 @@ our $def_cfg = {
     use_qrz                 => 0,              # 1 will enable QRZ lookups
 
     # misc
-    vfo_digits              => 8,              # digits to display on VFO
-
+    vfo_digits              => 10,              # digits to display on VFO
     # Default window properties
     win_border              => 10,
     win_visible             => 0,
