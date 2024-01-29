@@ -253,7 +253,7 @@ sub read_rig {
     my $freq = $rig->get_freq($curr_hlvfo);
     $vfos->{$curr_vfo}{'freq'} = $freq;
     if (!defined $last_freq || !($last_freq == $freq)) {
-       $main::log->Log("hamlib", "info", "Freq change on VFO $curr_hlvfo to $freq");
+#       $main::log->Log("hamlib", "info", "Freq change on VFO $curr_hlvfo to $freq");
     }
     $last_freq = $freq;
 
